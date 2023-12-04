@@ -3,7 +3,6 @@ import './css/bootstrap.css';
 import './css/jquery-ui.css';
 import './css/jquery-ui.theme.css';
 import './css/responsive.css'
-import './css/style.css';
 
 
 import { Inter } from 'next/font/google'

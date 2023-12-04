@@ -26,7 +26,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 
 	const manager = new THREE.LoadingManager();
 	manager.onStart = function (url, itemsLoaded, itemsTotal) {
-		console.log('Comenzó la carga:', url, itemsLoaded, 'de', itemsTotal);
+		//console.log('Comenzó la carga:', url, itemsLoaded, 'de', itemsTotal);
 	};
 
 	manager.onLoad = function () {
@@ -35,15 +35,15 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 		  }, 10000); // Delay de 3 segundos*/
 		setIsLoading(false); // Establece la carga como falsa cuando todo esté cargado
 
-  		console.log('Todos los elementos han sido cargados.');
+  		//console.log('Todos los elementos han sido cargados.');
 	};
 
 	manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-		console.log('Cargando archivo: ' + url + '.\nCargados ' + itemsLoaded + ' de ' + itemsTotal + ' archivos.');
+		//console.log('Cargando archivo: ' + url + '.\nCargados ' + itemsLoaded + ' de ' + itemsTotal + ' archivos.');
 	};
 
 	manager.onError = function (url) {
-		console.log('Hubo un error al cargar ' + url);
+		//console.log('Hubo un error al cargar ' + url);
 	};
 
 	useEffect(() => {
@@ -257,6 +257,9 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
         if (onExport && exportGroupRef.current) {
             onExport(exportGroupRef.current);
         }
+
+		//onExport(sceneRef.current);
+
     };
 
 	//limpiar la escena
@@ -409,7 +412,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 		  block.rotation = randomRotation;
 		});  
 	
-		//por cada material los bloques que le corresponden
+		//por cada material le asigna los bloques que le corresponden
 		let organizedByMaterial = materials.map(() => []);
 		blockInfos.forEach((blockInfo) => {
 		  organizedByMaterial[blockInfo.materialIndex].push(blockInfo);
@@ -420,55 +423,63 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 		//---------------------aqui se contruyen las instancedMesh---------------
 		organizedByMaterial.forEach((blocksForMaterial, index) => {	
 		
-		  const material = materials[index];
-		  const instancedMesh = new THREE.InstancedMesh(//crea un instancedMesh
-			blockGeometry.clone(),
-			material,
-			blocksForMaterial.length
-		  );
-		  instancedMesh.castShadow = true;
-		  instancedMesh.receiveShadow = true;
-		  const allColorsBuffer = new THREE.InstancedBufferAttribute(
-			new Float32Array(blocksForMaterial.length * 3),
-			3
-		  );
+			const material = materials[index];
+			const instancedMesh = new THREE.InstancedMesh(//crea un instancedMesh
+				blockGeometry.clone(),
+				material,
+				blocksForMaterial.length
+			);
+			instancedMesh.castShadow = true;
+			instancedMesh.receiveShadow = true;
+			const allColorsBuffer = new THREE.InstancedBufferAttribute(
+				new Float32Array(blocksForMaterial.length * 3),
+				3
+			);
 
-		  //almacenar los colores de esa instancia para pasarlos al convertidor
-		  let instaceColors = [];
-	
-		  blocksForMaterial.forEach((blockInfo, instanceIndex) => {
-			instancedMesh.setMatrixAt(instanceIndex, blockInfo.matrix);
-			let color = new THREE.Color(rgbC(blockInfo.color));//se puede optimizar
-			instaceColors.push(color);
-			allColorsBuffer.setXYZ(instanceIndex, color.r, color.g, color.b);
-		  });
+			//almacenar los colores de esa instancia para pasarlos al convertidor
+			let instaceColors = [];
 
-		  instancedMesh.geometry.setAttribute("color", allColorsBuffer);
+			//cada MATERIAL tine un grupo de bloques asignados, aqui se recorre cada bloque de ese material
+			blocksForMaterial.forEach((blockInfo, instanceIndex) => {
+				instancedMesh.setMatrixAt(instanceIndex, blockInfo.matrix);
+				let color = new THREE.Color(rgbC(blockInfo.color));//se puede optimizar
+				instaceColors.push(color);
+				allColorsBuffer.setXYZ(instanceIndex, color.r, color.g, color.b);
+			});
 
-		  instancedMesh.instanceMatrix.needsUpdate = true;
-		  
-		  scene.add(instancedMesh);		  
+			instancedMesh.geometry.setAttribute("color", allColorsBuffer);
 
-		  convertInstancedMeshToGroup(instancedMesh, instaceColors);
-		  
+			instancedMesh.instanceMatrix.needsUpdate = true;		
+			
+			sceneRef.current.add(instancedMesh);
+			//exportGroupRef.current.add(instancedMesh);
+			
 		});// fin del siclo donde se crean las instancedMesh	  
 	};//fin de PaintFrame
 
-	  const convertInstancedMeshToGroup = (instancedMesh, instaceColors)=> {			
-	
-		for (let i = 0; i < instancedMesh.count; i++) {
+	const convertInstancedMeshToGroup = (instancedMesh, instaceColors)=> {
+
+		/*for (let i = 0; i < instancedMesh.count; i++) {
 			const matrix = new THREE.Matrix4();
 			instancedMesh.getMatrixAt(i, matrix);
 
-			const mesh = new THREE.Mesh(instancedMesh.geometry, instancedMesh.material.clone());
+			const geometryClone = instancedMesh.geometry.clone();
+			geometryClone.deleteAttribute('color');
+			const materialClone = instancedMesh.material.clone();
+			materialClone.metalnessMap = null;
+
+			console.log(materialClone);
+			const mesh1 = new THREE.Mesh(geometryClone, materialClone);
 			
 			// Suponiendo que tienes un array de colores para cada instancia
-			mesh.material.color.set(instaceColors[i]); // 'colors' es un array de colores correspondiente a cada instancia
+			mesh1.material.color.set(instaceColors[i]); // 'colors' es un array de colores correspondiente a cada instancia
 
-			mesh.applyMatrix4(matrix);
-			exportGroupRef.current.add(mesh);
-		}
-	  }
+			mesh1.applyMatrix4(matrix);
+			exportGroupRef.current.add(mesh1);
+		}*/
+
+		exportGroupRef.current.add(instancedMesh);
+	}
 	  
 	
 	  const getAvailableRotations = (index, blockInfos, currentXBlocks) => {
@@ -509,8 +520,8 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 		rectLight.width = width;
 		rectLight.position.y = (height) / 2 + offsetRect;
 
-		directionalLight.shadow.mapSize.width = 16384;
-		directionalLight.shadow.mapSize.height = 16384;
+		directionalLight.shadow.mapSize.width = 1024*4;
+		directionalLight.shadow.mapSize.height = 1024*4;
 
 		const offSet = 20;//para incluir al mu;eco  en las zombras
 		directionalLight.position.y = directionalLight.position.y + 30;
@@ -525,10 +536,10 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 		directionalLight.shadow.camera.bottom = - (height) / 2;
 		let shadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
 		const helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
-		scene.add( helper );
+		//scene.add( helper );
 		directionalLight.shadow.camera.updateProjectionMatrix();
 
-		scene.add(shadowHelper);
+		//scene.add(shadowHelper);
 	  };
 	
 	  //Create color string
@@ -549,6 +560,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 				/>
 			</div>
     		<div ref={canvasRef} style={{ width: '100%', height: '100%'}} />
+			{/* <button onClick={handleSomeAction}>Export</button> */}
 		</>
     );
 };

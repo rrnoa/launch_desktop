@@ -3,6 +3,7 @@ import IconButton from '@/app/components/IconButton';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Cropper from "react-easy-crop";
 import "react-easy-crop/react-easy-crop.css";
+import '@/app/css/style.css';
 import Scene3d from "@/app/components/Scene3d";
 import BuyPanel from '@/app/components/BuyPanel';
 import Tippy from '@tippyjs/react';
@@ -11,6 +12,7 @@ import debounce from 'lodash/debounce';
 import Switch from "react-switch";
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import getCroppedImg from '@/app/libs/cropImage';
+import GLTFExporterMeshGPUInstancingExtension from '@/app/libs/EXT_mesh_gpu_instancing_exporter.js';
 
 
 export default function Main() {
@@ -179,7 +181,9 @@ export default function Main() {
 		);
 	}
 	const handleExportScene = (scene) => {
+		console.log(scene);
 		const exporter = new GLTFExporter();
+		exporter.register(writer => new GLTFExporterMeshGPUInstancingExtension(writer));
         exporter.parse(scene, (gltf) => {
 			// gltf es un objeto JSON que representa tu escena
 			const output = JSON.stringify(gltf, null, 2);
