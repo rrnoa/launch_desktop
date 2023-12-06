@@ -3,10 +3,19 @@ import Image from 'next/image'
 import styles from './page.module.css'
 import Link from "next/link";
 import MobileDetect from 'mobile-detect';
+import { useEffect, useRef, useState } from 'react';
 
 export default function Home() {
+  const [isMobile, setIsMobile] = useState(null);
 
-  const handleButtonClick = () => {
+  useEffect(()=>{
+    const md = new MobileDetect(window.navigator.userAgent)
+    console.log(md.mobile());
+    const is = md.mobile() ? true : false;
+    setIsMobile(is) ;
+  },[]);
+
+  /*const handleButtonClick = () => {
     const md = new MobileDetect(window.navigator.userAgent);
     const isMobile = md.mobile() ? true : false;
   
@@ -18,7 +27,7 @@ export default function Home() {
       // Redirigir a la versión de escritorio
       window.location.href = '/main';
     }
-  };
+  };*/
 
   return (
     <main className={styles.main}>
@@ -26,7 +35,7 @@ export default function Home() {
       <div className={styles.center}>
         <Image
           className={styles.logo}
-          src="/next.svg"
+          src="next.svg"
           alt="Next.js Logo"
           width={180}
           height={37}
@@ -35,14 +44,9 @@ export default function Home() {
       </div>
 
       <div className={styles.grid}>
-        <button onClick={handleButtonClick}>
-          Load version
-        </button>
-        <h2>
-            Art Attack <span>-&gt;</span>
-          </h2>
-          <p>The journey begins</p>
-        
+      <Link className="button button--brand" href={isMobile?"/mobile":"/main"}>
+          <h2>Load version</h2>
+        </Link>        
       </div>
     </main>
   )

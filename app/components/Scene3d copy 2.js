@@ -10,7 +10,8 @@ import AmbientLightControl from '../libs/3d/controls/AmbientLightControl';
 import MaterialControl from '../libs/3d/controls/MaterialControl';
 import RendererControl from '../libs/3d/controls/RendererControl';
 import { Blocks } from  'react-loader-spinner';
-
+import { CSM } from 'three/examples/jsm/csm/CSM';
+import { CSMHelper } from 'three/examples/jsm/csm/CSMHelper';
 
 
 const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport, theme='light'}) => {
@@ -22,12 +23,8 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 	const wallMaterialRef = useRef(null);
 	const dennisMaterialRef = useRef(null);
 	const exportGroupRef = useRef(null);
-	const cameraRef = useRef(null);
-	const controlsRef = useRef(null);
-	const directionalLightRef = useRef(new THREE.DirectionalLight(0xffffff, 2));
 
 	const [isLoading, setIsLoading] = useState(true);
-	const [lastZoomRange, setLastZoomRange] = useState(null);
 
 	const manager = new THREE.LoadingManager();
 	manager.onStart = function (url, itemsLoaded, itemsTotal) {
@@ -45,56 +42,6 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 	manager.onError = function (url) {
 		//console.log('Hubo un error al cargar ' + url);
 	};
-
-	const calculateZoomRange = (zoomLevel) => {
-		if (zoomLevel <= 25) return 1;
-		if (zoomLevel <= 40) return 2;
-		if (zoomLevel <= 60) return 3;
-		return 4;
-	}
-
-	useEffect(() => {
-		console.log("zoom cambiando",directionalLightRef.current.shadow.mapSize.width)
-        const handleCameraChange = () => {
-            const zoomLevel = cameraRef.current.position.z;
-            const currentZoomRange = calculateZoomRange(zoomLevel);
-
-            if (currentZoomRange !== lastZoomRange) {
-                adjustShadowResolution(zoomLevel);
-                setLastZoomRange(currentZoomRange);
-            }
-        };
-		const cr = controlsRef.current
-		if( controlsRef.current){
-			controlsRef.current.addEventListener('change', handleCameraChange);			
-		}
-       /*  return () => cr.removeEventListener('change', handleCameraChange); */
-    }, [controlsRef.current, lastZoomRange]);
-
-	const calculateResolutionBasedOnZoom = (zoomLevel) =>{
-		if(zoomLevel <= 25) {
-			return 1024*5;
-		} else if(zoomLevel <=40 ){
-			return 1024*2;
-		} else if(zoomLevel <= 60){
-			return 1024*2;
-		}else{
-			return 1024;
-		}
-	}
-
-	const adjustShadowResolution = (zoomLevel) => {
-		
-		if (directionalLightRef.current.shadow.map) {
-			directionalLightRef.current.shadow.map.needsUpdate = true;
-			directionalLightRef.current.shadow.map.dispose(); // Libera la memoria del mapa de sombras actual
-			directionalLightRef.current.shadow.map = null; // Elimina la referencia al mapa de sombras
-		}
-		var newResolution = calculateResolutionBasedOnZoom(zoomLevel);
-		directionalLightRef.current.shadow.mapSize.width = newResolution;
-		directionalLightRef.current.shadow.mapSize.height = newResolution;
-		 // Indica al renderizador que actualice el mapa de sombras
-	}			
 
 	useEffect(() => {
 		if(sceneRef.current){
@@ -139,10 +86,14 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 
 					const paintAreaWidth = canvasRef.current?.offsetWidth;
 					const paintAreaHeight = canvasRef.current?.offsetHeight;
-					cameraRef.current = new THREE.PerspectiveCamera(75, paintAreaWidth / paintAreaHeight, 2, 1000);
+					const camera = new THREE.PerspectiveCamera(75, paintAreaWidth / paintAreaHeight, 2, 1000);
 					const cameraZPosition = Math.max( width, height)+40;
-					cameraRef.current.position.z = cameraZPosition;
-					cameraRef.current.updateProjectionMatrix();
+					camera.position.z = cameraZPosition;
+					
+					const cameraHelper = new THREE.CameraHelper( camera );
+					scene.add( cameraHelper );
+
+					camera.updateProjectionMatrix();
 				
 					const renderer = new THREE.WebGLRenderer({ antialias: true });
 					console.log("-------------------",renderer.capabilities.maxTextureSize);
@@ -162,26 +113,53 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 					//renderer.toneMapping = THREE.ACESFilmicToneMapping;
 					canvasRef.current?.appendChild(renderer.domElement);
 
+					const csm = new CSM({
+						fade: true,
+						far: camera.far,
+						cascades: 4,
+						shadowMapSize: 1024*4,
+						lightDirection: new THREE.Vector3(-1, -1, -1).normalize(),
+						camera: camera,
+						parent: scene,
+						lightIntensity: 1
+					});
 
-					const rectLight = new THREE.RectAreaLight(0xffffff, 1, 24, 1);
+					const csmHelper = new CSMHelper(csm)
+					csmHelper.displayFrustum = true
+					csmHelper.displayPlanes = true
+					csmHelper.displayShadowBounds = true
+					scene.add(csmHelper)
+
+					/*const csm2 = new CSM({
+						fade: true,
+						far: camera.far,
+						cascades: 4,
+						shadowMapSize: 4096,
+						lightDirection: new THREE.Vector3(-1, -1, 0),
+						camera: camera,
+						parent: scene,
+						lightIntensity: 1
+					})*/
+
+
+					//const rectLight = new THREE.RectAreaLight(0xffffff, 1, 24, 1);
 					const ambientlight = new THREE.AmbientLight(0xffffff, 1);
-
-					directionalLightRef.current.castShadow = true;
+					//const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+					//directionalLight.castShadow = true;
 					//config cotrols
-					controlsRef.current = new OrbitControls(cameraRef.current, renderer.domElement);
+					const controls = new OrbitControls(camera, renderer.domElement);
 					//controls.minDistance = Math.max( width, height);
-					controlsRef.current.minDistance = 15;
-					controlsRef.current.maxDistance = 100;
-					controlsRef.current.enablePan = false;
-					controlsRef.current.maxPolarAngle = THREE.MathUtils.degToRad(90);
-					controlsRef.current.minPolarAngle = THREE.MathUtils.degToRad(45);
-					controlsRef.current.maxAzimuthAngle = THREE.MathUtils.degToRad(30);
-					controlsRef.current.minAzimuthAngle = THREE.MathUtils.degToRad(-30);
-					controlsRef.current.update();					
-					
-					scene.add(ambientlight);
+					controls.maxDistance = cameraZPosition * 1.5;
+					controls.enablePan = false;
+					controls.maxPolarAngle = THREE.MathUtils.degToRad(90);
+					controls.minPolarAngle = THREE.MathUtils.degToRad(45);
+					controls.maxAzimuthAngle = THREE.MathUtils.degToRad(30);
+					controls.minAzimuthAngle = THREE.MathUtils.degToRad(-30);
+					controls.update();
+
+					//scene.add(ambientlight);
 					//scene.add(rectLight);
-					scene.add(directionalLightRef.current);
+					//scene.add(directionalLight);
 					const material = new THREE.MeshStandardMaterial();
 
 					const floorWidth = 1000;
@@ -246,7 +224,9 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 					
 					// Render the scene and camera
 					const renderScene = () => {
-						renderer.render(scene, cameraRef.current);
+						renderer.render(scene, camera);
+						csm.update();
+    					csmHelper.update();
 						animationFrameId.current = requestAnimationFrame(renderScene);
 					};
 				  
@@ -255,9 +235,10 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 
 					AmbientLightControl(gui, ambientlight);					
 
-					DirectionalLightControl(gui, directionalLightRef.current);
-					scene.add(directionalLightRef.current.target);					
+					//DirectionalLightControl(gui, directionalLight);
 
+					//scene.add(directionalLight.target);
+					//RectLightControl(gui, rectLight);
 					MaterialControl(gui, material);
 					RendererControl(gui, renderer);
 
@@ -268,7 +249,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 					.then((data) => {
 						console.log("json",data);
 						gui.load(data);						
-						repositionLights(rectLight, directionalLightRef.current, scene);
+						//repositionLights(rectLight, directionalLight, scene);
 					})
 					.catch((error) => console.error("Error fetching the json:", error));
 
@@ -280,13 +261,12 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 							console.log(width,height);
 				
 							renderRef.current.setSize(width, height);
-							cameraRef.current.aspect = width / height;
-							cameraRef.current.updateProjectionMatrix();
-
+							camera.aspect = width / height;
+							camera.updateProjectionMatrix();
 						}
 					};
 				
-					window.addEventListener('resize', onResize);				
+					//window.addEventListener('resize', onResize);				
 
 				}
 			});
@@ -570,7 +550,10 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 		//config Rect Light
 		let offsetRect = rectLight.position.y - 12;
 		rectLight.width = width;
-		rectLight.position.y = (height) / 2 + offsetRect;		
+		rectLight.position.y = (height) / 2 + offsetRect;
+
+		/* directionalLight.shadow.mapSize.width = 1024*4;
+		directionalLight.shadow.mapSize.height = 1024*4; */
 
 		const offSet = 20;//para incluir al mu;eco  en las zombras
 		directionalLight.position.y = directionalLight.position.y + 30;
@@ -583,8 +566,8 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 		directionalLight.shadow.camera.left = - (width) / 2 - 60;
 		directionalLight.shadow.camera.right = (width ) / 2 + 6;
 		directionalLight.shadow.camera.bottom = - (height) / 2;
-		//let shadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
-		//const helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
+		let shadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+		const helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
 		//scene.add( helper );
 		directionalLight.shadow.camera.updateProjectionMatrix();
 
@@ -609,7 +592,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 				/>
 			</div>
     		<div ref={canvasRef} style={{ width: '100%', height: '100%'}} />
-			{/* {<button onClick={handleSomeAction}>Export</button> }  */}
+			{<button onClick={handleSomeAction}>Export</button> } 
 		</>
     );
 };

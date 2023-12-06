@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100;8..144,200;8..144,300;8..144,400;8..144,500;8..144,600;8..144,700;8..144,800;8..144,900;8..144,1000&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 /* Estilos para el modo claro */
 :root {
     --color-fondo-claro: #fff;
@@ -25,12 +26,69 @@
   }
 
 html {
+    /*font-size: 2.37vh;  */  
     font-size: 20px;
 }
 
-  a:visited, a:hover, a:active {
+div.bottom-area { 
+  height: 100%;
+  padding-top: 6vh;  
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
+}
+
+.step.inactive {  
+  pointer-events: none; /* Deshabilita eventos de clic */
+  opacity: 0.4; /* Efecto de velo gris */
+}
+
+button.inactive {
+  display: block;
+  pointer-events: none; /* Deshabilita eventos de clic */
+  opacity: 0.4; /* Efecto de velo gris */
+}
+
+body {	
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;    
+  background: var(--color-fondo-oscuro);
+  color: var(--color-text);	
+}
+
+a:visited, a:hover, a:active, a:link{
     text-decoration: none;
 }
+
+.lil-gui {
+    display: none !important;
+}
+
+div.buttons-list button.active {
+    color: #FFF;
+    border: none;
+    background: linear-gradient(0deg, #344054 0%, #344054 100%), #FFF;
+}
+
+.spinner {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0; 
+  border-radius: 8.66px;
+}
+
+@media screen and (min-width: 600px) {
+    html {
+      font-size: 22px !important; /* Tamaño de fuente más grande para pantallas más amplias */
+      /* otros estilos para pantallas más grandes */
+    }
+  }
 
 .main-wrapper{
     display: flex;
@@ -40,15 +98,17 @@ html {
 
 header.mb-header{
     padding: 16px;
+    max-height: 70px;
     /*background: var(--color-fondo-claro); */
 }
 
 .header-inner-item-1 img {
-    width: 200px;
+    width: 23.7vh;
+    max-width: 220px;
 }
 
 .mb-step-area {
-    padding: 10px 30px 30px;
+    padding: 10px 25px 25px;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -62,9 +122,9 @@ header.mb-header{
 }
 
 .canvas-area {
+    position: relative;
     display: flex;
-    height: 513px;
-    padding: 50px 32px;
+    height: 61vh;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -73,30 +133,43 @@ header.mb-header{
     border-radius: 8.66px;
     border: 1px dashed var(--grey-grey-500, #9E9E9E);
     background: rgba(250, 250, 250, 0.70);
+    overflow: hidden;
 }
 
-.step-actions-area{
-    height: 100px;
+.canvas-area input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
 }
 
-.buttons-area a {
-    border-radius: 6px;
+.buttons-area a, .step-actions-area a {
+    border-radius: 0.7vh;
     background: #344054;
     color: #FFF;
-    font-size: 1rem;
-    font-weight: 400;
+    font-size: 1.25rem;
+    font-weight: 600;
     letter-spacing: 0;
     line-height: 17.4px;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 48px;
+    height: 5.69vh;
 }
 
-img.btn-icons {
-    width: 25px;
-    height: 25px;
+span.notifications {
+  font-size: 0.6rem;
+  opacity: 0.6;
+  position: absolute;
+  line-height: 25px;
+}
+
+img.btn-icons {    
+    height: 1.25rem;
 }
 
 .step-actions-area .form{
@@ -106,13 +179,13 @@ img.btn-icons {
 }
 
 
-.step-actions-area h2 {
+.bottom-area h2 {
     color: var(--color-text-hight-enfasis);
     font-size: 1rem;
     font-weight: 700;
-    margin-bottom: 2.2vh;
     display: flex;
     align-items: center;
+    margin: 0;
 }
 
 .action_buttons {
@@ -122,9 +195,9 @@ img.btn-icons {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 0.6vh;
+    width: 5.69vh;
+    height: 5.69vh;
+    border-radius: 0.7vh;
     border: 1px solid #E4E7EC;
     background: #FFF;
 }
@@ -137,11 +210,11 @@ img.btn-icons {
     align-items: center;
     justify-content: center;
     text-align: center;
-    width: 100px;
-    height: 48px;
+    width: 9.8vh;
+    height:  5.69vh;
     border: 1px solid #E4E7EC;
     background: #FFF;
-    border-radius: 0.6vh 0.6vh 0.6vh 0.6vh;
+    border-radius: 0.7vh 0.7vh 0.7vh 0.7vh;
 }
 
 .step-actions-area div.inputs {
@@ -149,3 +222,154 @@ img.btn-icons {
     align-items: center;
     gap: 10px;
 }
+
+.header-inner-item-2 label{
+    display: flex;
+}
+
+.upload-description {
+    padding: 30px;
+}
+
+.upload-description img {
+    width: 2rem;
+    display: block;
+    margin: 0 auto 20px;
+}
+
+.upload-description p {
+    color: var(--color-text-hight-enfasis);
+    font-size: 1rem;
+    font-weight: 400;
+    text-align: center;
+}
+
+.wrapper_edit_buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;   
+}
+div.buttons-list {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+div.buttons-list button {
+    color: #646464;
+    font-size: 1.2rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 5.69vh;
+    height: 5.69vh;
+    margin-right: 1.6vh;
+    border-radius: 0.6vh;
+    border: 1px solid #E4E7EC;
+    background: #FFF;
+}
+
+img {
+  max-width: 100%;
+}
+
+img.crop {
+    max-width: 100%; /* La imagen no excederá el ancho del contenedor */
+    max-height: 100%; /* La imagen no excederá el alto del contenedor */
+    display: block; /* Elimina cualquier espacio extra debajo de la imagen */
+}
+
+#slider-range-min {
+    border-radius: 10px;
+    margin-bottom: 1.976vh;
+}
+
+input[type=range] {
+    -webkit-appearance: none; /* Necesario para deshacerse del estilo predeterminado en WebKit/Blink */
+    width: 100%; /* Ancho completo para que ocupe el contenedor */
+    /*margin: 10px 0; *//* Espacio alrededor para evitar que se toque con otros elementos */
+  }
+  
+  /* Estilo para la pista */
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: #ddd; /* Color de fondo de la pista */
+    border-radius: 4px; /* Bordes redondeados */
+  }
+  
+  input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #ccc; /* Color de fondo de la pista al enfocar */
+  }
+  
+  /* Estilo para el pulgar */
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Necesario para deshacerse del estilo predeterminado en WebKit/Blink */
+    border: none; /* Elimina cualquier borde predeterminado */
+    height: calc(1.5vh ); /* ajusta el tamaño del pulgar */
+    width: calc(1.5vh); /* mantiene la proporción del tamaño */
+    border-radius: 50%; /* Hace el pulgar completamente redondo */
+    background: #344054; /* Color de fondo del pulgar */
+    margin-top: calc(-0.75vh + 2px); /* ajusta la alineación del pulgar */
+    cursor: pointer; /* Cambia el cursor a un puntero para indicar que es deslizable */
+  }
+
+  .step-actions-area input[type=range]{
+    border: 0;
+    background-color: transparent;
+  }
+
+  input[type=range]::-moz-range-thumb {
+    height: calc(1.5vh ); /* ajusta el tamaño del pulgar */
+    width: calc(1.5vh); /* mantiene la proporción del tamaño */
+    border-radius: 50%;
+    background: #344054;
+    cursor: pointer;
+  }
+  
+  /* Estilo para el pulgar al enfocarse/hover/activo */
+  input[type=range]:focus::-webkit-slider-thumb,
+  input[type=range]:hover::-webkit-slider-thumb {
+    background: #555; /* Color de fondo del pulgar al enfocar/hover */
+  }
+  
+  /* Mozilla Firefox requiere un conjunto diferente de pseudo-elementos */
+  input[type=range]::-moz-range-track {
+    background: #ddd;
+    border-radius: 4px;
+  }
+  
+  input[type=range]::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #344054;
+    cursor: pointer;
+  }
+  
+  /* Para Internet Explorer */
+  input[type=range]::-ms-track {
+    background: transparent; /* IE no permite cambiar el fondo de la pista, así que lo hacemos transparente */
+    border-color: transparent;
+    border-width: 16px 0;
+    color: transparent;
+  }
+  
+  input[type=range]::-ms-thumb {
+    height: 1.976vh;
+    width: 1.976vh;
+    border-radius: 50%;
+    background: #344054;
+    cursor: pointer;
+  }
+  
+  input[type=range]::-ms-fill-lower {
+    background: #ddd;
+    border-radius: 4px;
+  }
+  
+  input[type=range]::-ms-fill-upper {
+    background: #ddd;
+    border-radius: 4px;
+  }

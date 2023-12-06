@@ -181,14 +181,19 @@ export default function Main() {
 		);
 	}
 	const handleExportScene = (scene) => {
-		console.log(scene);
 		const exporter = new GLTFExporter();
-		exporter.register(writer => new GLTFExporterMeshGPUInstancingExtension(writer));
-        exporter.parse(scene, (gltf) => {
+        exporter.parse(
+			scene, 
+			(gltf) => {
 			// gltf es un objeto JSON que representa tu escena
 			const output = JSON.stringify(gltf, null, 2);
-			downloadJSON(output, 'scene.gltf');
-		});
+			downloadJSON(output, 'modelo.gltf');
+			},// called when there is an error in the generation
+			function ( error ) {	
+				console.log( 'An error happened' );	
+			},
+			{maxTextureSize: 128}
+		);
     };
 	const downloadJSON = (json, filename) => {
 		const blob = new Blob([json], { type: 'application/json' });
@@ -265,12 +270,13 @@ export default function Main() {
                             image={uploadedImage}
 							rotation={rotation}							
 							onCropChange={setCrop}
-      						onCropComplete={onCropComplete}                             crop={crop}
+      						onCropComplete={onCropComplete}
+							crop={crop}
                             zoom={zoom}
 							zoomSpeed={0.1}
                             aspect={width / height}
                             onZoomChange={(newZoom) => setZoom(newZoom)}
-							style={{ containerStyle: { width: '100%', height: '100%' }, mediaStyle: imageStyle }}
+							style={{ containerStyle: { width: '100%', height: '100%', borderRadius:'8px' }, mediaStyle: imageStyle }}
                             />
                         )}
                         {currentState=="upload" && (

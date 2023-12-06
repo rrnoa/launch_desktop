@@ -38,12 +38,9 @@ export default async function getCroppedImg(
   contrast = 100,
   flip = { horizontal: false, vertical: false }
 ) {
-  console.log("imageElement",imageElement);
   const image = await createImage(imageElement);  
   const canvas = document.createElement('canvas')
   const ctx = canvas.getContext('2d')
-
-  console.log(pixelCrop);
 
   if (!ctx) {
     return null
@@ -79,8 +76,6 @@ export default async function getCroppedImg(
   if (!croppedCtx) {
     return null
   }
-
-  console.log(pixelCrop);
 
   // Set the size of the cropped canvas
   croppedCanvas.width = pixelCrop.width

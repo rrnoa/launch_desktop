@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    //basePath: "/promo_two",
+    //basePath: "/tinyexport",
     reactStrictMode: false,
     output: "export",
 }
