@@ -2,10 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import pixelateImg from '@/app/libs/pixelate';
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import DirectionalLightControl from '../libs/3d/controls/DirectionalLightControl';
 import RectLightControl from '../libs/3d/controls/RectLightControl';
@@ -14,7 +11,6 @@ import MaterialControl from '../libs/3d/controls/MaterialControl';
 import RendererControl from '../libs/3d/controls/RendererControl';
 import { Blocks } from  'react-loader-spinner';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
-import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 
 
 
@@ -30,7 +26,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 	const cameraRef = useRef(null);
 	const controlsRef = useRef(null);	
 
-	const inch = 0.0254;
+	const inch = 0.254;
 
 	const [isLoading, setIsLoading] = useState(true);
 	const [lastZoomRange, setLastZoomRange] = useState(null);
@@ -74,8 +70,8 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
     useEffect(() => {
 		console.log("useEffect Scene3d");
 		if(!isLoading) setIsLoading(true);
-        const xBlocks = Math.round(width / blockSize);
-		const yBlocks = Math.round(height / blockSize);
+        const xBlocks = Math.floor(width / blockSize);
+		const yBlocks = Math.floor(height / blockSize);
 		const scene = new THREE.Scene();
 		sceneRef.current = scene; // Almacena la escena en la referencia
 
@@ -86,7 +82,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 		pixelateImg(croppedImg, xBlocks, yBlocks)
 			.then((data) => {
 				//despues de pixelada la imagen entonces se crea la escena
-					const { imageURL, allColors } = data;
+					const { imageURL, allColors } = data;						
 					setPixelInfo({ 
 						pixelatedImage: imageURL, 
 						colorsArray: allColors 
@@ -96,15 +92,19 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 
 					const paintAreaWidth = canvasRef.current?.offsetWidth;
 					const paintAreaHeight = canvasRef.current?.offsetHeight;
-					cameraRef.current = new THREE.PerspectiveCamera(45, paintAreaWidth / paintAreaHeight, 0.1, 100);
-					const cameraZPosition = Math.max( width, height)+2;
+					cameraRef.current = new THREE.PerspectiveCamera(45, paintAreaWidth / paintAreaHeight, 2, 1000);
+					const cameraZPosition = Math.max( width, height)+40;
 					cameraRef.current.position.z = cameraZPosition;
 					cameraRef.current.updateProjectionMatrix();
 				
 					const renderer = new THREE.WebGLRenderer({ antialias: true });
 					console.log("----------",renderer.capabilities.maxTextureSize);
-					
+					renderer.gammaFactor = 2.2;
+
 					renderRef.current = renderer; 
+
+					const axesHelper = new THREE.AxesHelper( 15 );
+					sceneRef.current.add( axesHelper );
 				
 					renderer.setSize(paintAreaWidth, paintAreaHeight);
 					renderer.setPixelRatio(window.devicePixelRatio);
@@ -115,32 +115,31 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 
 					const directionalLight = new THREE.DirectionalLight(0xffffff, 3)
 
-					//DirectionalLightControl(gui, directionalLight);
+					DirectionalLightControl(gui, directionalLight);
 					directionalLight.castShadow = true;
-					directionalLight.position.x = 0.5;
-					directionalLight.position.y = 2;
-					directionalLight.position.z = 1;
-					directionalLight.shadow.camera.far = 20;
+					directionalLight.position.x = 8*inch;
+					directionalLight.position.y = 30*inch;
+					directionalLight.position.z = 30*inch;
+					directionalLight.shadow.camera.far = 120*inch;
 		
-					directionalLight.shadow.camera.top = height / 2 + 0.1;
-					directionalLight.shadow.camera.left = - (width) / 2 - 0.1 ;
-					directionalLight.shadow.camera.right = (width ) / 2 + 0.1;
-					directionalLight.shadow.camera.bottom = - (height) / 2 - 0.1;
-					directionalLight.shadow.mapSize.width = 1024;
-					directionalLight.shadow.mapSize.height = 1024; 
+					directionalLight.shadow.camera.top = height / 2;
+					directionalLight.shadow.camera.left = - (width) / 2 ;
+					directionalLight.shadow.camera.right = (width ) / 2 ;
+					directionalLight.shadow.camera.bottom = - (height) / 2;
+					directionalLight.shadow.mapSize.width = 1024*4;
+					directionalLight.shadow.mapSize.height = 1024*4; 
 
-					directionalLight.shadow.radius = 2;
-					directionalLight.shadow.blurSamples = 4;
+					directionalLight.shadow.radius = 10;
+					directionalLight.shadow.blurSamples = 11;
 					//directionalLight.shadow.bias = 0.00002;
-					directionalLight.shadow.bias = -0.0001;
-					//DirectionalLightControl(gui,directionalLight);
-					//let shadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
-					//const helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
+					directionalLight.shadow.bias = -0.0005;
+					let shadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+					const helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
 					
-					//scene.add( helper );
+					scene.add( helper );
 					
-					//scene.add(shadowHelper);					
-				 
+					scene.add(shadowHelper);					
+				
 					renderer.toneMappingExposure = 1;
 					directionalLight.shadow.camera.updateProjectionMatrix();
 				
@@ -148,19 +147,18 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 					renderer.toneMapping = THREE.ACESFilmicToneMapping;
 					canvasRef.current?.appendChild(renderer.domElement);
 
-					const ambientlight = new THREE.AmbientLight(0xffffff, 4);
-					//AmbientLightControl(gui,ambientlight);
+					const ambientlight = new THREE.AmbientLight(0xffffff, 2);
 					
 					//config cotrols
 					controlsRef.current = new OrbitControls(cameraRef.current, renderer.domElement);
-					//controlsRef.current.minDistance = Math.max(5, Math.hypot(width, height)/4);
-					controlsRef.current.minDistance = 0.5;
-					//controlsRef.current.maxDistance = 20;
-					/* controlsRef.current.enablePan = false;
+					controlsRef.current.minDistance = Math.max(5, Math.hypot(width, height)/4);
+					//controlsRef.current.minDistance = 50;
+					controlsRef.current.maxDistance = 350 * inch;
+					controlsRef.current.enablePan = false;
 					controlsRef.current.maxPolarAngle = THREE.MathUtils.degToRad(90);
 					controlsRef.current.minPolarAngle = THREE.MathUtils.degToRad(45);
 					controlsRef.current.maxAzimuthAngle = THREE.MathUtils.degToRad(30);
-					controlsRef.current.minAzimuthAngle = THREE.MathUtils.degToRad(-30); */
+					controlsRef.current.minAzimuthAngle = THREE.MathUtils.degToRad(-30);
 					controlsRef.current.update();
 
 					scene.add(ambientlight);
@@ -171,99 +169,61 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 					const floorWidth = 1000;
 					const floorDepth = 600;
 					const floorGeometry = new THREE.PlaneGeometry( floorWidth, floorDepth );
-					const floorColor = theme === 'light' ?0xbbbbbb : 0x121212;
+					const floorColor = theme === 'light' ? 0xdee2e6 : 0x121212;
 					floorMaterialRef.current = new THREE.MeshStandardMaterial( { color: floorColor } );
 
 					floorMaterialRef.current.side = THREE.DoubleSide;
 					const floorMesh = new THREE.Mesh( floorGeometry, floorMaterialRef.current );
 					floorMesh.rotateX(Math.PI/2);
-					floorMesh.position.set(0, - height/2 -0.001, floorDepth/2 - 3 );
+					floorMesh.position.set(0, - Math.ceil(height/2), floorDepth/2 - 3 );
 					floorMesh.receiveShadow = true;
-					scene.add( floorMesh );
+					//scene.add( floorMesh );
 
-					const wallHeight = 30;
-					const wallWidth = 100;
+					const wallHeight = 1000;
+					const wallWidth = 1000;
 					const wallGeometry = new THREE.PlaneGeometry( wallWidth, wallHeight );
 					const wallColor = theme === 'light' ? 0xffffff : 0x121212;
 					wallMaterialRef.current = new THREE.MeshStandardMaterial( { color: wallColor } );
 					wallMaterialRef.current.side = THREE.DoubleSide;
 					const wallMesh = new THREE.Mesh( wallGeometry, wallMaterialRef.current );
 					//la altura del muro / 2, menos la mitad de la altura del cuadro
-					wallMesh.position.set(0, wallHeight/2 - Math.ceil(height/2) , -2*inch );
+					wallMesh.position.set(0, wallHeight/2 - Math.ceil(height/2) , -3 );
 					wallMesh.receiveShadow = true;
-					scene.add( wallMesh );
-					const loaderSvg = new SVGLoader(manager);
+					//scene.add( wallMesh );
+					const loaderSvg = new SVGLoader();
 					//cargar la geometría
-					const loader = new GLTFLoader(manager);
-					const models = ['bloque_optimizado.glb', 'bloque_optimizado.glb', 'bloque_optimizado.glb', 'bloque_optimizado.glb'];
-					
-					function loadCubos(url) {
-						return new Promise((resolve, reject) => {
-							loader.load(url, (gltf) => resolve(gltf), undefined, reject);
-						});
-					}
-
-					const loadPromises = models.map(model => loadCubos(model));
-
-					// Cargar todos los modelos
-
-					Promise.all(loadPromises).then((loadedModels) => {
-
-						// Realiza cualquier otra operación que necesites después de cargar los modelos
-						const mesh1 = loadedModels[0].scene.children[0];						
-						const mesh2 = loadedModels[1].scene.children[0];						
-						const mesh3 = loadedModels[2].scene.children[0];						
-						const mesh4 = loadedModels[3].scene.children[0];
-						const meshes = [mesh1, mesh2, mesh3, mesh4];
-						//scene.add(mesh1);
-						paintFrame(scene, meshes, allColors, material);
-					});
-
+					const loader = new OBJLoader(manager);
+					loader.load("CUBO.obj", function (object) {						
+						const blockGeometry = object.children[0].geometry;
+						paintFrame(scene, blockGeometry, allColors, material);
 						
-					loaderSvg.load('human_frontal_silhouette_by_ikaros_ainasoja.svg', function(data) {
-						const paths = data.paths;
+						loaderSvg.load('human_frontal_silhouette_by_ikaros_ainasoja.svg', function(data) {
+							const paths = data.paths;
 						
-						for (let i = 0; i < paths.length; i++) {
-							const path = paths[i];
+							for (let i = 0; i < paths.length; i++) {
+								const path = paths[i];
 						
-							const material = new THREE.MeshBasicMaterial({
-								color: new THREE.Color(0xdee2e6),
-								side: THREE.DoubleSide,
-								depthWrite: false
-							});
+								const material = new THREE.MeshBasicMaterial({
+									color: new THREE.Color(0xdee2e6),
+									side: THREE.DoubleSide,
+									depthWrite: false
+								});
 						
-							const shapes = path.toShapes(true);
+								const shapes = path.toShapes(true);
 						
-							for (let j = 0; j < shapes.length; j++) {
-								const shape = shapes[j];
-								const geometry = new THREE.ShapeGeometry(shape);
-								const mesh = new THREE.Mesh(geometry, material);
-								mesh.scale.set(0.0032, -0.0032, 0.0032);
-								mesh.position.set(-1.36 - width/2 - 0.5, - height/2 + 1.79, -inch);
-								scene.add(mesh);
+								for (let j = 0; j < shapes.length; j++) {
+									const shape = shapes[j];
+									const geometry = new THREE.ShapeGeometry(shape);
+									const mesh = new THREE.Mesh(geometry, material);
+									mesh.scale.set(0.125, -0.125, 0.125);
+									mesh.position.set(-width-60,- Math.ceil(height/2)+70, -1);
+									scene.add(mesh);
+								}
 							}
-						}
+						
+						});
 						
 					});
-
-					/* const loaderFont = new FontLoader(manager);
-
-					loaderFont.load( 'Roboto_Regular.json', function ( font ) {
-						console.log("fuentes cargadas");
-						const textGeometry = new TextGeometry( '5.6 ft', {
-							font: font,
-							size: 0.04,
-							height: 0.001,
-							curveSegments: 12,							
-						} );
-	
-						const textMaterial = new THREE.MeshStandardMaterial({color: 0x344054})
-						const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-						textMesh.position.set(-1.18, 0.55 , -0.0245 );
-						scene.add(textMesh);
-
-					}); */
-
 					
 					// Render the scene and camera
 					const renderScene = () => {
@@ -283,15 +243,17 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 					})
 					.then((data) => {
 						console.log("json",data);
-						gui.load(data);						
+						//gui.load(data);						
 						//repositionLights(rectLight, directionalLightRef.current, scene);
 					})
 					.catch((error) => console.error("Error fetching the json:", error));
 
 					const onResize = () => {
 						if (canvasRef.current && renderRef.current) {
+							console.log("redimensionando..");
 							const width = canvasRef.current.offsetWidth;
 							const height = canvasRef.current.offsetHeight;
+							console.log(width,height);
 				
 							renderRef.current.setSize(width, height);
 							cameraRef.current.aspect = width / height;
@@ -312,6 +274,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 				gui.destroy();
 				cancelAnimationFrame(animationFrameId.current);
 				removeObjWithChildren(scene);
+				console.log(scene);
 				// Eliminar el canvas del DOM
 				if (canvasRef.current && renderRef.current?.domElement) {
 					canvasRef.current.removeChild(renderRef.current.domElement);
@@ -357,17 +320,90 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 	}
 	
 
-	const paintFrame = (scene, meshes, allColors, material) => {
+	const paintFrame = (scene, blockGeometry, allColors, material) => {
 
 		exportGroupRef.current = new THREE.Group();
-		//meshes.map((mesh) => mesh.scale.set(2, 2, 2));
-	
-		const currentXBlocks = Math.round(width / blockSize); //la cantidad de bloques disminuye si aumenta el tama;o del bloque
-		const currentYBlocks = Math.round(height / blockSize);
 
+		blockGeometry.scale(blockSize , blockSize , blockSize );
+	
+		const currentXBlocks = width / blockSize; //la cantidad de bloques disminuye si aumenta el tama;o del bloque
+		const currentYBlocks = height / blockSize;
 		// Calcula el desplazamiento necesario para que (0, 0, 0) quede en el centro del cuadro
 		const offsetX = -(currentXBlocks - 1) * blockSize * 0.5;
 		const offsetY = -(currentYBlocks - 1) * blockSize * 0.5;	
+	
+		const diffuseMaps = [
+		  "textures/Textura1_Albedo.jpg",
+		  "textures/Textura2_Albedo.jpg",
+		  "textures/Textura3_Albedo.jpg",
+		  "textures/Textura4_Albedo.jpg",
+		  // Agrega más texturas aquí
+		];
+	
+		const roughnessMaps = [
+		  "textures/Textura1_Roughness.jpg",
+		  "textures/Textura2_Roughness.jpg",
+		  "textures/Textura3_Roughness.jpg",
+		  "textures/Textura4_Roughness.jpg",
+		];
+	
+		const normalMaps = [
+		  "textures/Textura1_Normal.jpg",
+		  "textures/Textura2_Normal.jpg",
+		  "textures/Textura3_Normal.jpg",
+		  "textures/Textura4_Normal.jpg",
+		];
+	
+		const diffuseTextures = [];
+		const roughnessTextures = [];
+		const normalTextures = [];
+		const textureLoader = new THREE.TextureLoader(manager);
+		 //cargar texturas diffuse
+		for (const texturePath of diffuseMaps) {
+		  const texture = textureLoader.load(texturePath);
+		  diffuseTextures.push(texture);
+		}
+		//cargar texturas roughness
+		for (const texturePath of roughnessMaps) {
+		  const texture = textureLoader.load(texturePath);
+		  roughnessTextures.push(texture);
+		}
+	
+		for (const texturePath of normalMaps) {
+		  const texture = textureLoader.load(texturePath);
+		  normalTextures.push(texture);
+		} 
+	
+		// Preparar los 4 materiales
+		const material1 = material.clone();
+		material1.map = diffuseTextures[0];
+		material1.roughnessMap = roughnessTextures[0];
+		material1.normalMap = normalTextures[0];
+		material1.vertexColors = true;
+		material1.needsUpdate = true;
+	
+		const material2 = material.clone();
+		material2.map = diffuseTextures[1];
+		material2.roughnessMap = roughnessTextures[1];
+		material2.normalMap = normalTextures[1];
+		material2.vertexColors = true;
+		material2.needsUpdate = true;
+	
+		const material3 = material.clone();
+		material3.map = diffuseTextures[2];
+		material3.roughnessMap = roughnessTextures[2];
+		material3.normalMap = normalTextures[2];
+		material3.vertexColors = true;
+		material3.needsUpdate = true;
+	
+		const material4 = material.clone();
+		material4.map = diffuseTextures[3];
+		material4.roughnessMap = roughnessTextures[3];
+		material4.normalMap = normalTextures[3];
+		material4.vertexColors = true;
+		material4.needsUpdate = true;
+	
+		let materials = [material1, material2, material3, material4];
 	
 		//de cada bloque guarda su color y su posicion y el materrial que le toca
 		let blockInfos = allColors.map((color, index) => {
@@ -376,10 +412,9 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 		  const columna = index % currentXBlocks;
 		  const posX = columna * blockSize + offsetX;
 		  const posY = -fila * blockSize - offsetY;
-
-		  matrix.setPosition(posX, posY, 0);	
-		  
-		  const materialIndex = Math.floor(Math.random() * 4);	 
+		  matrix.setPosition(posX, posY, 0);
+	
+		  const materialIndex = Math.floor(Math.random() * 4);
 	
 		  return {
 			materialIndex: materialIndex,
@@ -388,7 +423,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 			rotation: null, // La rotación se definirá en el siguiente paso
 		  };
 		});
-
+	
 		blockInfos.forEach((block, index) => {
 		  const availableRotations = getAvailableRotations(
 			index,
@@ -404,28 +439,22 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 		  const rotationMatrix = new THREE.Matrix4().makeRotationZ(randomRotation);
 		  block.matrix.multiply(rotationMatrix);
 		  block.rotation = randomRotation;
-		});
+		});  
 	
 		//por cada material le asigna los bloques que le corresponden
-		let organizedByMaterial = meshes.map(() => []);
+		let organizedByMaterial = materials.map(() => []);
 		blockInfos.forEach((blockInfo) => {
 		  organizedByMaterial[blockInfo.materialIndex].push(blockInfo);
 		});
-
-		const geometry = meshes[0].geometry; //cualquier geometria porque todas son iguales
-		geometry.scale(blockSize/2 , blockSize/2 , blockSize/2 );
+		//console.log(organizedByMaterial );
+		blockGeometry.rotateX(Math.PI / 2);
 	
-		let ccc = 0;
 		//---------------------aqui se contruyen las instancedMesh---------------
-		organizedByMaterial.forEach((blocksForMaterial, index) => {				
-			const material = meshes[index].material;
-			material.vertexColors = true;
-			material.metalness = 0;
-			material.emissiveIntensity = 0;
-			material.needsUpdate = true;
-			material.color = new THREE.Color(0xffffff);
+		organizedByMaterial.forEach((blocksForMaterial, index) => {	
+		
+			const material = materials[index];
 			const instancedMesh = new THREE.InstancedMesh(//crea un instancedMesh
-				geometry.clone(),
+				blockGeometry.clone(),
 				material,
 				blocksForMaterial.length
 			);
@@ -466,6 +495,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 			const geometryClone = instancedMesh.geometry.clone();
 			geometryClone.deleteAttribute('color');
 			const materialClone = instancedMesh.material.clone();
+			materialClone.metalnessMap = null;
 
 			const mesh1 = new THREE.Mesh(geometryClone, materialClone);
 			
@@ -528,7 +558,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 				/>
 			</div>
     		<div ref={canvasRef} style={{ width: '100%', height: '100%'}} />
-			{/* <button onClick={handleSomeAction}>Export</button> */}
+			<button onClick={handleSomeAction}>Export</button>
 		</>
     );
 };

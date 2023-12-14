@@ -4,8 +4,6 @@ import pixelateImg from '@/app/libs/pixelate';
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import DirectionalLightControl from '../libs/3d/controls/DirectionalLightControl';
 import RectLightControl from '../libs/3d/controls/RectLightControl';
@@ -14,8 +12,6 @@ import MaterialControl from '../libs/3d/controls/MaterialControl';
 import RendererControl from '../libs/3d/controls/RendererControl';
 import { Blocks } from  'react-loader-spinner';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
-import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-
 
 
 const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport, theme='light'}) => {
@@ -96,9 +92,9 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 
 					const paintAreaWidth = canvasRef.current?.offsetWidth;
 					const paintAreaHeight = canvasRef.current?.offsetHeight;
-					cameraRef.current = new THREE.PerspectiveCamera(45, paintAreaWidth / paintAreaHeight, 0.1, 100);
+					cameraRef.current = new THREE.PerspectiveCamera(45, paintAreaWidth / paintAreaHeight, 0.5, 100);
 					const cameraZPosition = Math.max( width, height)+2;
-					cameraRef.current.position.z = cameraZPosition;
+					cameraRef.current.position.z = calculateCameraInitialPosition();
 					cameraRef.current.updateProjectionMatrix();
 				
 					const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -133,14 +129,13 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 					directionalLight.shadow.blurSamples = 4;
 					//directionalLight.shadow.bias = 0.00002;
 					directionalLight.shadow.bias = -0.0001;
-					//DirectionalLightControl(gui,directionalLight);
-					//let shadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
-					//const helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
+					/* let shadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+					const helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
 					
-					//scene.add( helper );
+					scene.add( helper );
 					
-					//scene.add(shadowHelper);					
-				 
+					scene.add(shadowHelper);					
+				 */
 					renderer.toneMappingExposure = 1;
 					directionalLight.shadow.camera.updateProjectionMatrix();
 				
@@ -149,18 +144,18 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 					canvasRef.current?.appendChild(renderer.domElement);
 
 					const ambientlight = new THREE.AmbientLight(0xffffff, 4);
-					//AmbientLightControl(gui,ambientlight);
+					AmbientLightControl(gui,ambientlight);
 					
 					//config cotrols
 					controlsRef.current = new OrbitControls(cameraRef.current, renderer.domElement);
 					//controlsRef.current.minDistance = Math.max(5, Math.hypot(width, height)/4);
 					controlsRef.current.minDistance = 0.5;
-					//controlsRef.current.maxDistance = 20;
-					/* controlsRef.current.enablePan = false;
+					controlsRef.current.maxDistance = 10;
+					controlsRef.current.enablePan = false;
 					controlsRef.current.maxPolarAngle = THREE.MathUtils.degToRad(90);
 					controlsRef.current.minPolarAngle = THREE.MathUtils.degToRad(45);
 					controlsRef.current.maxAzimuthAngle = THREE.MathUtils.degToRad(30);
-					controlsRef.current.minAzimuthAngle = THREE.MathUtils.degToRad(-30); */
+					controlsRef.current.minAzimuthAngle = THREE.MathUtils.degToRad(-30);
 					controlsRef.current.update();
 
 					scene.add(ambientlight);
@@ -195,7 +190,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 					const loaderSvg = new SVGLoader(manager);
 					//cargar la geometría
 					const loader = new GLTFLoader(manager);
-					const models = ['bloque_optimizado.glb', 'bloque_optimizado.glb', 'bloque_optimizado.glb', 'bloque_optimizado.glb'];
+					const models = ['cubo1.glb', 'cubo2.glb', 'cubo3.glb', 'cubo4.glb'];
 					
 					function loadCubos(url) {
 						return new Promise((resolve, reject) => {
@@ -240,33 +235,16 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 								const mesh = new THREE.Mesh(geometry, material);
 								mesh.scale.set(0.0032, -0.0032, 0.0032);
 								mesh.position.set(-1.36 - width/2 - 0.5, - height/2 + 1.79, -inch);
+
 								scene.add(mesh);
 							}
 						}
 						
 					});
-
-					/* const loaderFont = new FontLoader(manager);
-
-					loaderFont.load( 'Roboto_Regular.json', function ( font ) {
-						console.log("fuentes cargadas");
-						const textGeometry = new TextGeometry( '5.6 ft', {
-							font: font,
-							size: 0.04,
-							height: 0.001,
-							curveSegments: 12,							
-						} );
-	
-						const textMaterial = new THREE.MeshStandardMaterial({color: 0x344054})
-						const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-						textMesh.position.set(-1.18, 0.55 , -0.0245 );
-						scene.add(textMesh);
-
-					}); */
-
 					
 					// Render the scene and camera
 					const renderScene = () => {
+						//console.log(cameraRef.current.position.z,'width:' ,width/0.0254);
 						renderer.render(scene, cameraRef.current);
 						animationFrameId.current = requestAnimationFrame(renderScene);
 					};
@@ -283,7 +261,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 					})
 					.then((data) => {
 						console.log("json",data);
-						gui.load(data);						
+						//gui.load(data);						
 						//repositionLights(rectLight, directionalLightRef.current, scene);
 					})
 					.catch((error) => console.error("Error fetching the json:", error));
@@ -319,6 +297,10 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 			};
     }, [blockSize]); // Dependencias del efecto	
 
+	const calculateCameraInitialPosition = () => {
+		//return (width/0.0254)*4/24;
+		return 0.04808 * width/0.0254 + 2.84608;
+	}
 	const handleSomeAction = () => {
         if (onExport && exportGroupRef.current) {
             onExport(exportGroupRef.current);
@@ -528,7 +510,6 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 				/>
 			</div>
     		<div ref={canvasRef} style={{ width: '100%', height: '100%'}} />
-			{/* <button onClick={handleSomeAction}>Export</button> */}
 		</>
     );
 };

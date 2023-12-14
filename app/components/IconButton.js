@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css'; // optionalcon los estilos necesarios
 
-const IconButton = ({ icon, activeIcon, onClick, isActive, name }) => {
+const IconButton = ({ icon, activeIcon, onClick, isActive, name, children }) => {
   //const [isActive, setIsActive] = useState(false);
 
   const handleClick = () => {
@@ -17,7 +17,8 @@ const IconButton = ({ icon, activeIcon, onClick, isActive, name }) => {
 <Tippy content={name}>
 
     <button className={`icon-btn ${isActive ? 'active' : ''}`} onClick={handleClick}>
-      <img className='btn-icons' src={isActive ? activeIcon : icon} alt="Icon" />
+      {/* <img className='btn-icons' src={isActive ? activeIcon : icon} alt="Icon" /> */}
+      {children}
     </button>
       
 </Tippy>

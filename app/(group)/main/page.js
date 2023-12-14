@@ -12,7 +12,7 @@ import debounce from 'lodash/debounce';
 import Switch from "react-switch";
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import getCroppedImg from '@/app/libs/cropImage';
-import GLTFExporterMeshGPUInstancingExtension from '@/app/libs/EXT_mesh_gpu_instancing_exporter.js';
+import { Brightness, Contrast, Locked,Moon,Sun,Tilt,Undo,Unlocked, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
 
 
 export default function Main() {
@@ -31,7 +31,7 @@ export default function Main() {
 
   // Definir tus filtros y las imágenes de muestra para cada uno  
 
-	const [activeButton, setActiveButton] = useState("brightness"); 
+	const [activeButton, setActiveButton] = useState("rotate"); 
 	const [rotation, setRotation] = useState(0);
 	const [contrast, setContrast] = useState(100);
 	const [brightness, setBrightness] = useState(100);
@@ -115,7 +115,7 @@ export default function Main() {
 		  setCurrentState("crop");
 		  setCurrentStep(2);
 			//reset para cuando se carga desde el preview
-		  setActiveButton("brightness"); 
+		  setActiveButton("rotate"); 
 		  setRotation(0);
 		  setContrast(100);
 		  setBrightness(100);		
@@ -192,7 +192,7 @@ export default function Main() {
 			function ( error ) {	
 				console.log( 'An error happened' );	
 			},
-			{maxTextureSize: 128}
+			{maxTextureSize: 512}
 		);
     };
 	const downloadJSON = (json, filename) => {
@@ -206,13 +206,14 @@ export default function Main() {
 		document.body.removeChild(link);
 		URL.revokeObjectURL(url);
 	};
+
 	
   return (
-    <>
+    <div className='app-container'>
 		<header className="header-area">
 			<div className="header-item">
 				<div className="header-item-inner">
-					<a href="#"><img src={theme == 'dark'? "images/logo-black.png" :"images/logo-white.png"} alt=""/></a>					
+					<a href="#"><img src={theme == 'light'? "images/woodxel-black.png" :"images/woodxel-white.png"} alt=""/></a>					
 				</div>
 				<Tippy content={theme == 'dark'?"Change to light":"Change to dark"}>
 				<div className="header-item-inner2">
@@ -222,34 +223,37 @@ export default function Main() {
 					onChange={toggleTheme} 
 					checked={theme == 'dark'?true:false}					
 					onColor={'#121212'}
-					uncheckedIcon = {
-						
+					height={24} // Altura en píxeles
+                    width={50}  // Ancho en píxeles
+					uncheckedIcon = {						
 						<div
-							style={{
+						style={{
 							display: "flex",
 							justifyContent: "center",
 							alignItems: "center",
 							height: "100%",
-							fontSize: 20,
-							padding: '7px'
-							}}
+							width: "1rem",
+							padding: "0 5px",						
+							paddingRight: 2
+						  }}
 						>
-						<img src="images/sun-2-svgrepo.svg" alt=""/>
+						<Sun/>	
 						</div>
 						
 					}
 					checkedIcon = {
 						<div
-							style={{
+						style={{
 							display: "flex",
 							justifyContent: "center",
 							alignItems: "center",
 							height: "100%",
-							fontSize: 20,
-							padding: '7px'
-							}}
+							width: "1rem",
+							padding: "0 5px",						
+							paddingRight: 2
+						  }}
 						>
-							<img  src="images/moon-svgrepo.svg" alt=""/>
+							<Moon/>
 						</div>					
 					}
 
@@ -260,7 +264,7 @@ export default function Main() {
 			</div>	
 		</header>	
 
-		<section className="step-area" >
+		<div className="step-area" >
 			<div className="step-area-inner">
 				<div className="step-item" >
 					<div className="step-item-inner">
@@ -268,7 +272,7 @@ export default function Main() {
                             <Cropper
 							ref={cropperRef}
                             image={uploadedImage}
-							rotation={rotation}							
+							rotation={rotation}
 							onCropChange={setCrop}
       						onCropComplete={onCropComplete}
 							crop={crop}
@@ -283,17 +287,17 @@ export default function Main() {
                             <>							
 								<input type="file" onChange={handleImageChange} accept="image/*" title=""/>								
                                 <div className="step-item-inner2" >
-                                    <img src="images/upload-svgrepo.svg" alt=""/>
-                                    <p style={{fontWeight: '700'}}>Step 1: Upload your media or drop it here</p>
+                                    <UploadSvgrepo/>
+                                    <p style={{fontWeight: '700'}}>STEP 1: Upload your media or drop it here</p>
                                 </div>
                             </>                               
                             )
                         }
 						{currentState == "view" && (							
 							<Scene3d 
-							width={width}
-							height={height}
-							blockSize={blockSize}
+							width={width * 0.0254}
+							height={height * 0.0254}
+							blockSize={blockSize * 0.0254}
 							croppedImg = {previewImage}
 							onExport={handleExportScene}
 							theme={theme}
@@ -306,10 +310,11 @@ export default function Main() {
 				<div className="step-item2">
 					<div className={`step-item2-inner step-item2-inner10 ${currentStep === 1 ? "step inactive" : ""}`} style={{paddingBottom: '0px'}}>
 						<Tippy content='Click or drop a new image'>
-						<div className="step-item2-inner11" style={{backgroundColor: "grey"}}>
+						<div className="step-item2-inner11">
 							<PreviewImg/>
 							<button className='action_buttons btn-preview-upload'>
-								<img className="upload-icon" src="images/gallery-send-svgrepo.svg" alt="Upload" style={{cursor: 'pointer'}}></img>
+								<UploadPreview/>
+								{/* <img className="upload-icon" src="images/gallery-send-svgrepo.svg" alt="Upload" style={{cursor: 'pointer'}}></img> */}
 							</button>
 							
 							<input type="file" onChange={handleImageChange} accept="image/*" title=''/>							
@@ -318,7 +323,7 @@ export default function Main() {
 						
 					</div>
 					<div className={`step-item2-inner2 step-item2-inner10 ${currentStep === 1 || currentStep !== 2 ? "step inactive" : ""}`}>
-						<h2>Step 2: Input panel size</h2>
+						<h2>STEP 2: Input panel size</h2>
 						
 						<div className="form">							
 							<div className="inputs">
@@ -339,40 +344,42 @@ export default function Main() {
 							</div>
 							<Tippy content="Confirm">
 								<button className='action_buttons' onClick={handleInputsLock}>
-									<img className={`btn-icons ${currentStep == 2?"chake-icon":""}`} src={currentStep == 2?"images/lock-keyhole-unlocked-svgrepo.svg":"images/lock-keyhole-svgrepo.svg"} alt="Reset"/>
+									{currentStep == 2 ?  <Unlocked/> : <Locked/>}
 								</button>	
 							</Tippy>		
 														
 						</div>
 					</div>
 					<div className={`step-item2-inner3 step-item2-inner10 ${currentStep === 1 || currentStep !== 3 ? "step inactive" : ""}`}>
-						<h2>Step 3: Edit your image</h2>
+						<h2>STEP 3: Edit your image</h2>
 						<div className='wrapper_edit_buttons'>
 							<div className='buttons-list'>							
 								<IconButton 
 									isActive={activeButton == "rotate"?true:false} 
-									onClick={() => editBtnHandler("rotate")} 
-									icon="images/tilt.svg" 
-									activeIcon="images/tilt-active.svg"
+									onClick={() => editBtnHandler("rotate")}
 									name = 'Rotate'
-								/>
+								>
+									<Tilt color={activeButton == "rotate"?'#ffffff':'#344054'}></Tilt>
+								</IconButton>
 								<IconButton 
 										isActive={activeButton == "contrast"?true:false} 
-										onClick={() => editBtnHandler("contrast")} 
-										icon="images/contrast.svg" 
-										activeIcon="images/contrast-active.svg" 
+										onClick={() => editBtnHandler("contrast")}										
 										name = 'Contrast'
-								/>
+								>
+									<Contrast color={activeButton == "contrast"?'#ffffff':'#344054'}/>
+								</IconButton>
 								<IconButton 
 										isActive={activeButton == "brightness"?true:false}
-										onClick={() => editBtnHandler("brightness")} 
-										icon="images/brightness.svg" 
-										activeIcon="images/brightness-active.svg" 
+										onClick={() => editBtnHandler("brightness")} 										
 										name = 'Brightness'
-									/>			
+								>
+								<Brightness color={activeButton == "brightness"?'#ffffff':'#344054'}/>
+								</IconButton>			
 							</div>
 							<Tippy content="Back one step">
-								<button className='action_buttons' onClick={ () => goToPreviousStep()}><img className='btn-icons' src="images/undo-left-round.svg" alt=""/></button>
+								<button className='action_buttons' onClick={ () => goToPreviousStep()}>
+									<Undo/>
+								</button>
 							</Tippy>
 
 						</div>
@@ -433,7 +440,7 @@ export default function Main() {
 						</Tippy>
 					</div>
 					<div className={`step-item2-inner5 step-item2-inner10 ${currentStep === 1 || currentStep !== 4 ? "step inactive" : ""}`}>
-						<h2>Step 4: Select block size</h2>
+						<h2>STEP 4: Select block size</h2>
 						<div className='wrapper_edit_buttons'>
 							<div className='buttons-list'>
 								<Tippy content="1” blocks">
@@ -451,13 +458,15 @@ export default function Main() {
 								</Tippy>
 							</div>
 							<Tippy content="Back one step">
-								<button className='action_buttons' onClick={() => goToPreviousStep()}><img className='btn-icons' src="images/undo-left-round.svg" alt=""/></button>
+								<button className='action_buttons' onClick={() => goToPreviousStep()}>
+									<Undo/>
+								</button>
 							</Tippy>
 						</div>
 						
 					</div>
 					<div className={`step-item2-inner6 ${currentStep === 1 || currentStep !== 4 ? "step inactive" : ""}`}>
-						<h2>Step 5: Buying options</h2>
+						<h2>STEP 5: Buying options</h2>
 						<BuyPanel
 						pixelatedImage = {pixelInfo.pixelatedImage}
 						colorsArray = {pixelInfo.colorsArray}
@@ -471,7 +480,7 @@ export default function Main() {
 					</div>
 				</div>
 			</div>
-		</section>		
-    </>
+		</div>		
+    </div>
   )
 }

@@ -5,6 +5,7 @@
 /* Estilos para el modo claro */
 :root {
     --color-fondo-claro: #fff;
+    --color-lienzo-claro: #dee2e6;
     --color-fondo-oscuro: #fff;
     --color-text: #344053;
     --color-text-hight-enfasis:  #344053;
@@ -19,6 +20,7 @@
   [data-theme='dark'] {
     --color-fondo-claro: #1F1F1F;
     --color-fondo-oscuro: #121212;
+    --color-lienzo-claro: #dee2e6;
     --color-text: #fff;
     --color-text-hight-enfasis: rgb(255,255,255,0.87);
     --color-text-medium-enfasis: rgb(255,255,255,0.60);
@@ -59,6 +61,12 @@ button {
     padding: 0;
 }
 
+html, body {    
+    width: 100vw;
+    height: 100vh;
+   overflow: hidden;  /* Esto evita el desplazamiento */
+  }
+
 p {
     margin: 0;
 }
@@ -73,7 +81,16 @@ html {
 }
 
 .lil-gui {
-    /*display: none !important;*/
+    display: none !important;
+}
+
+#feetsText {
+    position: absolute;
+	top: 10px;
+	width: 100%;
+	text-align: center;
+	z-index: 100;
+	display:block;
 }
 
 .spinner {
@@ -86,6 +103,7 @@ html {
   top: 0;
   left: 0; 
   border-radius: 8.66px;
+  z-index: 1000;
 }
 
 @keyframes shake {
@@ -110,6 +128,11 @@ button.inactive {
     display: block;
     pointer-events: none; /* Deshabilita eventos de clic */
     opacity: 0.4; /* Efecto de velo gris */
+}
+
+svg.btn-icons {
+    width: 2.6vh;
+    height: 2.6vh;
 }
 
 img.btn-icons {
@@ -147,12 +170,20 @@ img {
     max-width: 100%;
 }
 
-body {	
+body {    
     font-family: 'Roboto', sans-serif;
     font-size: 1rem;
     font-weight: 400;    
 	background: var(--color-fondo-oscuro);
 	color: var(--color-text);	
+}
+.app-container{
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
 }
 
 .container {
@@ -163,7 +194,7 @@ body {
 /*=== Header area start ===*/
 
 .header-area {
-    padding: 0.878vh;
+    padding: 0.878vh 0;
     border-bottom: 1px solid var(--bordes-areas);
     background: var(--color-fondo-claro);
 }
@@ -180,15 +211,19 @@ body {
 }
 
 /*=== step area start ===*/
+.step-area {
+    height: 100%;
+}
 
 .step-area-inner {
     display: flex;
+    height: 100%;
 }
 
 .step-item {
     width: 100%;
-    padding: 3.29vh 4.28vh 3.29vh 3.29vh;
-    min-height: 93.08vh;
+    padding: 3.29vh 3.29vh 3.29vh 3.29vh;
+    /* min-height: 93.08vh; */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -198,13 +233,19 @@ body {
     width: 100%;
     border-radius: 8.66px;
     border: 1px dashed #9E9E9E;
-    background: var(--color-fondo-oscuro);
+    background: var(--color-fondo-claro);
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
-    padding: 50px 10px;
+    /*padding: 50px 10px;*/
+    background-color: var(--color-lienzo-claro);
+
+}
+
+.step-item-inner canvas{
+    border-radius: 8.66px;
 }
 
 .step-item-inner input {
@@ -217,8 +258,12 @@ body {
     cursor: pointer;
 }
 
-.step-item-inner2 img {
-    width: 5.49vh;
+.step-item-inner2 {
+    text-align: center;
+}
+
+.step-item-inner2 svg {
+    width: 4.5vh;
     display: block;
     margin: 0 auto 20px;
 }
@@ -234,7 +279,7 @@ body {
     border-left: 1px solid var(--bordes-areas);
     background: var(--color-fondo-claro);
     padding: 3.29vh 3.29vh 3.29vh;
-    min-height: 93.08vh;
+   /*  min-height: 93.08vh; */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -257,6 +302,14 @@ body {
     font-family: 'Roboto Flex', sans-serif;
 }
 
+.reactEasyCrop_Container{
+    background-color: var(--color-lienzo-claro);
+}
+
+/* .reactEasyCrop_CropArea.reactEasyCrop_CropAreaGrid{
+    color: transparent !important;
+} */
+
 .step-item2-inner11 {
     width: 100%;
     height: 20vh;
@@ -267,6 +320,7 @@ body {
     align-items: center; /* Centra verticalmente */
     overflow: hidden; /* En caso de que la imagen sea más grande que el contenedor */
     border-radius: 0.6vh;
+    background-color: var(--color-lienzo-claro);
 }
 
 .step-item2-inner11 input {
@@ -291,7 +345,7 @@ body {
     display: block; /* Elimina cualquier espacio extra debajo de la imagen */
 }
 
-.step-item2-inner11 img.upload-icon {
+.step-item2-inner11 svg.upload-icon {
     width: 2.6vh;
     height: 2.6vh;
 }

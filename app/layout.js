@@ -1,14 +1,11 @@
 //import './globals.css'
-import './css/bootstrap.css';
-import './css/jquery-ui.css';
-import './css/jquery-ui.theme.css';
-import './css/responsive.css'
+//import './css/bootstrap.css';
+//import './css/jquery-ui.css';
+//import './css/jquery-ui.theme.css';
+//import './css/responsive.css'
 
 
-import { Inter } from 'next/font/google'
-
-
-const inter = Inter({ subsets: ['latin'] })
+//import { Inter } from 'next/font/google'
 
 export const metadata = {
   title: 'Lignum',
@@ -18,7 +15,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body>{children}</body>
     </html>
   )
 }

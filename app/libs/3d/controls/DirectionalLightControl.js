@@ -16,12 +16,12 @@ function DirectionalLightControl(gui, light, cameraHelper) {
     bottom: -10,
     left: -10,
     right: 10,
-    intensity: 1.0,
+    intensity: 3.0,
     showCameraHelper: false,
     lightX: light.position.x,
     lightY: light.position.y,
     lightZ: light.position.z,
-    bias: 0.0,
+    bias: -0.0005,
   };
 
   light.intensity = params.intensity;

@@ -58,7 +58,6 @@ export default async function getCroppedImg(
   // set canvas size to match the bounding box
   canvas.width = bBoxWidth
   canvas.height = bBoxHeight
-
   ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
   // translate canvas context to a central location to allow rotating and flipping around the center
   ctx.translate(bBoxWidth / 2, bBoxHeight / 2)
