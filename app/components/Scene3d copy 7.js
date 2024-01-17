@@ -20,35 +20,26 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 
 	const meshesRef = useRef([]);//almacena los bloques cargados
 	const allColorsRef = useRef([]);
-	
-	function loadModelWithRetry(url, maxAttempts, delay, onLoad, onProgress, onError) {
-		const loader = new GLTFLoader();
-	
-		let attempts = 0;
-	
-		function attemptLoad() {
-			loader.load(url, 
-				(gltf) => {
-					// Si la carga es exitosa, llama a la función onLoad
-					onLoad(gltf);
-				}, 
-				onProgress, 
-				(error) => {
-					// Si ocurre un error y aún quedan intentos, reintenta después de un retraso
-					attempts++;
-					if (attempts < maxAttempts) {
-						console.log(`Error al cargar. Reintentando ${attempts} de ${maxAttempts}...`);
-						setTimeout(attemptLoad, delay);
-					} else {
-						// Si se alcanza el máximo de intentos, llama a la función onError
-						onError(error);
-					}
-				}
-			);
-		}
-	
-		attemptLoad();
-	}
+
+	const manager = new THREE.LoadingManager();
+	manager.onStart = function (url, itemsLoaded, itemsTotal) {
+		handleLoading(true);
+		console.log('Comenzó la carga:', url, itemsLoaded, 'de', itemsTotal);
+	};
+
+	manager.onLoad = function () {	
+		paintFrame(meshesRef.current, allColorsRef.current);
+		snap.current = true;
+		handleLoading(false);
+	};
+
+	manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+		console.log('Cargando archivo: ' + url + '.\nCargados ' + itemsLoaded + ' de ' + itemsTotal + ' archivos.');
+	};
+
+	manager.onError = function (url) {
+		console.log('Hubo un error al cargar ' + url);
+	};
 	
     useEffect(() => {
 		console.log("----------------------useEffect Scene3d----------------------------");
@@ -56,7 +47,8 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 		const yBlocks = Math.round(height / blockSize);
 		let backColor = theme === 'light' ? 0xdee2e6 : 0x121212;
 		sceneRef.background = new THREE.Color(backColor);
-	
+    	//const gui = new GUI();
+		//gui.close();
 		pixelateImg(croppedImg, xBlocks, yBlocks)
 			.then((data) => {
 				//despues de pixelada la imagen entonces se crea la escena
@@ -180,40 +172,16 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 					// Call the renderScene function to start the animation loop
 					animate();	
 
-					const loaderSvg = new SVGLoader();
+					const loaderSvg = new SVGLoader(manager);
 					//cargar la geometría
-
+					const loaderGltf = new GLTFLoader(manager);	
+					//const models = ['bloque_optimizado.glb', 'bloque_optimizado.glb', 'bloque_optimizado.glb', 'bloque_optimizado.glb'];
+					//const meshes = [];
 					meshesRef.current = [];
-					handleLoading(true);
-					const loadModelPromises = models.map((modelUrl) => {
-						return new Promise((resolve, reject) => {
-							loadModelWithRetry(
-								modelUrl,
-								3, // Número máximo de intentos
-								2000, // Retraso entre intentos
-								(gltf) => { 
-									console.log('Modelo cargado:', gltf); 
-									meshesRef.current.push(gltf.scene.children[0]);
-									resolve(gltf); // Resolver la promesa cuando se carga el modelo
-								},
-								undefined, // Función de progreso
-								(error) => { 
-									console.error('No se pudo cargar el modelo:', error); 
-									reject(error); // Rechazar la promesa si no se puede cargar el modelo
-								}
-							);
-						});
-					});
-					
-					Promise.all(loadModelPromises).then(() => {
-						console.log("Todos los modelos han sido cargados, incluyendo reintentos.");
-						paintFrame(meshesRef.current, allColorsRef.current);
-						snap.current = true;
-						handleLoading(false);
-					}).catch(error => {
-						console.error("Hubo un error al cargar uno o más modelos:", error);
-						alert("An issue occurred while loading the content. Please try refreshing the page.")
-					});
+					for (let index = 0; index < models.length; index++) {
+						loaderGltf.load(models[index], 
+							(gltf)=> meshesRef.current.push(gltf.scene.children[0]));
+					}
 
 					loaderSvg.load('human_frontal_silhouette_by_ikaros_ainasoja.svg', (data) => {
 						const paths = data.paths;

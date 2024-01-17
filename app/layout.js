@@ -4,7 +4,6 @@
 //import './css/jquery-ui.theme.css';
 //import './css/responsive.css'
 
-
 //import { Inter } from 'next/font/google'
 
 export const metadata = {

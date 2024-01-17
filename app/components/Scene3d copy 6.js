@@ -1,10 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import pixelateImg from '@/app/libs/pixelate';
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
+import { GUI } from "three/addons/libs/lil-gui.module.min.js";
+import DirectionalLightControl from '../libs/3d/controls/DirectionalLightControl';
+import RectLightControl from '../libs/3d/controls/RectLightControl';
+import AmbientLightControl from '../libs/3d/controls/AmbientLightControl';
+import MaterialControl from '../libs/3d/controls/MaterialControl';
+import RendererControl from '../libs/3d/controls/RendererControl';
+import { Blocks } from  'react-loader-spinner';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+
+
+
 
 const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupRefChange, theme='light', setProductImg, handleLoading, sceneRef, renderRef }) => {
     const canvasRef = useRef();
@@ -18,50 +31,43 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 
 	const models = ['v5_1.glb', 'v5_2.glb', 'v5_3.glb', 'v5_4.glb'];
 
-	const meshesRef = useRef([]);//almacena los bloques cargados
+	const meshesRef = useRef([]);
 	const allColorsRef = useRef([]);
-	
-	function loadModelWithRetry(url, maxAttempts, delay, onLoad, onProgress, onError) {
-		const loader = new GLTFLoader();
-	
-		let attempts = 0;
-	
-		function attemptLoad() {
-			loader.load(url, 
-				(gltf) => {
-					// Si la carga es exitosa, llama a la función onLoad
-					onLoad(gltf);
-				}, 
-				onProgress, 
-				(error) => {
-					// Si ocurre un error y aún quedan intentos, reintenta después de un retraso
-					attempts++;
-					if (attempts < maxAttempts) {
-						console.log(`Error al cargar. Reintentando ${attempts} de ${maxAttempts}...`);
-						setTimeout(attemptLoad, delay);
-					} else {
-						// Si se alcanza el máximo de intentos, llama a la función onError
-						onError(error);
-					}
-				}
-			);
-		}
-	
-		attemptLoad();
-	}
+
+	const manager = new THREE.LoadingManager();
+	manager.onStart = function (url, itemsLoaded, itemsTotal) {
+		handleLoading(true);
+		console.log('Comenzó la carga:', url, itemsLoaded, 'de', itemsTotal);
+	};
+
+	manager.onLoad = function () {	
+		paintFrame(meshesRef.current, allColorsRef.current);
+		handleLoading(false);
+	};
+
+	manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+		console.log('Cargando archivo: ' + url + '.\nCargados ' + itemsLoaded + ' de ' + itemsTotal + ' archivos.');
+	};
+
+	manager.onError = function (url) {
+		console.log('Hubo un error al cargar ' + url);
+	};
 	
     useEffect(() => {
 		console.log("----------------------useEffect Scene3d----------------------------");
+		//handleLoading(true);
         const xBlocks = Math.round(width / blockSize);
 		const yBlocks = Math.round(height / blockSize);
 		let backColor = theme === 'light' ? 0xdee2e6 : 0x121212;
 		sceneRef.background = new THREE.Color(backColor);
-	
+    	//const gui = new GUI();
+		//gui.close();
 		pixelateImg(croppedImg, xBlocks, yBlocks)
 			.then((data) => {
 				//despues de pixelada la imagen entonces se crea la escena
 					const { imageURL, allColors } = data;
 					allColorsRef.current = allColors;
+					console.log(allColorsRef.current);
 					setPixelInfo({ 
 						pixelatedImage: imageURL, 
 						colorsArray: allColors 
@@ -129,11 +135,10 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 					controls.minDistance = 0.5;
 					controls.maxDistance = 20;
 					controls.enablePan = false;
-					//controls.maxPolarAngle = THREE.MathUtils.degToRad(92);
+					/* controls.maxPolarAngle = THREE.MathUtils.degToRad(92);
 					controls.minPolarAngle = THREE.MathUtils.degToRad(45);
-					controls.maxPolarAngle = controls.getPolarAngle();
 					controls.maxAzimuthAngle = THREE.MathUtils.degToRad(60);
-					controls.minAzimuthAngle = THREE.MathUtils.degToRad(-60);
+					controls.minAzimuthAngle = THREE.MathUtils.degToRad(-60);  */
 					controls.update();
 
 					sceneRef.add(ambientlight);
@@ -171,50 +176,24 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 						requestAnimationFrame(animate);
 						controls.update();
 						renderRef.render(sceneRef, camera);
-						if(snap.current){
-							snapshot(width, height);
+						/* if(snap.current){
+							snapshot();
 							snap.current = false;
-						}
+						} */
 					};
 				  
 					// Call the renderScene function to start the animation loop
 					animate();	
 
-					const loaderSvg = new SVGLoader();
+					const loaderSvg = new SVGLoader(manager);
 					//cargar la geometría
-
-					meshesRef.current = [];
-					handleLoading(true);
-					const loadModelPromises = models.map((modelUrl) => {
-						return new Promise((resolve, reject) => {
-							loadModelWithRetry(
-								modelUrl,
-								3, // Número máximo de intentos
-								2000, // Retraso entre intentos
-								(gltf) => { 
-									console.log('Modelo cargado:', gltf); 
-									meshesRef.current.push(gltf.scene.children[0]);
-									resolve(gltf); // Resolver la promesa cuando se carga el modelo
-								},
-								undefined, // Función de progreso
-								(error) => { 
-									console.error('No se pudo cargar el modelo:', error); 
-									reject(error); // Rechazar la promesa si no se puede cargar el modelo
-								}
-							);
-						});
-					});
-					
-					Promise.all(loadModelPromises).then(() => {
-						console.log("Todos los modelos han sido cargados, incluyendo reintentos.");
-						paintFrame(meshesRef.current, allColorsRef.current);
-						snap.current = true;
-						handleLoading(false);
-					}).catch(error => {
-						console.error("Hubo un error al cargar uno o más modelos:", error);
-						alert("An issue occurred while loading the content. Please try refreshing the page.")
-					});
-
+					const loaderGltf = new GLTFLoader(manager);	
+					//const models = ['bloque_optimizado.glb', 'bloque_optimizado.glb', 'bloque_optimizado.glb', 'bloque_optimizado.glb'];
+					//const meshes = [];
+					for (let index = 0; index < models.length; index++) {
+						loaderGltf.load(models[index], 
+							(gltf)=> meshesRef.current.push(gltf.scene.children[0]));
+					}
 					loaderSvg.load('human_frontal_silhouette_by_ikaros_ainasoja.svg', (data) => {
 						const paths = data.paths;
 						for (let i = 0; i < paths.length; i++) {
@@ -239,23 +218,46 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 							}
 						}		
 					});
+
+					//paintFrame(meshes, allColors);
+
 					
-					registerWindowsListener(()=>onResize(camera));
+					//handleLoading(false);
+					snap.current = true;
 					
+					//MaterialControl(gui, material);
+					//RendererControl(gui, renderer);
+
+					/* fetch("jueves_config.json")
+					.then((response) => {
+						return response.json();
+					})
+					.then((data) => {
+						console.log("json",data);
+						gui.load(data);						
+						//repositionLights(rectLight, directionalLightRef.current, scene);
+					})
+					.catch((error) => console.error("Error fetching the json:", error)); */
+
+					/* const onResize = () => {
+						if (canvasRef.current && renderRef.current) {
+							const width = canvasRef.current.offsetWidth;
+							const height = canvasRef.current.offsetHeight;
+				
+							renderRef.current.setSize(width, height);
+							cameraRef.current.aspect = width / height;
+							cameraRef.current.updateProjectionMatrix();
+
+						}
+					};
+				
+					window.addEventListener('resize', onResize);				
+ 				*/
 				}
 			});
 
-			const onResize = (camera) => {
-				if (canvasRef.current && renderRef) {
-					const canvasWidth = canvasRef.current.offsetWidth;
-					const canvasHeight = canvasRef.current.offsetHeight;
-		
-					renderRef.setSize(canvasWidth, canvasHeight);
-					camera.aspect = canvasWidth / canvasHeight;
-					camera.updateProjectionMatrix();
-	
-				}
-			};	
+			//const canvasElements = document.querySelectorAll('canvas');
+    		//console.log(`Número de elementos <canvas>: ${canvasElements.length}`);
 			
 			// Función de limpieza
 			return () => {
@@ -264,31 +266,25 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 					canvasRef.current.removeChild(renderRef.domElement);
 				}
 				renderRef.dispose();
-				unRegisterWindowListener(onResize);
-				//gui.destroy();
+				/* //window.removeEventListener('resize', onResize);
+				gui.destroy();*/
 				cancelAnimationFrame(animationFrameId.current);
 				removeObjWithChildren(sceneRef);
+				console.log('After clean scene', sceneRef);
 				
 			};
     }, [blockSize]); // Dependencias del efecto	
-
-	const registerWindowsListener = (action) =>{		
-		window.addEventListener('resize', action);		
+	
+	const toggleSnap = () => {
+		snap.current = true;
 	}
 
-	const unRegisterWindowListener = (action) => {
-		window.removeEventListener('resize', action);
-	}
+	const snapshot = () => {
+		// Tamaño de la región que deseas capturar
+		const regionWidth = 150;
+		const regionHeight = 150;
 
-	const snapshot = (width, height) => {		
-
-		const point1 = [0.6096, 200];
-		const point2 = [1.27, 320];
-
-		const regionWidth = interpolateLinear(Math.max(width,height), point1, point2);
-		const regionHeight = regionWidth;
-
-		let canvas = renderRef.domElement;
+		let canvas = renderRef.current.domElement;
 
 		// Calcula el centro del canvas original
 		const centerX = canvas.width / 2;
@@ -316,62 +312,30 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 		setProductImg(dataURL);
 	}
 
-	const interpolateLinear = (x, point1, point2) => {
-		const [x0, y0] = point1;
-		const [x1, y1] = point2;
-	
-		// Asegúrate de que x1 y x0 no sean iguales para evitar división por cero
-		if (x1 === x0) {
-			console.error("Error: x0 y x1 no pueden ser iguales.");
-			return null;
-		}
-	
-		return y0 + ((y1 - y0) / (x1 - x0)) * (x - x0);
-	}
-
 	//limpiar la escena
-	//Se estan quedando Mesh sin eliminar, se puede comprobar en la Memory
 	const removeObjWithChildren = (obj) => {
 		while (obj.children.length > 0) {
 		  removeObjWithChildren(obj.children[0]);
 		}
 		if (obj.geometry) {
 		  obj.geometry.dispose();
-		  //console.log('eliminando geometrias');
-
+		  //obj.geometry = undefined;
 		}
 		if (obj.material) {
 		  if (Array.isArray(obj.material)) {
-			for (const material of obj.material) {
-			  if (material.map) {
-				material.map.dispose();
-				//console.log('eliminando texturas');
-			  }
-			  if (material.metalnessMap) {
-				material.metalnessMap.dispose();
-				//console.log('eliminando texturas');
-			  }
-			  if (material.normalMap) {
-				material.normalMap.dispose();
-				//console.log('eliminando texturas');
-			  }
+			for (let material of obj.material) {
+			  if (material.map) material.map.dispose();
+			  if (material.metalnessMap) material.metalnessMap.dispose();
+			  if (material.normalMap) material.metalnessMap.dispose();
 			  material.dispose();
-		  	  //console.log('eliminando materiales');
+			  //material = undefined;
 			}
-		  } else {
-			if (obj.material.map) {
-			  obj.material.map.dispose();
-			  //console.log('eliminando texturas');
-			}
-			if (obj.material.metalnessMap) {
-				obj.material.metalnessMap.dispose();
-				//console.log('eliminando texturas');
-			}
-			if (obj.material.normalMap) {
-				obj.material.normalMap.dispose();
-				//console.log('eliminando texturas');
-			}
-			obj.material.dispose();
+		  } else {			
+			  if (obj.material.map) obj.material.map.dispose();
+			  if (obj.material.metalnessMap) obj.material.metalnessMap.dispose();
+			  if (obj.material.normalMap) obj.material.metalnessMap.dispose();
+				obj.material.dispose();
+				//obj.material = undefined
 		  }
 		}
 		if (obj.parent) {
@@ -381,7 +345,6 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 	
 
 	const paintFrame = (meshes, allColors) => {
-		console.log('meshes',meshes);
 
 		exportGroupRef.current = new THREE.Group();
 	
@@ -453,7 +416,6 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 			);
 			instancedMesh.castShadow = true;
 			instancedMesh.receiveShadow = true;
-			instancedMesh.name = 'instancedMesh'+index;
 			const allColorsBuffer = new THREE.InstancedBufferAttribute(
 				new Float32Array(blocksForMaterial.length * 3),
 				3
@@ -475,12 +437,12 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 			instancedMesh.instanceMatrix.needsUpdate = true;		
 			
 			sceneRef.add(instancedMesh);
-			convertInstancedMeshToGroup(instancedMesh, instaceColors);
+			//convertInstancedMeshToGroup(instancedMesh, instaceColors);
 			
 		});// fin del siclo donde se crean las instancedMesh
 
-		//console.log("Paint frame",sceneRef);
-		onGroupRefChange(exportGroupRef.current);//devuelve al padre el grupo con todos los mesh para exportar
+		console.log("Paint frame",sceneRef);
+		//onGroupRefChange(exportGroupRef.current);//devuelve al padre el grupo con todos los mesh para exportar
 
 	};//fin de PaintFrame
 

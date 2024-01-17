@@ -9,6 +9,7 @@ import Scene3d from "@/app/components/Scene3d";
 import BuyPanel from '@/app/components/BuyPanel';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css'; // optional
+import Switch from "react-switch";
 import getCroppedImg from '@/app/libs/cropImage';
 import { Brightness, Contrast, Locked, Moon, Sun,Tilt,Undo,Unlocked, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
 import Export3d from '@/app/components/Export3d';
@@ -61,10 +62,25 @@ export default function Main() {
 	const meshes = useRef([]);//contiene las mallas de los bloques
 	const svgShape = useRef();//contiene la silueta del hombre
 
-	const sceneRef = useRef();
-	const renderRef = useRef();
+	const manager = new THREE.LoadingManager();
+	manager.onStart = function (url, itemsLoaded, itemsTotal) {
+		setIsLoading(true);
+		console.log('Comenzó la carga:', url, itemsLoaded, 'de', itemsTotal);
+	};
 
-	
+	manager.onLoad = function () {		
+		//setIsLoading(false); // Establece la carga como falsa cuando todo esté cargado 
+		console.log('se cargaron todos');
+		setIsLoading(false);
+	};
+
+	manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+		console.log('Cargando archivo: ' + url + '.\nCargados ' + itemsLoaded + ' de ' + itemsTotal + ' archivos.');
+	};
+
+	manager.onError = function (url) {
+		console.log('Hubo un error al cargar ' + url);
+	};
 
 	// Función para cambiar el tema
 	const toggleTheme = () => {
@@ -72,18 +88,76 @@ export default function Main() {
 	};
 
 	// Efecto para actualizar el atributo data-theme
-	useEffect(() => {		
-		console.log('Useffect primero');
+	useEffect(() => {
+		console.log('Useeffect primero');
+		const loaderSvg = new SVGLoader(manager);
+		//cargar la geometría
+		const loaderGltf = new GLTFLoader(manager);	
+		//const models = ['bloque_optimizado.glb', 'bloque_optimizado.glb', 'bloque_optimizado.glb', 'bloque_optimizado.glb'];
+		const models = ['v5_1.glb', 'v5_2.glb', 'v5_3.glb', 'v5_4.glb'];
+					
+		function loadCubos(url) {
+			return new Promise((resolve, reject) => {
+				loaderGltf.load(url, (gltf) => resolve(gltf), undefined, reject);
+			});
+		}
 
-		sceneRef.current = new THREE.Scene();
-		renderRef.current = new THREE.WebGLRenderer({ antialias: true});		
+		const loadPromises = models.map(model => loadCubos(model));
 
-	},[]);
+		loadPromises.push( 
+			new Promise((resolve, reject) => {
+				loaderSvg.load('human_frontal_silhouette_by_ikaros_ainasoja.svg', (data) => {
+					const paths = data.paths;
+					for (let i = 0; i < paths.length; i++) {
+						const path = paths[i];
+					
+						const material = new THREE.MeshBasicMaterial({
+							color: new THREE.Color(0xdee2e6),
+							side: THREE.DoubleSide,
+							depthWrite: false
+						});
+					
+						const shapes = path.toShapes(true);
+					
+						for (let j = 0; j < shapes.length; j++) {
+							const shape = shapes[j];
+							const geometry = new THREE.ShapeGeometry(shape);
+							const mesh = new THREE.Mesh(geometry, material);
+							mesh.scale.set(0.0032, -0.0032, 0.0032);
+							mesh.name = "Man Shape";
+							resolve(mesh);
+						}
+					}		
+				}, undefined, reject);
+			})
+		);
 		
+		// Cargar todos los modelos
+
+		Promise.all(loadPromises)
+		.then((loadedModels) => {
+			// Realiza cualquier otra operación que necesites después de cargar los modelos
+			const mesh1 = loadedModels[0].scene.children[0];						
+			const mesh2 = loadedModels[1].scene.children[0];						
+			const mesh3 = loadedModels[2].scene.children[0];						
+			const mesh4 = loadedModels[3].scene.children[0];
+			meshes.current = [mesh1, mesh2, mesh3, mesh4];
+			svgShape.current = loadedModels[4];
+			console.log(meshes.current);
+			console.log(svgShape.current);
+			//crear snapshoot of the screen
+		})
+		.catch((err) => {
+			alert("Some objects fail to load");
+		});
+
+	}, [])
+
 	// Efecto para actualizar el atributo data-theme
-	/* useEffect(() => {
+	useEffect(() => {
+		console.log('data-theme', theme);
 		document.documentElement.setAttribute('data-theme', theme);
-	}, [theme]);	 */
+	}, [theme]);	
 
 	// Función para avanzar al siguiente paso
 	const goToNextStep = () => {
@@ -149,37 +223,24 @@ export default function Main() {
 	 * Cambio en las dimensiones
 	 */
 	const handleWidth = (event) => {
-		console.log("cuando cambia");
-
 		let { min, max, value } = event.target;		
+		//value = Math.max(Number(min), Math.min(Number(max), Number(value)));
 		setWidth(value);
+		setBlockSize(value %2 == 0 ? 2 : 1);
 	};	
-
-	// cuando pierde e foco
-    const handleWidthAdjustment = (event) => {
-		console.log("cuando pierde e foco");
-        let { min, max, value } = event.target;
-        value = Math.max(Number(min), Math.min(Number(max), Number(value)));
-        setWidth(value);
-        setBlockSize(value % 2 === 0 ? 2 : 1);
-    }
 	
 	const handleHeight = (event) => {
 		let { min, max, value } = event.target;
+		//value = Math.max(Number(min), Math.min(Number(max), Number(value)));
 		setHeight(value);
-	};
+		setBlockSize(value %2 == 0 ? 2 : 1);
+	};	
 
-	// cuando pierde e foco
-    const handleHeightAdjustment = (event) => {
-        let { min, max, value } = event.target;
-        value = Math.max(Number(min), Math.min(Number(max), Number(value)));
-        setHeight(value);
-        setBlockSize(value % 2 === 0 ? 2 : 1);
-    }
 	//cuando se hace click sobre el candado
 	const handleInputsLock = () => {		
 		goToNextStep();
-	};	
+	};
+	
 
 	/**
 	 * Cambia tamaño de bloques
@@ -215,10 +276,11 @@ export default function Main() {
 
 	const handleExportGroupRef= (group)=>{
 		setExportGroupRef(group);
-	}	
+	}
 	
   return (
-    <div className='app-container'>		
+    <div className='app-container'>
+		{console.log("re-render en page.js")}
 		<header className="header-area">
 			<div className="header-item">
 				<div className="header-item-inner">
@@ -276,16 +338,14 @@ export default function Main() {
 							theme={theme}
 							setPixelInfo = {setPixelInfo}
 							setProductImg = {setProductImg}
+							meshes = {meshes.current}
+							svgShape = {svgShape.current}
 							handleLoading = {setIsLoading}
-							sceneRef = {sceneRef.current }
-							renderRef = {renderRef.current}
-							
 							/>
 						)}                   
 					</div>
 				</div>
 				<div className="step-item2">
-					<div className='step-item2-inside'>					
 					<div className={`step-item2-inner step-item2-inner10 ${currentStep === 1 ? "step inactive" : ""}`} style={{paddingBottom: '0px'}}>
 						<Tippy content='Click or drop a new image'>
 						<div className={`step-item2-inner11 ${isLoading ? "step inactive" : ""}`}>
@@ -309,7 +369,6 @@ export default function Main() {
 								<input id='input_w' className="input_w" type="number" min="24" max="300" value={width} 
 								onChange={handleWidth}
 								onFocus={(even)=>{even.target.select()}}
-								onBlur={handleWidthAdjustment}
 								/>
 							</Tippy>				
 								<label htmlFor="input_w">W</label>
@@ -317,7 +376,6 @@ export default function Main() {
 								<input id='input_h' className="input_h" type="number" min="24" max="300" value={height} 
 								onChange={handleHeight}
 								onFocus={(even)=>{even.target.select()}}
-								onBlur={handleHeightAdjustment}
 								/>
 							</Tippy>
 								<label htmlFor="input_h">H</label>											
@@ -415,7 +473,7 @@ export default function Main() {
 						</div>
 						<Tippy content='Show your 3D panel'>						
 						<div style={{display: 'flex', justifyContent: 'right'}}>
-							<button id="btn-preview" onClick={handleView}>3D Panel Preview</button>
+							<a href="#" onClick={handleView}>3D Panel Preview</a>
 						</div>
 						</Tippy>
 					</div>
@@ -461,7 +519,6 @@ export default function Main() {
 						handleLoading = {setIsLoading}
 						/>
 					</div>
-				</div>
 				</div>
 			</div>
 		</div>		

@@ -8,7 +8,6 @@ import Tippy from '@tippyjs/react';
 const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, handleLoading, productImg, mobile}) => {
 
   const handleBuy = async (event) => {
-
     event.preventDefault();
     handleLoading(true);
     //en lugar de convertir todos los colores debería convertir solo los que van en la leyenda
@@ -20,7 +19,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
       blockSize
     );
 
-    const { pdf1, json } = await drawReportPdf1(//pdf con imagen pixelada y paneles      
+    const { pdf1, leyenda } = await drawReportPdf1(//pdf con imagen pixelada y paneles      
       xBlocks,
       yBlocks,
       blockSize,
@@ -34,7 +33,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
     //coloredBlueprint: coloredBlueprintFile,
     pixelated_img_url: dynamicProduct_img.src, */
 
-    const jsonCMYK = JSON.stringify(json);
+    const jsonCMYK = JSON.stringify(leyenda);
 
     const formData = new FormData();
     formData.append("action", "change_price");
@@ -212,11 +211,6 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
   ) => {
     const colorInfo = getColorInfo();
     const leyenda = [];
-    //almacena el json de la orden []
-    const json = {"work_orders": {
-      "12345": {
-      }      
-    }};
     //Draw blueprint of product in pdf format
     let doc = new jsPDF({
       orientation: "p",
@@ -246,19 +240,8 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
     for (let idx = 0; idx < colorInfo.length; idx++) {    
       let colorData = colorInfo[idx];
       let cmykwData = cmykwColors[colorData[0]]; //relaciona por la posicion guardada en colorinfo
-      let atem = [idx + 1, cmykwData, colorData[2]]; //crea un registro con [pos, color, cant] del cmyk+w
+      let atem = [idx + 1, cmykwData, colorData[2]]; //crea un regstro con [pos, color, cant] del cmyk+w
       leyenda.push(atem);
-      let colorKey = `color_${idx+1}`;
-      //arreglo con las rotaciones de cada componente del color [C,M,Y,K,W] 
-      const rotations = calculateRotations(cmykwData,blockSize,colorData[2]);
-      json.work_orders[12345][colorKey] = [
-        { id: 1, steps: rotations[0]},
-        { id: 2, steps: rotations[1]},
-        { id: 3, steps: rotations[2]},
-        { id: 4, steps: rotations[3]},
-        { id: 5, steps: rotations[4]}
-      ];
-
       doc.setDrawColor(0, 0, 0);
       doc.setFillColor(colorData[1][0], colorData[1][1], colorData[1][2]);
       doc.rect(x, y - 3, 10, 3, "FD");
@@ -369,34 +352,8 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
     // Save the PDF in base64 format
     //doc.save();
     const pdf1 = btoa(doc.output());
-    return { pdf1, leyenda, json };
+    return { pdf1, leyenda };
   };
-
-  const calculateRotations = (cmykBlanco, dimensionBloque, cantidadBloques) => {
-    // Datos de referencia para cobertura de acrílico y pasos de motor
-    const referencia = {
-      1: { area: 5, coverage: 4, motorSteps: 1720 },
-      2: { area: 15, coverage: 10, motorSteps: 4300 },
-      3: { area: 30, coverage: 19, motorSteps: 8170 }
-    };
-
-    // Obtener los datos de referencia para la dimensión del bloque
-    const datosBloque = referencia[dimensionBloque];
-    if (!datosBloque) {
-      throw new Error('Dimension de bloque no válida');
-    }
-
-    const totalPorcentaje = cmykBlanco.reduce((acc, val) => acc + val, 0);
-    const pasosPorMililitro = datosBloque.motorSteps / datosBloque.coverage;
-
-    // Calcular los pasos del motor para cada componente de CMYK + Blanco
-    const pasosPorComponente = cmykBlanco.map(componente => {
-      const mililitrosPorComponente = (componente / totalPorcentaje) * datosBloque.coverage * cantidadBloques;
-      return Math.round(mililitrosPorComponente * pasosPorMililitro);
-    });
-
-    return pasosPorComponente;
-  }
 
   const getImageWidthHeight = (xBlocks, yBlocks) => {
     const docWidth = 190; // El ancho máximo permitido del documento

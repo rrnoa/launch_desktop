@@ -1,88 +1,67 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import pixelateImg from '@/app/libs/pixelate';
-import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { GUI } from "three/addons/libs/lil-gui.module.min.js";
-import DirectionalLightControl from '../libs/3d/controls/DirectionalLightControl';
-import RectLightControl from '../libs/3d/controls/RectLightControl';
-import AmbientLightControl from '../libs/3d/controls/AmbientLightControl';
-import MaterialControl from '../libs/3d/controls/MaterialControl';
-import RendererControl from '../libs/3d/controls/RendererControl';
-import { Blocks } from  'react-loader-spinner';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 
-
-const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport, theme='light'}) => {
+const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupRefChange, theme='light', setProductImg, handleLoading, sceneRef, renderRef }) => {
     const canvasRef = useRef();
 	const animationFrameId = useRef(); // Referencia para almacenar el ID del frame de animación
-	const renderRef = useRef();
-	const sceneRef = useRef(null); // Referencia para la escena
-	const floorMaterialRef = useRef(null);
-	const wallMaterialRef = useRef(null);
 	//const dennisMaterialRef = useRef(null);
 	const exportGroupRef = useRef(null);
-	const cameraRef = useRef(null);
-	const controlsRef = useRef(null);	
 
 	const inch = 0.0254;
 
-	const [isLoading, setIsLoading] = useState(true);
-	const [lastZoomRange, setLastZoomRange] = useState(null);
+	const snap = useRef(false);
 
-	const manager = new THREE.LoadingManager();
-	manager.onStart = function (url, itemsLoaded, itemsTotal) {
-		//console.log('Comenzó la carga:', url, itemsLoaded, 'de', itemsTotal);
-	};
+	const models = ['v5_1.glb', 'v5_2.glb', 'v5_3.glb', 'v5_4.glb'];
 
-	manager.onLoad = function () {		
-		setIsLoading(false); // Establece la carga como falsa cuando todo esté cargado  		
-	};
+	const meshesRef = useRef([]);
+	const allColorsRef = useRef([]);
 
-	manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-		//console.log('Cargando archivo: ' + url + '.\nCargados ' + itemsLoaded + ' de ' + itemsTotal + ' archivos.');
-	};
-
-	manager.onError = function (url) {
-		//console.log('Hubo un error al cargar ' + url);
-	};	
-
-	useEffect(() => {
-		if(sceneRef.current){
-			// Suponiendo que tienes una referencia a tu escena de Three.js
-			if (theme === 'light') {
-				sceneRef.current.background = new THREE.Color(0xdee2e6); // Fondo blanco para tema claro
-				wallMaterialRef.current.color = new THREE.Color(0xFFFFFF);
-				floorMaterialRef.current.color = new THREE.Color(0xdee2e6);
-				//dennisMaterialRef.current.color = new THREE.Color(0xdee2e6);
-				
-			} else if (theme === 'dark') {
-				sceneRef.current.background = new THREE.Color(0x292929); // Fondo negro para tema oscuro
-				wallMaterialRef.current.color = new THREE.Color(0x292929);
-				floorMaterialRef.current.color = new THREE.Color(0x292929);
-				//dennisMaterialRef.current.color = new THREE.Color(0x121212);
-			}
-		}	
+	function loadModelWithRetry(url, maxAttempts, delay, onLoad, onProgress, onError) {
+		const loader = new GLTFLoader();
 	
-	}, [theme]); // Dependencia del efecto: se ejecuta cuando 'theme' cambia
+		let attempts = 0;
+	
+		function attemptLoad() {
+			loader.load(url, 
+				(gltf) => {
+					// Si la carga es exitosa, llama a la función onLoad
+					onLoad(gltf);
+				}, 
+				onProgress, 
+				(error) => {
+					// Si ocurre un error y aún quedan intentos, reintenta después de un retraso
+					attempts++;
+					if (attempts < maxAttempts) {
+						console.log(`Error al cargar. Reintentando ${attempts} de ${maxAttempts}...`);
+						setTimeout(attemptLoad, delay);
+					} else {
+						// Si se alcanza el máximo de intentos, llama a la función onError
+						onError(error);
+					}
+				}
+			);
+		}
+	
+		attemptLoad();
+	}
 	
     useEffect(() => {
-		console.log("useEffect Scene3d");
-		if(!isLoading) setIsLoading(true);
+		console.log("----------------------useEffect Scene3d----------------------------");
         const xBlocks = Math.round(width / blockSize);
 		const yBlocks = Math.round(height / blockSize);
-		const scene = new THREE.Scene();
-		sceneRef.current = scene; // Almacena la escena en la referencia
-
 		let backColor = theme === 'light' ? 0xdee2e6 : 0x121212;
-		scene.background = new THREE.Color(backColor);
-    	const gui = new GUI();
-		gui.close();
+		sceneRef.background = new THREE.Color(backColor);
+    	//const gui = new GUI();
+		//gui.close();
 		pixelateImg(croppedImg, xBlocks, yBlocks)
 			.then((data) => {
 				//despues de pixelada la imagen entonces se crea la escena
 					const { imageURL, allColors } = data;
+					allColorsRef.current = allColors;
 					setPixelInfo({ 
 						pixelatedImage: imageURL, 
 						colorsArray: allColors 
@@ -92,22 +71,19 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 
 					const paintAreaWidth = canvasRef.current?.offsetWidth;
 					const paintAreaHeight = canvasRef.current?.offsetHeight;
-					cameraRef.current = new THREE.PerspectiveCamera(45, paintAreaWidth / paintAreaHeight, 0.1, 100);
+					const camera = new THREE.PerspectiveCamera(45, paintAreaWidth / paintAreaHeight, 0.1, 100);
 					const cameraZPosition = Math.max( width, height)+2;
-					cameraRef.current.position.z = calculateCameraInitialPosition();
-					cameraRef.current.updateProjectionMatrix();
-				
-					const renderer = new THREE.WebGLRenderer({ antialias: true });
-					console.log("----------",renderer.capabilities.maxTextureSize);
+					camera.position.z = cameraZPosition;
+					camera.updateProjectionMatrix();			
 					
-					renderRef.current = renderer; 
+					//console.log("----------",renderRef.capabilities.maxTextureSize);					
 				
-					renderer.setSize(paintAreaWidth, paintAreaHeight);
-					renderer.setPixelRatio(window.devicePixelRatio);
-					renderer.shadowMap.enabled = true;
+					renderRef.setSize(paintAreaWidth, paintAreaHeight);
+					renderRef.setPixelRatio(window.devicePixelRatio);
+					renderRef.shadowMap.enabled = true;
 					//renderer.shadowMap.type = THREE.PCFSoftShadowMap;					
 					//renderer.shadowMap.type = THREE.PCFShadowMap;
-					renderer.shadowMap.type = THREE.VSMShadowMap;
+					renderRef.shadowMap.type = THREE.VSMShadowMap;
 
 					const directionalLight = new THREE.DirectionalLight(0xffffff, 3)
 
@@ -129,187 +105,249 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 					directionalLight.shadow.blurSamples = 4;
 					//directionalLight.shadow.bias = 0.00002;
 					directionalLight.shadow.bias = -0.0001;
-					/* let shadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
-					const helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
+					//DirectionalLightControl(gui,directionalLight);
+					//let shadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+					//const helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
 					
-					scene.add( helper );
+					//scene.add( helper );
 					
-					scene.add(shadowHelper);					
-				 */
-					renderer.toneMappingExposure = 1;
+					//scene.add(shadowHelper);					
+				 
+					renderRef.toneMappingExposure = 1;
 					directionalLight.shadow.camera.updateProjectionMatrix();
 				
 					//renderer.toneMapping = THREE.LinearToneMapping;
-					renderer.toneMapping = THREE.ACESFilmicToneMapping;
-					canvasRef.current?.appendChild(renderer.domElement);
+					renderRef.toneMapping = THREE.ACESFilmicToneMapping;
+					canvasRef.current?.appendChild(renderRef.domElement);
 
-					const ambientlight = new THREE.AmbientLight(0xffffff, 4);
-					AmbientLightControl(gui,ambientlight);
+					const ambientlight = new THREE.AmbientLight(0xffffff, 3);
+					//AmbientLightControl(gui,ambientlight);
 					
 					//config cotrols
-					controlsRef.current = new OrbitControls(cameraRef.current, renderer.domElement);
-					//controlsRef.current.minDistance = Math.max(5, Math.hypot(width, height)/4);
-					controlsRef.current.minDistance = 1;
-					controlsRef.current.maxDistance = 10;
-					controlsRef.current.enablePan = false;
-					controlsRef.current.maxPolarAngle = THREE.MathUtils.degToRad(90);
-					controlsRef.current.minPolarAngle = THREE.MathUtils.degToRad(45);
-					controlsRef.current.maxAzimuthAngle = THREE.MathUtils.degToRad(30);
-					controlsRef.current.minAzimuthAngle = THREE.MathUtils.degToRad(-30);
-					controlsRef.current.update();
+					const controls = new OrbitControls(camera, renderRef.domElement);
+					//controls.minDistance = Math.max(5, Math.hypot(width, height)/4);
+					controls.minDistance = 0.5;
+					controls.maxDistance = 20;
+					controls.enablePan = false;
+					controls.maxPolarAngle = THREE.MathUtils.degToRad(92);
+					controls.minPolarAngle = THREE.MathUtils.degToRad(45);
+					controls.maxAzimuthAngle = THREE.MathUtils.degToRad(60);
+					controls.minAzimuthAngle = THREE.MathUtils.degToRad(-60);
+					controls.update();
 
-					scene.add(ambientlight);
-					scene.add(directionalLight);
-
-					const material = new THREE.MeshStandardMaterial();
+					sceneRef.add(ambientlight);
+					sceneRef.add(directionalLight);
 
 					const floorWidth = 1000;
 					const floorDepth = 600;
 					const floorGeometry = new THREE.PlaneGeometry( floorWidth, floorDepth );
 					const floorColor = theme === 'light' ?0xbbbbbb : 0x121212;
-					floorMaterialRef.current = new THREE.MeshStandardMaterial( { color: floorColor } );
+					const floorMaterial = new THREE.MeshStandardMaterial( { color: floorColor } );
 
-					floorMaterialRef.current.side = THREE.DoubleSide;
-					const floorMesh = new THREE.Mesh( floorGeometry, floorMaterialRef.current );
+					floorMaterial.side = THREE.DoubleSide;
+					const floorMesh = new THREE.Mesh( floorGeometry, floorMaterial );
 					floorMesh.rotateX(Math.PI/2);
 					floorMesh.position.set(0, - height/2 -0.001, floorDepth/2 - 3 );
-					floorMesh.receiveShadow = true;
-					scene.add( floorMesh );
+					floorMesh.receiveShadow = false;
+					sceneRef.add( floorMesh );
 
 					const wallHeight = 30;
 					const wallWidth = 100;
 					const wallGeometry = new THREE.PlaneGeometry( wallWidth, wallHeight );
 					const wallColor = theme === 'light' ? 0xffffff : 0x121212;
-					wallMaterialRef.current = new THREE.MeshStandardMaterial( { color: wallColor } );
-					wallMaterialRef.current.side = THREE.DoubleSide;
-					const wallMesh = new THREE.Mesh( wallGeometry, wallMaterialRef.current );
+					const wallMaterial = new THREE.MeshStandardMaterial( { color: wallColor } );
+					wallMaterial.side = THREE.DoubleSide;
+					const wallMesh = new THREE.Mesh( wallGeometry, wallMaterial );
 					//la altura del muro / 2, menos la mitad de la altura del cuadro
-					wallMesh.position.set(0, wallHeight/2 - Math.ceil(height/2) , -2*inch );
+					wallMesh.position.set(0, wallHeight/2 - Math.ceil(height/2) , -inch );
 					wallMesh.receiveShadow = true;
-					scene.add( wallMesh );
-					const loaderSvg = new SVGLoader(manager);
-					//cargar la geometría
-					const loader = new OBJLoader(manager);
-					loader.load("CUBO.obj", function (object) {						
-						const blockGeometry = object.children[0].geometry;
-
-						paintFrame(scene, blockGeometry, allColors, material);
-						
-						loaderSvg.load('human_frontal_silhouette_by_ikaros_ainasoja.svg', function(data) {
-							const paths = data.paths;
-						
-							for (let i = 0; i < paths.length; i++) {
-								const path = paths[i];
-						
-								const material = new THREE.MeshBasicMaterial({
-									color: new THREE.Color(0xdee2e6),
-									side: THREE.DoubleSide,
-									depthWrite: false
-								});
-						
-								const shapes = path.toShapes(true);
-						
-								for (let j = 0; j < shapes.length; j++) {
-									const shape = shapes[j];
-									const geometry = new THREE.ShapeGeometry(shape);
-									const mesh = new THREE.Mesh(geometry, material);
-									mesh.scale.set(0.0032, -0.0032, 0.0032);
-									mesh.position.set(-1.36 - width/2 - 0.5, - height/2 + 1.79, -inch);
-									scene.add(mesh);
-								}
-							}
-						
-						});
-						
-					});
+					wallMesh.castShadow = false;
+					sceneRef.add( wallMesh );
 					
 					// Render the scene and camera
-					const renderScene = () => {
-						//console.log(cameraRef.current.position.z,'width:' ,width/0.0254);
-						renderer.render(scene, cameraRef.current);
-						animationFrameId.current = requestAnimationFrame(renderScene);
+					const animate = () => {
+						//animationFrameId.current = requestAnimationFrame(renderScene);
+						requestAnimationFrame(animate);
+						controls.update();
+						renderRef.render(sceneRef, camera);
+						if(snap.current){
+							snapshot(width, height);
+							snap.current = false;
+						}
 					};
 				  
 					// Call the renderScene function to start the animation loop
-					renderScene();				
+					animate();	
+
+					const loaderSvg = new SVGLoader();
+					//cargar la geometría
+					const loaderGltf = new GLTFLoader();	
+					//const models = ['bloque_optimizado.glb', 'bloque_optimizado.glb', 'bloque_optimizado.glb', 'bloque_optimizado.glb'];
+					//const meshes = [];
+					meshesRef.current = [];
+					handleLoading(true);
+					const loadModelPromises = models.map((modelUrl) => {
+						return new Promise((resolve, reject) => {
+							loadModelWithRetry(
+								modelUrl,
+								3, // Número máximo de intentos
+								2000, // Retraso entre intentos
+								(gltf) => { 
+									console.log('Modelo cargado:', gltf); 
+									meshesRef.current.push(gltf.scene.children[0]);
+									resolve(gltf); // Resolver la promesa cuando se carga el modelo
+								},
+								undefined, // Función de progreso
+								(error) => { 
+									console.error('No se pudo cargar el modelo:', error); 
+									reject(error); // Rechazar la promesa si no se puede cargar el modelo
+								}
+							);
+						});
+					});
 					
-					MaterialControl(gui, material);
-					//RendererControl(gui, renderer);
+					Promise.all(loadModelPromises).then(() => {
+						console.log("Todos los modelos han sido cargados, incluyendo reintentos.");
+						paintFrame(meshesRef.current, allColorsRef.current);
+						snap.current = true;
+						handleLoading(false);
+					}).catch(error => {
+						console.error("Hubo un error al cargar uno o más modelos:", error);
+						alert("An issue occurred while loading the content. Please try refreshing the page.")
+					});
 
-					fetch("jueves_config.json")
-					.then((response) => {
-						return response.json();
-					})
-					.then((data) => {
-						console.log("json",data);
-						//gui.load(data);						
-						//repositionLights(rectLight, directionalLightRef.current, scene);
-					})
-					.catch((error) => console.error("Error fetching the json:", error));
-
-					const onResize = () => {
-						if (canvasRef.current && renderRef.current) {
-							const width = canvasRef.current.offsetWidth;
-							const height = canvasRef.current.offsetHeight;
-				
-							renderRef.current.setSize(width, height);
-							cameraRef.current.aspect = width / height;
-							cameraRef.current.updateProjectionMatrix();
-
-						}
-					};
-				
-					window.addEventListener('resize', onResize);				
-
+					loaderSvg.load('human_frontal_silhouette_by_ikaros_ainasoja.svg', (data) => {
+						const paths = data.paths;
+						for (let i = 0; i < paths.length; i++) {
+							const path = paths[i];
+						
+							const material = new THREE.MeshStandardMaterial({
+								color: new THREE.Color(0xdee2e6),
+								side: THREE.DoubleSide,
+								depthWrite: false,								
+							});
+						
+							const shapes = path.toShapes(true);
+						
+							for (let j = 0; j < shapes.length; j++) {
+								const shape = shapes[j];
+								const geometry = new THREE.ShapeGeometry(shape);
+								const mesh = new THREE.Mesh(geometry, material);
+								mesh.scale.set(0.0032, -0.0032, 0.0032);
+								mesh.name = "Man Shape";
+								mesh.position.set(-1.36 - width/2 - 0.5, - height/2 + 1.79, inch);
+								sceneRef.add(mesh);
+							}
+						}		
+					});					
 				}
-			});
+			});			
 			
 			// Función de limpieza
 			return () => {
-				console.log("desmontando");				
-				//window.removeEventListener('resize', onResize);
-				gui.destroy();
-				cancelAnimationFrame(animationFrameId.current);
-				removeObjWithChildren(scene);
-				// Eliminar el canvas del DOM
-				if (canvasRef.current && renderRef.current?.domElement) {
-					canvasRef.current.removeChild(renderRef.current.domElement);
+				console.log("desmontando");		
+				if (canvasRef.current) {
+					canvasRef.current.removeChild(renderRef.domElement);
 				}
+				renderRef.dispose();
+				//gui.destroy();
+				cancelAnimationFrame(animationFrameId.current);
+				removeObjWithChildren(sceneRef);
+				
 			};
     }, [blockSize]); // Dependencias del efecto	
+	
 
-	const calculateCameraInitialPosition = () => {
-		//return (width/0.0254)*4/24;
-		return 0.04808 * width/0.0254 + 2.84608;
+	const snapshot = (width, height) => {		
+
+		const point1 = [0.6096, 500];//24 ulgadas
+		const point2 = [1.27, 800];//50 pulgadas
+
+		const regionWidth = interpolateLinear(Math.max(width,height), point1, point2);
+		const regionHeight = regionWidth;
+
+		let canvas = renderRef.domElement;
+
+		// Calcula el centro del canvas original
+		const centerX = canvas.width / 2;
+		const centerY = canvas.height / 2;
+
+		const x = centerX - regionWidth / 2;
+		const y = centerY - regionHeight / 2;
+
+		// Crea un canvas temporal y captura la región
+		const tempCanvas = document.createElement('canvas');
+		tempCanvas.width = regionWidth;
+		tempCanvas.height = regionHeight;
+		const tempCtx = tempCanvas.getContext('2d');
+
+		// Dibuja la región centrada en el canvas temporal
+		tempCtx.drawImage(canvas, x, y, regionWidth, regionHeight, 0, 0, regionWidth, regionHeight);
+
+		// Obtén la imagen de la región como data URL
+		var dataURL = tempCanvas.toDataURL('image/jpeg', 1); // 80% de calidad
+		// Opcional: si quieres descargar la imagen
+		/* var link = document.createElement('a');
+		link.href = dataURL;
+		link.download = 'mi-captura.jpg';
+		link.click(); */
+		setProductImg(dataURL);
 	}
-	const handleSomeAction = () => {
-        if (onExport && exportGroupRef.current) {
-            onExport(exportGroupRef.current);
-        }
 
-		//onExport(sceneRef.current);
-
-    };
+	const interpolateLinear = (x, point1, point2) => {
+		const [x0, y0] = point1;
+		const [x1, y1] = point2;
+	
+		// Asegúrate de que x1 y x0 no sean iguales para evitar división por cero
+		if (x1 === x0) {
+			console.error("Error: x0 y x1 no pueden ser iguales.");
+			return null;
+		}
+	
+		return y0 + ((y1 - y0) / (x1 - x0)) * (x - x0);
+	}
 
 	//limpiar la escena
+	//Se estan quedando Mesh sin eliminar, se puede comprobar en la Memory
 	const removeObjWithChildren = (obj) => {
 		while (obj.children.length > 0) {
 		  removeObjWithChildren(obj.children[0]);
 		}
 		if (obj.geometry) {
 		  obj.geometry.dispose();
+		  //console.log('eliminando geometrias');
+
 		}
 		if (obj.material) {
 		  if (Array.isArray(obj.material)) {
 			for (const material of obj.material) {
 			  if (material.map) {
 				material.map.dispose();
+				//console.log('eliminando texturas');
+			  }
+			  if (material.metalnessMap) {
+				material.metalnessMap.dispose();
+				//console.log('eliminando texturas');
+			  }
+			  if (material.normalMap) {
+				material.normalMap.dispose();
+				//console.log('eliminando texturas');
 			  }
 			  material.dispose();
+		  	  //console.log('eliminando materiales');
 			}
 		  } else {
 			if (obj.material.map) {
 			  obj.material.map.dispose();
+			  //console.log('eliminando texturas');
+			}
+			if (obj.material.metalnessMap) {
+				obj.material.metalnessMap.dispose();
+				//console.log('eliminando texturas');
+			}
+			if (obj.material.normalMap) {
+				obj.material.normalMap.dispose();
+				//console.log('eliminando texturas');
 			}
 			obj.material.dispose();
 		  }
@@ -317,93 +355,19 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 		if (obj.parent) {
 		  obj.parent.remove(obj);
 		}
-	}
-	
+	}	
 
-	const paintFrame = (scene, blockGeometry, allColors, material) => {
+	const paintFrame = (meshes, allColors) => {
+		console.log('meshes',meshes);
 
 		exportGroupRef.current = new THREE.Group();
-
-		blockGeometry.scale(blockSize , blockSize , blockSize );
 	
 		const currentXBlocks = Math.round(width / blockSize); //la cantidad de bloques disminuye si aumenta el tama;o del bloque
 		const currentYBlocks = Math.round(height / blockSize);
+
 		// Calcula el desplazamiento necesario para que (0, 0, 0) quede en el centro del cuadro
 		const offsetX = -(currentXBlocks - 1) * blockSize * 0.5;
 		const offsetY = -(currentYBlocks - 1) * blockSize * 0.5;	
-	
-		const diffuseMaps = [
-		  "textures/mobile/Textura1_Albedo.jpg",
-		  "textures/mobile/Textura2_Albedo.jpg",
-		  "textures/mobile/Textura3_Albedo.jpg",
-		  "textures/mobile/Textura4_Albedo.jpg",
-		  // Agrega más texturas aquí
-		];
-	
-		const roughnessMaps = [
-		  "textures/mobile/Textura1_Roughness.jpg",
-		  "textures/mobile/Textura2_Roughness.jpg",
-		  "textures/mobile/Textura3_Roughness.jpg",
-		  "textures/mobile/Textura4_Roughness.jpg",
-		];
-	
-		const normalMaps = [
-		  "textures/mobile/Textura1_Normal.jpg",
-		  "textures/mobile/Textura2_Normal.jpg",
-		  "textures/mobile/Textura3_Normal.jpg",
-		  "textures/mobile/Textura4_Normal.jpg",
-		];
-	
-		const diffuseTextures = [];
-		const roughnessTextures = [];
-		const normalTextures = [];
-		const textureLoader = new THREE.TextureLoader(manager);
-		 //cargar texturas diffuse
-		for (const texturePath of diffuseMaps) {
-		  const texture = textureLoader.load(texturePath);
-		  diffuseTextures.push(texture);
-		}
-		//cargar texturas roughness
-		for (const texturePath of roughnessMaps) {
-		  const texture = textureLoader.load(texturePath);
-		  roughnessTextures.push(texture);
-		}
-	
-		for (const texturePath of normalMaps) {
-		  const texture = textureLoader.load(texturePath);
-		  normalTextures.push(texture);
-		} 
-	
-		// Preparar los 4 materiales
-		const material1 = material.clone();
-		material1.map = diffuseTextures[0];
-		material1.roughnessMap = roughnessTextures[0];
-		material1.normalMap = normalTextures[0];
-		material1.vertexColors = true;
-		material1.needsUpdate = true;
-	
-		const material2 = material.clone();
-		material2.map = diffuseTextures[1];
-		material2.roughnessMap = roughnessTextures[1];
-		material2.normalMap = normalTextures[1];
-		material2.vertexColors = true;
-		material2.needsUpdate = true;
-	
-		const material3 = material.clone();
-		material3.map = diffuseTextures[2];
-		material3.roughnessMap = roughnessTextures[2];
-		material3.normalMap = normalTextures[2];
-		material3.vertexColors = true;
-		material3.needsUpdate = true;
-	
-		const material4 = material.clone();
-		material4.map = diffuseTextures[3];
-		material4.roughnessMap = roughnessTextures[3];
-		material4.normalMap = normalTextures[3];
-		material4.vertexColors = true;
-		material4.needsUpdate = true;
-	
-		let materials = [material1, material2, material3, material4];
 	
 		//de cada bloque guarda su color y su posicion y el materrial que le toca
 		let blockInfos = allColors.map((color, index) => {
@@ -412,9 +376,10 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 		  const columna = index % currentXBlocks;
 		  const posX = columna * blockSize + offsetX;
 		  const posY = -fila * blockSize - offsetY;
-		  matrix.setPosition(posX, posY, 0);
-	
-		  const materialIndex = Math.floor(Math.random() * 4);
+
+		  matrix.setPosition(posX, posY, 0);	
+		  
+		  const materialIndex = Math.floor(Math.random() * 4);	 
 	
 		  return {
 			materialIndex: materialIndex,
@@ -423,7 +388,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 			rotation: null, // La rotación se definirá en el siguiente paso
 		  };
 		});
-	
+
 		blockInfos.forEach((block, index) => {
 		  const availableRotations = getAvailableRotations(
 			index,
@@ -439,27 +404,33 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 		  const rotationMatrix = new THREE.Matrix4().makeRotationZ(randomRotation);
 		  block.matrix.multiply(rotationMatrix);
 		  block.rotation = randomRotation;
-		});  
+		});
 	
 		//por cada material le asigna los bloques que le corresponden
-		let organizedByMaterial = materials.map(() => []);
+		let organizedByMaterial = meshes.map(() => []);
 		blockInfos.forEach((blockInfo) => {
 		  organizedByMaterial[blockInfo.materialIndex].push(blockInfo);
 		});
-		//console.log(organizedByMaterial );
-		blockGeometry.rotateX(Math.PI / 2);
+
+		const geometry = meshes[0].geometry; //cualquier geometria porque todas son iguales
+		geometry.scale(blockSize/2 , blockSize/2 , blockSize/2 );
 	
 		//---------------------aqui se contruyen las instancedMesh---------------
-		organizedByMaterial.forEach((blocksForMaterial, index) => {	
-		
-			const material = materials[index];
+		organizedByMaterial.forEach((blocksForMaterial, index) => {				
+			const material = meshes[index].material;
+			material.vertexColors = true;
+			material.metalness = 0;
+			material.emissiveIntensity = 0;
+			material.needsUpdate = true;
+			material.color = new THREE.Color(0xffffff);
 			const instancedMesh = new THREE.InstancedMesh(//crea un instancedMesh
-				blockGeometry.clone(),
+				geometry.clone(),
 				material,
 				blocksForMaterial.length
 			);
 			instancedMesh.castShadow = true;
 			instancedMesh.receiveShadow = true;
+			instancedMesh.name = 'instancedMesh'+index;
 			const allColorsBuffer = new THREE.InstancedBufferAttribute(
 				new Float32Array(blocksForMaterial.length * 3),
 				3
@@ -480,10 +451,14 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 
 			instancedMesh.instanceMatrix.needsUpdate = true;		
 			
-			sceneRef.current.add(instancedMesh);
+			sceneRef.add(instancedMesh);
 			convertInstancedMeshToGroup(instancedMesh, instaceColors);
 			
-		});// fin del siclo donde se crean las instancedMesh	  
+		});// fin del siclo donde se crean las instancedMesh
+
+		//console.log("Paint frame",sceneRef);
+		onGroupRefChange(exportGroupRef.current);//devuelve al padre el grupo con todos los mesh para exportar
+
 	};//fin de PaintFrame
 
 	const convertInstancedMeshToGroup = (instancedMesh, instaceColors)=> {
@@ -504,7 +479,6 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 			mesh1.applyMatrix4(matrix);
 			exportGroupRef.current.add(mesh1);
 		}
-
 	}	  
 	
 	  const getAvailableRotations = (index, blockInfos, currentXBlocks) => {
@@ -546,17 +520,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onExport
 	
     return (
 		 <>
- 			<div className="spinner" style={{ backgroundColor: theme === 'light'?'#ffffff':'#121212', display: isLoading ? "flex" : "none" }}>
-			 <Blocks
-				visible={true}
-				height="80"
-				width="80"
-				ariaLabel="blocks-loading"
-				wrapperStyle={{}}
-				wrapperClass="blocks-wrapper"
-				/>
-			</div>
-    		<div ref={canvasRef} style={{ width: '100%', height: '100%'}} />
+    		<div ref={canvasRef} style={{ width: '100%', height: '100%'}} />		
 		</>
     );
 };

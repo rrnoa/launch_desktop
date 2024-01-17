@@ -1,10 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import pixelateImg from '@/app/libs/pixelate';
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
+import { GUI } from "three/addons/libs/lil-gui.module.min.js";
+import DirectionalLightControl from '../libs/3d/controls/DirectionalLightControl';
+import RectLightControl from '../libs/3d/controls/RectLightControl';
+import AmbientLightControl from '../libs/3d/controls/AmbientLightControl';
+import MaterialControl from '../libs/3d/controls/MaterialControl';
+import RendererControl from '../libs/3d/controls/RendererControl';
+import { Blocks } from  'react-loader-spinner';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
+import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import renderer from '../libs/3d/components/renderer';
 
 const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupRefChange, theme='light', setProductImg, handleLoading, sceneRef, renderRef }) => {
     const canvasRef = useRef();
@@ -18,45 +30,43 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 
 	const models = ['v5_1.glb', 'v5_2.glb', 'v5_3.glb', 'v5_4.glb'];
 
-	const meshesRef = useRef([]);//almacena los bloques cargados
+	const meshesRef = useRef([]);
 	const allColorsRef = useRef([]);
-	
-	function loadModelWithRetry(url, maxAttempts, delay, onLoad, onProgress, onError) {
-		const loader = new GLTFLoader();
-	
-		let attempts = 0;
-	
-		function attemptLoad() {
-			loader.load(url, 
-				(gltf) => {
-					// Si la carga es exitosa, llama a la función onLoad
-					onLoad(gltf);
-				}, 
-				onProgress, 
-				(error) => {
-					// Si ocurre un error y aún quedan intentos, reintenta después de un retraso
-					attempts++;
-					if (attempts < maxAttempts) {
-						console.log(`Error al cargar. Reintentando ${attempts} de ${maxAttempts}...`);
-						setTimeout(attemptLoad, delay);
-					} else {
-						// Si se alcanza el máximo de intentos, llama a la función onError
-						onError(error);
-					}
-				}
-			);
-		}
-	
-		attemptLoad();
-	}
+	const newEnvMapRef = useRef([]);
+
+	const manager = new THREE.LoadingManager();
+	manager.onStart = function (url, itemsLoaded, itemsTotal) {
+		handleLoading(true);
+		console.log('Comenzó la carga:', url, itemsLoaded, 'de', itemsTotal);
+	};	 
+
+	manager.onLoad = function () {	
+		console.log("cargado el mapa en el manager");
+
+		paintFrame(meshesRef.current, allColorsRef.current);
+		snap.current = true;
+		handleLoading(false);
+	};
+
+	manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+		//console.log('Cargando archivo: ' + url + '.\nCargados ' + itemsLoaded + ' de ' + itemsTotal + ' archivos.');
+	};
+
+	manager.onError = function (url) {
+		console.log('Hubo un error al cargar ' + url);
+	};
 	
     useEffect(() => {
+		let exrCubeRenderTarget, exrBackground;
+
 		console.log("----------------------useEffect Scene3d----------------------------");
         const xBlocks = Math.round(width / blockSize);
 		const yBlocks = Math.round(height / blockSize);
 		let backColor = theme === 'light' ? 0xdee2e6 : 0x121212;
-		sceneRef.background = new THREE.Color(backColor);
-	
+		//sceneRef.background = new THREE.Color(backColor);
+		sceneRef.background = new THREE.Color(0x00ff00);
+    	//const gui = new GUI();
+		//gui.close();
 		pixelateImg(croppedImg, xBlocks, yBlocks)
 			.then((data) => {
 				//despues de pixelada la imagen entonces se crea la escena
@@ -118,6 +128,8 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 				
 					//renderer.toneMapping = THREE.LinearToneMapping;
 					renderRef.toneMapping = THREE.ACESFilmicToneMapping;
+					//renderRef.outputColorSpace = THREE.SRGBColorSpace;
+
 					canvasRef.current?.appendChild(renderRef.domElement);
 
 					const ambientlight = new THREE.AmbientLight(0xffffff, 3);
@@ -129,14 +141,13 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 					controls.minDistance = 0.5;
 					controls.maxDistance = 20;
 					controls.enablePan = false;
-					//controls.maxPolarAngle = THREE.MathUtils.degToRad(92);
+					/* controls.maxPolarAngle = THREE.MathUtils.degToRad(92);
 					controls.minPolarAngle = THREE.MathUtils.degToRad(45);
-					controls.maxPolarAngle = controls.getPolarAngle();
 					controls.maxAzimuthAngle = THREE.MathUtils.degToRad(60);
-					controls.minAzimuthAngle = THREE.MathUtils.degToRad(-60);
+					controls.minAzimuthAngle = THREE.MathUtils.degToRad(-60);  */
 					controls.update();
 
-					sceneRef.add(ambientlight);
+					//sceneRef.add(ambientlight);
 					sceneRef.add(directionalLight);
 
 					const floorWidth = 1000;
@@ -150,7 +161,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 					floorMesh.rotateX(Math.PI/2);
 					floorMesh.position.set(0, - height/2 -0.001, floorDepth/2 - 3 );
 					floorMesh.receiveShadow = false;
-					sceneRef.add( floorMesh );
+					//sceneRef.add( floorMesh );
 
 					const wallHeight = 30;
 					const wallWidth = 100;
@@ -163,16 +174,16 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 					wallMesh.position.set(0, wallHeight/2 - Math.ceil(height/2) , -inch );
 					wallMesh.receiveShadow = true;
 					wallMesh.castShadow = false;
-					sceneRef.add( wallMesh );
+					//sceneRef.add( wallMesh );
 					
 					// Render the scene and camera
 					const animate = () => {
 						//animationFrameId.current = requestAnimationFrame(renderScene);
 						requestAnimationFrame(animate);
-						controls.update();
+						sceneRef.background = exrBackground;
 						renderRef.render(sceneRef, camera);
 						if(snap.current){
-							snapshot(width, height);
+							snapshot();
 							snap.current = false;
 						}
 					};
@@ -180,40 +191,16 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 					// Call the renderScene function to start the animation loop
 					animate();	
 
-					const loaderSvg = new SVGLoader();
+					const loaderSvg = new SVGLoader(manager);
 					//cargar la geometría
-
+					const loaderGltf = new GLTFLoader(manager);	
+					//const models = ['bloque_optimizado.glb', 'bloque_optimizado.glb', 'bloque_optimizado.glb', 'bloque_optimizado.glb'];
+					//const meshes = [];
 					meshesRef.current = [];
-					handleLoading(true);
-					const loadModelPromises = models.map((modelUrl) => {
-						return new Promise((resolve, reject) => {
-							loadModelWithRetry(
-								modelUrl,
-								3, // Número máximo de intentos
-								2000, // Retraso entre intentos
-								(gltf) => { 
-									console.log('Modelo cargado:', gltf); 
-									meshesRef.current.push(gltf.scene.children[0]);
-									resolve(gltf); // Resolver la promesa cuando se carga el modelo
-								},
-								undefined, // Función de progreso
-								(error) => { 
-									console.error('No se pudo cargar el modelo:', error); 
-									reject(error); // Rechazar la promesa si no se puede cargar el modelo
-								}
-							);
-						});
-					});
-					
-					Promise.all(loadModelPromises).then(() => {
-						console.log("Todos los modelos han sido cargados, incluyendo reintentos.");
-						paintFrame(meshesRef.current, allColorsRef.current);
-						snap.current = true;
-						handleLoading(false);
-					}).catch(error => {
-						console.error("Hubo un error al cargar uno o más modelos:", error);
-						alert("An issue occurred while loading the content. Please try refreshing the page.")
-					});
+					for (let index = 0; index < models.length; index++) {
+						loaderGltf.load(models[index], 
+							(gltf)=> meshesRef.current.push(gltf.scene.children[0]));
+					}
 
 					loaderSvg.load('human_frontal_silhouette_by_ikaros_ainasoja.svg', (data) => {
 						const paths = data.paths;
@@ -239,6 +226,39 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 							}
 						}		
 					});
+
+					const pmremGenerator = new THREE.PMREMGenerator(renderRef);
+					pmremGenerator.compileEquirectangularShader();
+
+					const exrLoader = new EXRLoader(manager);
+					exrLoader.load(
+						"photo_studio_01_4k.exr",
+						function (texture) {
+							exrCubeRenderTarget = pmremGenerator.fromEquirectangular(texture);
+							exrBackground = exrCubeRenderTarget.texture;
+							newEnvMapRef.current = exrCubeRenderTarget ? exrCubeRenderTarget.texture : null;
+
+							//loadObjectAndAndEnvMap(); // Add envmap once the texture has been loaded
+
+							console.log("cargado el mapa");
+
+							texture.dispose();
+						}
+					);
+					
+					//MaterialControl(gui, material);
+					//RendererControl(gui, renderer);
+
+					/* fetch("jueves_config.json")
+					.then((response) => {
+						return response.json();
+					})
+					.then((data) => {
+						console.log("json",data);
+						gui.load(data);						
+						//repositionLights(rectLight, directionalLightRef.current, scene);
+					})
+					.catch((error) => console.error("Error fetching the json:", error)); */	
 					
 					registerWindowsListener(()=>onResize(camera));
 					
@@ -280,13 +300,10 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 		window.removeEventListener('resize', action);
 	}
 
-	const snapshot = (width, height) => {		
-
-		const point1 = [0.6096, 200];
-		const point2 = [1.27, 320];
-
-		const regionWidth = interpolateLinear(Math.max(width,height), point1, point2);
-		const regionHeight = regionWidth;
+	const snapshot = () => {
+		// Tamaño de la región que deseas capturar
+		const regionWidth = 150;
+		const regionHeight = 150;
 
 		let canvas = renderRef.domElement;
 
@@ -314,19 +331,6 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 		link.download = 'mi-captura.jpg';
 		link.click(); */
 		setProductImg(dataURL);
-	}
-
-	const interpolateLinear = (x, point1, point2) => {
-		const [x0, y0] = point1;
-		const [x1, y1] = point2;
-	
-		// Asegúrate de que x1 y x0 no sean iguales para evitar división por cero
-		if (x1 === x0) {
-			console.error("Error: x0 y x1 no pueden ser iguales.");
-			return null;
-		}
-	
-		return y0 + ((y1 - y0) / (x1 - x0)) * (x - x0);
 	}
 
 	//limpiar la escena
@@ -381,8 +385,6 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 	
 
 	const paintFrame = (meshes, allColors) => {
-		console.log('meshes',meshes);
-
 		exportGroupRef.current = new THREE.Group();
 	
 		const currentXBlocks = Math.round(width / blockSize); //la cantidad de bloques disminuye si aumenta el tama;o del bloque
@@ -444,8 +446,10 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 			material.vertexColors = true;
 			material.metalness = 0;
 			material.emissiveIntensity = 0;
+			material.envMap = newEnvMapRef.current;
 			material.needsUpdate = true;
 			material.color = new THREE.Color(0xffffff);
+			
 			const instancedMesh = new THREE.InstancedMesh(//crea un instancedMesh
 				geometry.clone(),
 				material,

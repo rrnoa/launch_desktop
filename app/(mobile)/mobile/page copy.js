@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from 'react'
-import * as THREE from 'three';
 import '@/app/css/mobile-style.css'
+import Switch from "react-switch";
 import Cropper from "react-easy-crop";
 import "react-easy-crop/react-easy-crop.css";
 import getCroppedImg from '@/app/libs/cropImage';
@@ -10,7 +10,6 @@ import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import BuyPanel from '@/app/components/BuyPanel';
 import { Brightness, Contrast, Moon, Sun, Tilt, Undo, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
 import { Blocks } from  'react-loader-spinner';
-import Export3d from '@/app/components/Export3d';
 
 
 export default function Mobile() {
@@ -40,15 +39,6 @@ export default function Mobile() {
 	const croppedAreaPixelsRef = useRef(null);
 	const isSliderChangeRef = useRef(false);
 
-	const [productImg, setProductImg] = useState();
-
-    const sceneRef = useRef();
-	const renderRef = useRef();
-
-	const [exportGroupRef, setExportGroupRef] = useState();
-
-
-
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const handleResize = () => {
@@ -58,9 +48,6 @@ export default function Mobile() {
             // Establece la altura inicial y agrega el listener
             handleResize();
             window.addEventListener('resize', handleResize);
-
-            sceneRef.current = new THREE.Scene();
-		    renderRef.current = new THREE.WebGLRenderer({ antialias: true});		
       
             // Limpiar el event listener al desmontar el componente
             return () => window.removeEventListener('resize', handleResize);
@@ -72,10 +59,6 @@ export default function Mobile() {
 		console.log('data-theme', theme);
 		document.documentElement.setAttribute('data-theme', theme);
 	}, [theme]);
-
-    const handleExportGroupRef= (group)=>{
-		setExportGroupRef(group);
-	}
 
     /** cuando se sube una imagen */
     const handleImageChange = (e) => {
@@ -103,6 +86,7 @@ export default function Mobile() {
 
     // Actualiza el estado cuando el recorte se completa
 	const onCropComplete = (croppedArea, croppedAreaPixels) => {
+        console.log("cropcomplete");
 		croppedAreaPixelsRef.current = croppedAreaPixels;		
 	};
 
@@ -179,28 +163,17 @@ export default function Mobile() {
 
     const handleWidth = (event) => {
 		let { min, max, value } = event.target;		
+		//value = Math.max(Number(min), Math.min(Number(max), Number(value)));
 		setWidth(value);
+		setBlockSize(value %2 == 0 ? 2 : 1);
 	};	
-    // cuando pierde e foco
-    const handleWidthAdjustment = (event) => {
-        let { min, max, value } = event.target;
-        value = Math.max(Number(min), Math.min(Number(max), Number(value)));
-        setWidth(value);
-        setBlockSize(value % 2 === 0 ? 2 : 1);
-    }
 	
 	const handleHeight = (event) => {
 		let { min, max, value } = event.target;
+		//value = Math.max(Number(min), Math.min(Number(max), Number(value)));
 		setHeight(value);
+		setBlockSize(value %2 == 0 ? 2 : 1);
 	};
-
-    // cuando pierde e foco
-    const handleHeightAdjustment = (event) => {
-        let { min, max, value } = event.target;
-        value = Math.max(Number(min), Math.min(Number(max), Number(value)));
-        setHeight(value);
-        setBlockSize(value % 2 === 0 ? 2 : 1);
-    }
 
     const handlerConfirmImage = async () => {
        /*  console.log("confirm", contrast);
@@ -235,11 +208,49 @@ export default function Mobile() {
         <div className="mb-header-inner">
 				<div className="header-inner-item-1">
 					<a href="#"><img src={theme == 'dark'? "images/woodxel-white.png" :"images/woodxel-black.png"} alt=""/></a>					
-				</div>				
+				</div>
+				<div className="header-inner-item-2">
+				<label>					
+					<Switch 
+					onChange={toggleTheme} 
+					checked={theme == 'dark'?true:false}					
+					onColor={'#121212'}
+                    height={24} // Altura en píxeles
+                    width={46}  // Ancho en píxeles
+					uncheckedIcon = {						
+						<div
+							style={{
+							display: "flex",
+							justifyContent: "center",
+							alignItems: "center",
+							padding: '7px'
+							}}
+						>	
+                        <Sun/>			
+						</div>
+						
+					}
+					checkedIcon = {
+						<div
+							style={{
+							display: "flex",
+							justifyContent: "center",
+							alignItems: "center",
+							padding: '7px'
+							}}
+						>	
+                        <Moon/>
+						</div>					
+					}
+
+					/>
+				</label>
+				</div>
 			</div>	
         </header>
 
-        <div className="mb-step-area">
+        <div className="mb-step-area" >
+
             <div className='canvas-area'>
             <div className="spinner" style={{ backgroundColor: theme === 'light'?'#ffffff':'#121212', display: isLoading ? "flex" : "none" }}>
 			 <Blocks
@@ -253,21 +264,21 @@ export default function Mobile() {
 			</div>
                 {currentStep !== 0 && currentStep !== 3 && currentStep !== 4 && (
                     <div className="step-item2-inner11">
-                        <div className='action_buttons btn-preview-upload'>
-                           {/*  <img src="images/gallery-send-svgrepo.png"/>         */}
-                              <UploadPreview/>                        
-                        </div>
+                        <button className='action_buttons btn-preview-upload'>
+                        <UploadPreview/>                        
+                        </button>
                                 
                         <input type="file" onChange={handleImageChange} accept="image/*" title=''/>							
 				    </div>
                 )
-                }                
+                }
+                
                 {currentStep === 0 && (
                     <>							
 						<input type="file" onChange={handleImageChange} accept="image/*" title=""/>								
                          <div className="upload-description" >
                             <UploadSvgrepo/>                        
-                            <h2>STEP 1: Upload your media</h2>
+                            <p>STEP 1: Upload your media or drop it here</p>
                         </div>
                     </>                               
                     )
@@ -279,6 +290,7 @@ export default function Mobile() {
 					onCropChange={setCrop}
       				onCropComplete={onCropComplete}
                     rotation={rotation}
+                    onRotationChange={()=>{console.log("cambiando")}}		
                     crop={crop}
                     zoom={zoom}
 					zoomSpeed={0.1}
@@ -305,17 +317,11 @@ export default function Mobile() {
                         croppedImg = {previewImage}
                         onExport={handleExportScene}
                         theme={theme}
-                        handleLoading={setIsLoading}
                         setPixelInfo = {setPixelInfo}
-                        setProductImg = {setProductImg}
-                        sceneRef = {sceneRef.current }
-                        renderRef = {renderRef.current}
-						onGroupRefChange={handleExportGroupRef}//cuando se cree el grupo en la escena 3d
 					/>
 				) }
-            </div>            
-        </div>
-        <div className={`bottom-area ${isLoading || currentStep == 0 ? "step inactive" : ""}`}>
+            </div>
+            <div className='bottom-area'>
                 {(currentStep === 0 || currentStep === 1) && (
                     <h2>STEP 2: Input panel size</h2>                    
                 )}
@@ -337,22 +343,19 @@ export default function Mobile() {
                 { currentStep == 4 && (
                 <h2>STEP 5: Buying Options</h2>
                 )}
-                <div className={`step-actions-area ${isLoading ? "step inactive" : ""}`}>
+                <div className='step-actions-area'>
                     {(currentStep === 0 || currentStep === 1) && (
-                    <div>                        
+                    <div className={`step ${currentStep === 0?"inactive":""}`}>                        
                         <div className="form">							
                             <div className="inputs">
                                 <input id='input_w' className="input_w" type="number" min="24" max="300" value={width} 
                                 onChange={handleWidth}
                                 onFocus={(even)=>{even.target.select()}}
-                                onBlur={handleWidthAdjustment}
                                 />
                                 <label htmlFor="input_w">W</label>
                                 <input id='input_h' className="input_h" type="number" min="24" max="300" value={height} 
                                 onChange={handleHeight}
                                 onFocus={(even)=>{even.target.select()}}
-                                onBlur={handleHeightAdjustment}
-                                
                                 />
                                 <label htmlFor="input_h">H</label>										
                             </div>                            
@@ -452,9 +455,6 @@ export default function Mobile() {
                             blockSize = {blockSize}
                             xBlocks = {Math.floor(width / blockSize)}
                             yBlocks = {Math.floor(height / blockSize)}
-                            handleLoading = {setIsLoading}
-						    productImg = {productImg}
-                            mobile = {true}
                             />
                         </div>
                     )}
@@ -462,27 +462,26 @@ export default function Mobile() {
                 </div>
                 <div className='buttons-area'>
                     {currentStep === 2 && activeButton != "" && (
-                        <button onClick={handlerConfirmImage}>Confirm</button>
+                        <a href="#" onClick={handlerConfirmImage}>Confirm</a>
                     )}
                     {currentStep == 2 && activeButton == "" && (
-                        <button className={`step ${isLoading?"inactive":""}`} onClick={handlePanelPreview}>3D Panel preview</button>
+                        <a href="#" className={`step ${isLoading?"inactive":""}`} onClick={handlePanelPreview}>3D Panel preview</a>
                     )}
                     {currentStep == 3 && activeButton == "" && (
-                        <button className={`step ${isLoading?"inactive":""}`} onClick={goToNextStep}>Buying options</button>
+                        <a href="#" onClick={goToNextStep}>Buying options</a>
                     )}
+
                     {currentStep == 4 && (
-                      <Export3d 
-                      exportGroup={exportGroupRef}
-                      handleLoading = {setIsLoading}
-                      mobile={true}
-                      />
+                        <a href="#" onClick={goToNextStep}>3D Model</a>
                     )}
+
                     {(currentStep == 0 || currentStep == 1) && (                       
-                        <button className={`step ${currentStep === 0 || width < 24 || width > 300 || height < 24 || height > 300 || isLoading?"inactive":""}`} 
-                        onClick={handleCropClick}>Next</button>
+                        <a href="#" className={`step ${currentStep === 0 || width < 24 || width < 24 || height < 24 || height < 24 || isLoading?"inactive":""}`} 
+                        onClick={handleCropClick}>Next</a>
                     )}
                 </div>
             </div>
+        </div>
     </div>
   )
 }

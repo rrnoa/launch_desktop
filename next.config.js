@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    //basePath: "/garbage3",
-    reactStrictMode: false,
+    //basePath: "/woodxel",
+    reactStrictMode: true,
     output: "export",
 }
 

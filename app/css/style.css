@@ -58,7 +58,7 @@ form,
 label,
 button {
     margin: 0;
-    padding: 0;
+    padding: 0;    
 }
 
 html, body {    
@@ -119,13 +119,11 @@ html {
   }
 
 .step.inactive {
-    display: block;
     pointer-events: none; /* Deshabilita eventos de clic */
     opacity: 0.4; /* Efecto de velo gris */
 }
 
 button.inactive {
-    display: block;
     pointer-events: none; /* Deshabilita eventos de clic */
     opacity: 0.4; /* Efecto de velo gris */
 }
@@ -140,9 +138,8 @@ img.btn-icons {
     height: 2.6vh;
 }
 
-.header-item-inner img {
-    height: 2.5vh;
-    max-height: 23px;
+.header-item-inner img {    
+    max-height: 35px;
 }
 
 button:focus,
@@ -193,9 +190,8 @@ body {
 
 /*=== Header area start ===*/
 
-.header-area {
-    padding: 0.878vh 0;
-    border-bottom: 1px solid var(--bordes-areas);
+.header-area {    
+    /* border-bottom: 1px solid var(--bordes-areas); */
     background: var(--color-fondo-claro);
 }
 
@@ -204,6 +200,7 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 3.29vh;
+    height: 80px;
 }
 
 .header-item-inner2 {
@@ -222,7 +219,7 @@ body {
 
 .step-item {
     width: 100%;
-    padding: 3.29vh 3.29vh 3.29vh 3.29vh;
+    padding: 0 3.29vh 3.29vh 3.29vh;
     /* min-height: 93.08vh; */
     display: flex;
     align-items: center;
@@ -274,17 +271,25 @@ body {
     font-weight: 700;
 }
 
-.step-item2 {
-    width: 47vh;
-    border-left: 1px solid var(--bordes-areas);
+.step-item2 {    
     background: var(--color-fondo-claro);
-    padding: 3.29vh 3.29vh 3.29vh;
-   /*  min-height: 93.08vh; */
+    padding: 0 0 3.29vh 0;
+   
+}
+
+.step-item2-inside{
+    width: 34vh;
+    border-left: 1px solid var(--bordes-areas);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
+    padding: 0 3.29vh 0 3.29vh;
+    height: 100%;
+
 }
+
+
 
 .step-item2 h2 {
     color: var(--color-text-hight-enfasis);
@@ -306,9 +311,9 @@ body {
     background-color: var(--color-lienzo-claro);
 }
 
-/* .reactEasyCrop_CropArea.reactEasyCrop_CropAreaGrid{
-    color: transparent !important;
-} */
+ .reactEasyCrop_CropArea.reactEasyCrop_CropAreaGrid{
+    color: rgb(255 255 255 / 60%) !important;
+} 
 
 .step-item2-inner11 {
     width: 100%;
@@ -335,6 +340,7 @@ body {
 
 .step-item2-inner .step-item2-inner11 img.default {
     height: 100%; /* La imagen no excederá el ancho del contenedor */
+    width: 100%;
     object-fit: cover;
     display: block; /* Elimina cualquier espacio extra debajo de la imagen */
 }
@@ -435,6 +441,7 @@ div.buttons-list button{
     border-radius: 0.6vh;
     border: 1px solid #E4E7EC;
     background: #FFF;
+    cursor: pointer;
 }
 
 .wrapper_edit_buttons {
@@ -577,7 +584,7 @@ input[type=range] {
     top: -2px;
 }
 
-.step-item2-inner3 a {
+.step-item2-inner3 #btn-preview {
     color: #FFF;
     font-size: 1rem;
     font-weight: 600;
@@ -588,7 +595,7 @@ input[type=range] {
     height: 3.84vh;
     border-radius: 0.6vh;
     background: #344054;
-    line-height: 17.4px;
+    line-height: 12.4px;
 }
 
 .step-item2-inner5 ul {
@@ -638,7 +645,7 @@ ul li button.active {
     height: 3.84vh;
 }
 
-.step-item2-inner6 button {
+.step-item2-inner6 button, #btn-preview{
     color: #FFF;
     font-size: 1rem;
     font-weight: 400;
@@ -654,3 +661,18 @@ ul li button.active {
 .step-item2 a:hover {
     opacity: .8;
 }
+
+.step-item2 button:hover {
+    opacity: .8;
+}
+button {
+    border: 0;
+    cursor: pointer;
+}
+.price-tag{
+    padding-left: 10px;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+

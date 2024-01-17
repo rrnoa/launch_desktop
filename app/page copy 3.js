@@ -34,13 +34,13 @@ export default function Home() {
               <p className="caption">CRAFT CUSTOM WOOD PANELS FROM YOUR PHOTOS WITH PIXEL ART PRECISION</p>
               <p className="main-headline">WOODEXEL: Transforming Design into Reality</p>
             </div>
-            <p className="txt">Our unique platform transforms your photographs into stunning, custom-made wooden panels, intricately pixelated to perfection.</p>
+            <p className="txt">Embark on a design journey with WOODEXEL. Our unique platform transforms your photographs into stunning, custom-made wooden panels, intricately pixelated to perfection.</p>
             <div className="boton">
               <button className="button">
                 <div className="text-container">
-                  <a href={is?"/mobile":"/main"}>
+                  <Link  href={is?"/mobile":"/main"}>
                     <div className="text-wrapper-4">Start Designing Your Masterpiece</div>
-                  </a>
+                  </Link>
                 </div>
               </button>
               </div>
@@ -49,9 +49,9 @@ export default function Home() {
         <div className='section-1-wrapper' style={{backgroundImage: 'url(images/blocks.png)', backgroundRepeat: 'no-repeat', backgroundPosition: '0 75px'}}>
         <div className='section-1'>
           <div className="overlap-14">
-            <div className="top-section-1">
+            <div className="top">
               <div className="secondary-headline">LignumBLOCKS</div>
-              <p className="bringing-acoustic">BRINGING ACOUSTIC DESIGN TO DIGITAL &amp; PHYSICAL REALMS</p>
+              <p className="bringing-acoustic">Bringing Acoustic Design to Digital &amp; Physical Realms</p>
             </div>
           </div>
           <p className="p">In the bustling sphere of modern interior design and architecture, every detail counts, and every second is invaluable. At LignumBLOCKS, we don’t just provide a tool; we present a transformative dual experience</p>

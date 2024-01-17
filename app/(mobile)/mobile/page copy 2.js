@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three';
 import '@/app/css/mobile-style.css'
+import Switch from "react-switch";
 import Cropper from "react-easy-crop";
 import "react-easy-crop/react-easy-crop.css";
 import getCroppedImg from '@/app/libs/cropImage';
@@ -10,7 +11,6 @@ import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import BuyPanel from '@/app/components/BuyPanel';
 import { Brightness, Contrast, Moon, Sun, Tilt, Undo, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
 import { Blocks } from  'react-loader-spinner';
-import Export3d from '@/app/components/Export3d';
 
 
 export default function Mobile() {
@@ -45,9 +45,6 @@ export default function Mobile() {
     const sceneRef = useRef();
 	const renderRef = useRef();
 
-	const [exportGroupRef, setExportGroupRef] = useState();
-
-
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -72,10 +69,6 @@ export default function Mobile() {
 		console.log('data-theme', theme);
 		document.documentElement.setAttribute('data-theme', theme);
 	}, [theme]);
-
-    const handleExportGroupRef= (group)=>{
-		setExportGroupRef(group);
-	}
 
     /** cuando se sube una imagen */
     const handleImageChange = (e) => {
@@ -103,6 +96,7 @@ export default function Mobile() {
 
     // Actualiza el estado cuando el recorte se completa
 	const onCropComplete = (croppedArea, croppedAreaPixels) => {
+        console.log("cropcomplete");
 		croppedAreaPixelsRef.current = croppedAreaPixels;		
 	};
 
@@ -179,28 +173,17 @@ export default function Mobile() {
 
     const handleWidth = (event) => {
 		let { min, max, value } = event.target;		
+		//value = Math.max(Number(min), Math.min(Number(max), Number(value)));
 		setWidth(value);
+		setBlockSize(value %2 == 0 ? 2 : 1);
 	};	
-    // cuando pierde e foco
-    const handleWidthAdjustment = (event) => {
-        let { min, max, value } = event.target;
-        value = Math.max(Number(min), Math.min(Number(max), Number(value)));
-        setWidth(value);
-        setBlockSize(value % 2 === 0 ? 2 : 1);
-    }
 	
 	const handleHeight = (event) => {
 		let { min, max, value } = event.target;
+		//value = Math.max(Number(min), Math.min(Number(max), Number(value)));
 		setHeight(value);
+		setBlockSize(value %2 == 0 ? 2 : 1);
 	};
-
-    // cuando pierde e foco
-    const handleHeightAdjustment = (event) => {
-        let { min, max, value } = event.target;
-        value = Math.max(Number(min), Math.min(Number(max), Number(value)));
-        setHeight(value);
-        setBlockSize(value % 2 === 0 ? 2 : 1);
-    }
 
     const handlerConfirmImage = async () => {
        /*  console.log("confirm", contrast);
@@ -253,21 +236,21 @@ export default function Mobile() {
 			</div>
                 {currentStep !== 0 && currentStep !== 3 && currentStep !== 4 && (
                     <div className="step-item2-inner11">
-                        <div className='action_buttons btn-preview-upload'>
-                           {/*  <img src="images/gallery-send-svgrepo.png"/>         */}
-                              <UploadPreview/>                        
-                        </div>
+                        <button className='action_buttons btn-preview-upload'>
+                        <UploadPreview/>                        
+                        </button>
                                 
                         <input type="file" onChange={handleImageChange} accept="image/*" title=''/>							
 				    </div>
                 )
-                }                
+                }
+                
                 {currentStep === 0 && (
                     <>							
 						<input type="file" onChange={handleImageChange} accept="image/*" title=""/>								
                          <div className="upload-description" >
                             <UploadSvgrepo/>                        
-                            <h2>STEP 1: Upload your media</h2>
+                            <p>STEP 1: Upload your media</p>
                         </div>
                     </>                               
                     )
@@ -307,15 +290,13 @@ export default function Mobile() {
                         theme={theme}
                         handleLoading={setIsLoading}
                         setPixelInfo = {setPixelInfo}
-                        setProductImg = {setProductImg}
                         sceneRef = {sceneRef.current }
                         renderRef = {renderRef.current}
-						onGroupRefChange={handleExportGroupRef}//cuando se cree el grupo en la escena 3d
 					/>
 				) }
             </div>            
         </div>
-        <div className={`bottom-area ${isLoading || currentStep == 0 ? "step inactive" : ""}`}>
+        <div className='bottom-area'>
                 {(currentStep === 0 || currentStep === 1) && (
                     <h2>STEP 2: Input panel size</h2>                    
                 )}
@@ -339,20 +320,17 @@ export default function Mobile() {
                 )}
                 <div className={`step-actions-area ${isLoading ? "step inactive" : ""}`}>
                     {(currentStep === 0 || currentStep === 1) && (
-                    <div>                        
+                    <div className={`step ${currentStep === 0?"inactive":""}`}>                        
                         <div className="form">							
                             <div className="inputs">
                                 <input id='input_w' className="input_w" type="number" min="24" max="300" value={width} 
                                 onChange={handleWidth}
                                 onFocus={(even)=>{even.target.select()}}
-                                onBlur={handleWidthAdjustment}
                                 />
                                 <label htmlFor="input_w">W</label>
                                 <input id='input_h' className="input_h" type="number" min="24" max="300" value={height} 
                                 onChange={handleHeight}
                                 onFocus={(even)=>{even.target.select()}}
-                                onBlur={handleHeightAdjustment}
-                                
                                 />
                                 <label htmlFor="input_h">H</label>										
                             </div>                            
@@ -462,24 +440,20 @@ export default function Mobile() {
                 </div>
                 <div className='buttons-area'>
                     {currentStep === 2 && activeButton != "" && (
-                        <button onClick={handlerConfirmImage}>Confirm</button>
+                        <a href="#" onClick={handlerConfirmImage}>Confirm</a>
                     )}
                     {currentStep == 2 && activeButton == "" && (
-                        <button className={`step ${isLoading?"inactive":""}`} onClick={handlePanelPreview}>3D Panel preview</button>
+                        <a href="#" className={`step ${isLoading?"inactive":""}`} onClick={handlePanelPreview}>3D Panel preview</a>
                     )}
                     {currentStep == 3 && activeButton == "" && (
-                        <button className={`step ${isLoading?"inactive":""}`} onClick={goToNextStep}>Buying options</button>
+                        <a href="#" className={`step ${isLoading?"inactive":""}`} onClick={goToNextStep}>Buying options</a>
                     )}
                     {currentStep == 4 && (
-                      <Export3d 
-                      exportGroup={exportGroupRef}
-                      handleLoading = {setIsLoading}
-                      mobile={true}
-                      />
+                        <a href="#" className={`step ${isLoading?"inactive":""}`} onClick={goToNextStep}>3D Model</a>
                     )}
                     {(currentStep == 0 || currentStep == 1) && (                       
-                        <button className={`step ${currentStep === 0 || width < 24 || width > 300 || height < 24 || height > 300 || isLoading?"inactive":""}`} 
-                        onClick={handleCropClick}>Next</button>
+                        <a href="#" className={`step ${currentStep === 0 || width < 24 || width < 24 || height < 24 || height < 24 || isLoading?"inactive":""}`} 
+                        onClick={handleCropClick}>Next</a>
                     )}
                 </div>
             </div>

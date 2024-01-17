@@ -17,7 +17,6 @@ const IconButton = ({ icon, activeIcon, onClick, isActive, name, children }) => 
 <Tippy content={name}>
 
     <button className={`icon-btn ${isActive ? 'active' : ''}`} onClick={handleClick}>
-      {/* <img className='btn-icons' src={isActive ? activeIcon : icon} alt="Icon" /> */}
       {children}
     </button>
       
