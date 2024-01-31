@@ -8,11 +8,13 @@ import SliderTestimonials from './components/SliderTestimonials';
 
 export default function Home() {
   const [is, setIs] = useState();
-
+  const [disable, setDisable] = useState(true);
 
   useEffect(()=>{
     //const is = isMobile ? '/mobile' : '/main';
+    console.log("Cambiar mobile/main");
     setIs(isMobile);
+    setDisable(false);
   },[]);
 
   return (    
@@ -38,9 +40,16 @@ export default function Home() {
             <div className="boton">
               <button className="button">
                 <div className="text-container">
-                  <a href={is?"/mobile":"/main"}>
-                    <div className="text-wrapper-4">Start Designing Your Masterpiece</div>
-                  </a>
+                  {disable? 
+                  (
+                    <div className="text-wrapper-4" >Preparing Your Canvas...</div>
+                  ):
+                  (
+                  <Link href={is?"/mobile":"/main"} className={`button ${disable?"inactive":""}`}>                    
+                    <div className="text-wrapper-4" >Start Designing Your Masterpiece</div>
+                  </Link>
+                  )
+                  }                  
                 </div>
               </button>
               </div>

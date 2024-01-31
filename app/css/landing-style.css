@@ -175,6 +175,11 @@ button {
     }
 }
 
+button.inactive {
+    pointer-events: none; /* Deshabilita eventos de clic */
+    opacity: 0.4; /* Efecto de velo gris */
+}
+
 a {
     text-decoration: none;
 }

@@ -311,7 +311,7 @@ body {
     background-color: var(--color-lienzo-claro);
 }
 
- .reactEasyCrop_CropArea.reactEasyCrop_CropAreaGrid{
+.reactEasyCrop_CropArea.reactEasyCrop_CropAreaGrid{
     color: rgb(255 255 255 / 60%) !important;
 } 
 

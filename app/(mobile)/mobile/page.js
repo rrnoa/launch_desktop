@@ -131,19 +131,9 @@ export default function Mobile() {
 	const goToPreviousStep = () => {        
 		setCurrentStep(prevStep => prevStep - 1);
         console.log("currentStep", currentStep);        
-	};	
+	};
 
-	const updatePreviewImage = async () => {
-		if (width==0 || height == 0) {
-            console.log("mal");
-			return;
-		  }
-		  const croppedImage = await getCroppedImg(uploadedImage, croppedAreaPixelsRef.current, rotation, brightness, contrast);
-		  // Suponiendo que getCroppedImg devuelve una URL de la imagen
-		  setPreviewImage(croppedImage);
-	  };
-
-    	// Estilos para aplicar brillo, contraste y rotación en tiempo real
+    // Estilos para aplicar brillo, contraste y rotación en tiempo real
 	const imageStyle = {
 		//filter: `brightness(${brightness}%) contrast(${contrast}%)`,		
 		transition: 'filter 0.3s ease, transform 0.3s ease'
@@ -216,21 +206,16 @@ export default function Mobile() {
 		setActiveButton(btn);	
 	}	
 
-    const changeRotation = (r) => {
-        console.log(r);
-    }
-
     const handlePanelPreview = async () => {
         setIsLoading(true);
         const croppedImage = await getCroppedImg(uploadedImage, croppedAreaPixelsRef.current, rotation, brightness, contrast);
         // Suponiendo que getCroppedImg devuelve una URL de la imagen
         setPreviewImage(croppedImage);
-        setIsLoading(false);
         goToNextStep();
     }
 
   return (
-    <div className='main-wrapper' style={{ width: '100vw', height: viewportHeight, overflow: 'hidden' }}>
+    <div className='main-wrapper' style={{ width: '100vw', height: viewportHeight}}>
         <header className='mb-header'>
         <div className="mb-header-inner">
 				<div className="header-inner-item-1">
@@ -288,14 +273,12 @@ export default function Mobile() {
                     />
                 )}
                 {currentStep === 2 && (
-                    <div>
                     <img 
                         src={previewImage} 
                         alt="Preview" 
                         className='crop' 
                         style={{filter: `brightness(${brightness}%) contrast(${contrast}%)`, transition: 'filter 0.3s ease, transform 0.3s ease', transform: ` rotate(${rotation}deg)`}}
 				    />
-                    </div>
                 )}
                 {(currentStep == 3 || currentStep == 4) && (							
 					<Scene3dMobile

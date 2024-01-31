@@ -39,10 +39,10 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
     formData.append("pdf1", pdf1);
     formData.append("pdf2", pdf2); 
 
-    //fetch("https://lignumcd.local/wp-admin/admin-ajax.php", {
-    fetch("https://lignumcd.com/wp-admin/admin-ajax.php", {
+    fetch("https://lignumcd.local/wp-admin/admin-ajax.php", {
+    //fetch("https://lignumcd.com/wp-admin/admin-ajax.php", {
       method: "POST",
-      //credentials: 'include',
+      credentials: 'include',
       body: formData
       })
       .then(response => {
@@ -54,8 +54,8 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
       })
       .then(text => {
         const data = JSON.parse(text); // Luego trata de parsear el texto a JSON
-        window.location.href = 'https://lignumcd.com/checkout/';
-        //window.location.href = 'https://lignumcd.local/checkout/';
+        //window.location.href = 'https://lignumcd.com/checkout/';
+        window.location.href = 'https://lignumcd.local/checkout/';
       })
       .catch((error) => {
         console.error("Fetch error:", error);
@@ -252,18 +252,18 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
           { id: 2, steps: pasosPorComponente[1]},
           { id: 3, steps: pasosPorComponente[2]},
           { id: 4, steps: pasosPorComponente[3]},
-          { id: 5, steps: 0}//para el blanco siempre 0
+          { id: 5, steps: pasosPorComponente[4]}
         ],
         rgb: rgbData,
         cmykw: cmykwData,
         ml: mililitrosTotal
       };
 
-      const RECT_WIDTH = 34; const RECT_HEIGHT = 34;
+      const RECT_WIDTH = 25; const RECT_HEIGHT = 25;
 
       doc.setDrawColor(0, 0, 0);
       doc.setFillColor(colorData[1][0], colorData[1][1], colorData[1][2]);
-      doc.rect(5 + idx % 6 * RECT_WIDTH, 5 + Math.trunc(idx/6) * RECT_HEIGHT, RECT_WIDTH, RECT_HEIGHT, "FD");
+      doc.rect(x , y - 25, 10, 3, "FD");
       doc.setDrawColor(0, 0, 0);
 
       let text =
@@ -376,7 +376,6 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
 
   const calculateRotations = (cmykBlanco, dimensionBloque, cantidadBloques) => {
     // Datos de referencia para cobertura de acrílico y pasos de motor
-    cmykBlanco.pop();//aqui elimino el blanco que es el ultimo elemento de la lista
     const referencia = {
       1: { ml: 0.6, motorSteps: 258 },
       2: { ml: 1.93, motorSteps: 830 },
@@ -475,7 +474,6 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
     m = ((m - k) / (1 - k)) * 100;
     y = ((y - k) / (1 - k)) * 100;
     k = k * 100;
-    
     var w = 100 - Math.max(c, m, y, k); // Componente blanco para aumentar la luminosidad
     c = Math.round(c * 100) / 100; //2 lugares decimales
     m = Math.round(m * 100) / 100; //2 lugares decimales

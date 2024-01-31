@@ -26,7 +26,13 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
       blockSize,
       pixelatedImage,
       cmykwColors
-    );   
+    );
+
+    /* price: calculatePrice(), //data
+    cmykwColors: jsonCMYK,
+    blueprint: pdf,
+    //coloredBlueprint: coloredBlueprintFile,
+    pixelated_img_url: dynamicProduct_img.src, */
 
     const jsonCMYK = JSON.stringify(json);
 
@@ -240,30 +246,22 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
     for (let idx = 0; idx < colorInfo.length; idx++) {    
       let colorData = colorInfo[idx];
       let cmykwData = cmykwColors[colorData[0]]; //relaciona por la posicion guardada en colorinfo
-      let rgbData = colorsArray[colorData[0]];
       let atem = [idx + 1, cmykwData, colorData[2]]; //crea un registro con [pos, color, cant] del cmyk+w
       leyenda.push(atem);
       let colorKey = `color_${idx+1}`;
       //arreglo con las rotaciones de cada componente del color [C,M,Y,K,W] 
-      const {pasosPorComponente, mililitrosTotal }= calculateRotations(cmykwData,blockSize,colorData[2]);
-      json.work_orders[12345][colorKey] = {
-        steps_data: [
-          { id: 1, steps: pasosPorComponente[0]},
-          { id: 2, steps: pasosPorComponente[1]},
-          { id: 3, steps: pasosPorComponente[2]},
-          { id: 4, steps: pasosPorComponente[3]},
-          { id: 5, steps: 0}//para el blanco siempre 0
-        ],
-        rgb: rgbData,
-        cmykw: cmykwData,
-        ml: mililitrosTotal
-      };
-
-      const RECT_WIDTH = 34; const RECT_HEIGHT = 34;
+      const rotations = calculateRotations(cmykwData,blockSize,colorData[2]);
+      json.work_orders[12345][colorKey] = [
+        { id: 1, steps: rotations[0]},
+        { id: 2, steps: rotations[1]},
+        { id: 3, steps: rotations[2]},
+        { id: 4, steps: rotations[3]},
+        { id: 5, steps: rotations[4]}
+      ];
 
       doc.setDrawColor(0, 0, 0);
       doc.setFillColor(colorData[1][0], colorData[1][1], colorData[1][2]);
-      doc.rect(5 + idx % 6 * RECT_WIDTH, 5 + Math.trunc(idx/6) * RECT_HEIGHT, RECT_WIDTH, RECT_HEIGHT, "FD");
+      doc.rect(x, y - 3, 10, 3, "FD");
       doc.setDrawColor(0, 0, 0);
 
       let text =
@@ -376,11 +374,10 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
 
   const calculateRotations = (cmykBlanco, dimensionBloque, cantidadBloques) => {
     // Datos de referencia para cobertura de acrílico y pasos de motor
-    cmykBlanco.pop();//aqui elimino el blanco que es el ultimo elemento de la lista
     const referencia = {
-      1: { ml: 0.6, motorSteps: 258 },
-      2: { ml: 1.93, motorSteps: 830 },
-      3: { ml: 4.2, motorSteps: 1806 }
+      1: { area: 5, coverage: 4, motorSteps: 1720 },
+      2: { area: 15, coverage: 10, motorSteps: 4300 },
+      3: { area: 30, coverage: 19, motorSteps: 8170 }
     };
 
     // Obtener los datos de referencia para la dimensión del bloque
@@ -389,20 +386,16 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
       throw new Error('Dimension de bloque no válida');
     }
 
-    const totalPorcentaje = cmykBlanco.reduce((acc, val) => acc + val, 0);//suma todos los valores
+    const totalPorcentaje = cmykBlanco.reduce((acc, val) => acc + val, 0);
+    const pasosPorMililitro = datosBloque.motorSteps / datosBloque.coverage;
 
-    //const pasosPorMililitro = datosBloque.motorSteps / datosBloque.ml;
-    const PASOS_POR_MILIMETROS = 430;
-    let mililitrosTotal = 0;
     // Calcular los pasos del motor para cada componente de CMYK + Blanco
-    const pasosPorComponente = cmykBlanco.map(componente => {//guarda en un arreglo los pasos por cada componente cmykw
-      const mililitrosPorComponente = (componente / totalPorcentaje) * datosBloque.ml * cantidadBloques;
-      mililitrosTotal += mililitrosPorComponente;
-      return Math.round(mililitrosPorComponente * PASOS_POR_MILIMETROS);
+    const pasosPorComponente = cmykBlanco.map(componente => {
+      const mililitrosPorComponente = (componente / totalPorcentaje) * datosBloque.coverage * cantidadBloques;
+      return Math.round(mililitrosPorComponente * pasosPorMililitro);
     });
-    console.log(pasosPorComponente, mililitrosTotal);
 
-    return {pasosPorComponente, mililitrosTotal};
+    return pasosPorComponente;
   }
 
   const getImageWidthHeight = (xBlocks, yBlocks) => {
@@ -475,7 +468,6 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
     m = ((m - k) / (1 - k)) * 100;
     y = ((y - k) / (1 - k)) * 100;
     k = k * 100;
-    
     var w = 100 - Math.max(c, m, y, k); // Componente blanco para aumentar la luminosidad
     c = Math.round(c * 100) / 100; //2 lugares decimales
     m = Math.round(m * 100) / 100; //2 lugares decimales

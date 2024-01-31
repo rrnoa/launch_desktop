@@ -207,7 +207,6 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 					});
 					
 					Promise.all(loadModelPromises).then(() => {
-						console.log("Todos los modelos han sido cargados, incluyendo reintentos.");
 						paintFrame(meshesRef.current, allColorsRef.current);
 						snap.current = true;
 						handleLoading(false);
@@ -241,13 +240,15 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 						}		
 					});					
 				}
-			});			
+			});	
+			
+			let cr = canvasRef.current; //guardar una referencia por si cambia el valor
 			
 			// Función de limpieza
 			return () => {
 				console.log("desmontando");		
-				if (canvasRef.current) {
-					canvasRef.current.removeChild(renderRef.domElement);
+				if (cr && renderRef.domElement && cr.contains(renderRef.domElement)) {
+					cr.removeChild(renderRef.domElement);
 				}
 				renderRef.dispose();
 				//gui.destroy();
