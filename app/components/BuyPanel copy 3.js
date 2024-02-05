@@ -259,8 +259,6 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
         ml: mililitrosTotal
       };
 
-      const RECT_WIDTH = 25; const RECT_HEIGHT = 25;
-
       doc.setDrawColor(0, 0, 0);
       doc.setFillColor(colorData[1][0], colorData[1][1], colorData[1][2]);
       doc.rect(x , y - 25, 10, 3, "FD");

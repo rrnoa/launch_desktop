@@ -37,7 +37,7 @@ const Export3d = ({exportGroup, handleLoading, mobile}) => {
 		console.log("haciendo ajax request...")
 
 		//fetch("https://lignumcd.local/wp-admin/admin-ajax.php", {
-		fetch("https://lignumcd.com/wp-admin/admin-ajax.php", {
+		/* fetch("https://lignumcd.com/wp-admin/admin-ajax.php", {
 			method: "POST",
 			//credentials: 'include',
 			body: formData
@@ -60,7 +60,7 @@ const Export3d = ({exportGroup, handleLoading, mobile}) => {
 		alert("Server connection error");
         console.error("Fetch error:", error);
 		handleLoading(false);
-      });
+      }); */
   	};
 
 	const calculatePrice = () => {
@@ -82,7 +82,7 @@ const Export3d = ({exportGroup, handleLoading, mobile}) => {
   return (
 	<>
 	{mobile && (
-		<button id="woodxel_panel_3d" onClick={onclickHandler}>			
+		<button id="woodxel_panel_3d" className='inactive' onClick={onclickHandler}>			
 			<span>
 				3D Model
 				{exportGroup ? <span className="price-tag">{'$'+calculatePrice()}</span> : ''}
@@ -91,7 +91,7 @@ const Export3d = ({exportGroup, handleLoading, mobile}) => {
 	)}
 	{!mobile && (
 		<Tippy content='Get your 3D file'>
-		<button id="woodxel_panel_3d" onClick={onclickHandler}>
+		<button id="woodxel_panel_3d" className='inactive' onClick={onclickHandler}>
 			<span>
 				3D Model
 				{exportGroup ? <span className="price-tag">{'$'+calculatePrice()}</span> : ''}

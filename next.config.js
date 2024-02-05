@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    basePath: "/woodxel",
+    //basePath: "/woodxel_lab",
     reactStrictMode: true,
     output: "export",
 }

@@ -5,14 +5,13 @@ import svgNumbers from "@/app/libs/svg";
 import "@/app/libs/svg2pdf.umd.min.js";
 import Tippy from '@tippyjs/react';
 
-const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, handleLoading, productImg, mobile}) => {
+const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks, yBlocks, handleLoading, productImg, mobile}) => {
 
   const handleBuy = async (event) => {
 
     event.preventDefault();
-    handleLoading(true);
-    //en lugar de convertir todos los colores debería convertir solo los que van en la leyenda
-    const cmykwColors = convertColorsToCmykWithWhite(colorsArray);
+    //handleLoading(true);
+    //en lugar de convertir todos los colores debería convertir solo los que van en la leyenda    
 
     const pdf2 = await drawReportPdf2( ///pdf para imprimir en los paneles de madera      
       xBlocks,
@@ -25,7 +24,6 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
       yBlocks,
       blockSize,
       pixelatedImage,
-      cmykwColors
     );   
 
     const jsonCMYK = JSON.stringify(json);
@@ -40,7 +38,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
     formData.append("pdf2", pdf2); 
 
     //fetch("https://lignumcd.local/wp-admin/admin-ajax.php", {
-    fetch("https://lignumcd.com/wp-admin/admin-ajax.php", {
+    /* fetch("https://lignumcd.com/wp-admin/admin-ajax.php", {
       method: "POST",
       //credentials: 'include',
       body: formData
@@ -60,7 +58,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
       .catch((error) => {
         console.error("Fetch error:", error);
         alert("Connection Error. Please, reload page");
-      });
+      }); */
   };
 
   const calculatePrice = ()=> {
@@ -190,7 +188,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
 
 
   // Guardar el PDF generado
-  //doc.save('cuadriculas_colores.pdf');
+  doc.save('cuadriculas_colores.pdf');
   const pdf2 = btoa(doc.output());
   return  pdf2;
 
@@ -201,9 +199,10 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
     xBlocks,
     yBlocks,
     blockSize,
-    pixelatedImage,
-    cmykwColors
+    pixelatedImage,    
   ) => {
+
+    //arreglo posicion del color, color y cantidad, es una agrupacion de los colores
     const colorInfo = getColorInfo();
     const leyenda = [];
     //almacena el json de la orden []
@@ -231,33 +230,13 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
     doc.setFontSize(12);
     // Draw color index, 43 colors per column, 3 columns per page
 
-    let y = 40;
-    let x = 10;
-
     drawHeader(doc, xBlocks, blockSize, yBlocks, totalPanels);
 
     //colorInfo tiene el indice de todos los colores con su cantidad [ [posicion, [r,g,b], cantidad]...]
     for (let idx = 0; idx < colorInfo.length; idx++) {    
       let colorData = colorInfo[idx];
-      let cmykwData = cmykwColors[colorData[0]]; //relaciona por la posicion guardada en colorinfo
-      let rgbData = colorsArray[colorData[0]];
-      let atem = [idx + 1, cmykwData, colorData[2]]; //crea un registro con [pos, color, cant] del cmyk+w
-      leyenda.push(atem);
-      let colorKey = `color_${idx+1}`;
-      //arreglo con las rotaciones de cada componente del color [C,M,Y,K,W] 
-      const {pasosPorComponente, mililitrosTotal }= calculateRotations(cmykwData,blockSize,colorData[2]);
-      json.work_orders[12345][colorKey] = {
-        steps_data: [
-          { id: 1, steps: pasosPorComponente[0]},
-          { id: 2, steps: pasosPorComponente[1]},
-          { id: 3, steps: pasosPorComponente[2]},
-          { id: 4, steps: pasosPorComponente[3]},
-          { id: 5, steps: 0}//para el blanco siempre 0
-        ],
-        rgb: rgbData,
-        cmykw: cmykwData,
-        ml: mililitrosTotal
-      };
+      //let atem = [idx + 1, cmykwData, colorData[2]]; //crea un registro con [pos, color, cant] del cmyk+w
+      //leyenda.push(atem);
 
       const RECT_WIDTH = 34; const RECT_HEIGHT = 34;
 
@@ -266,10 +245,59 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
       doc.rect(5 + idx % 6 * RECT_WIDTH, 5 + Math.trunc(idx/6) * RECT_HEIGHT, RECT_WIDTH, RECT_HEIGHT, "FD");
       doc.setDrawColor(0, 0, 0);
 
+
+      let textPaleta =
+        "" +
+        (idx + 1) +
+        ": " +
+      colorDetails[colorData[0]][0];
+
+      doc.text(5 + idx % 6 * RECT_WIDTH, 10 + Math.trunc(idx/6) * RECT_HEIGHT, textPaleta);
+
+      let textName = ""+colorDetails[colorData[0]][1];
+       
+      doc.text(5 + idx % 6 * RECT_WIDTH, 14 + Math.trunc(idx/6) * RECT_HEIGHT, textName);
+
+      let textCode = ""+colorDetails[colorData[0]][2]; 
+       
+      doc.text(5 + idx % 6 * RECT_WIDTH, 18 + Math.trunc(idx/6) * RECT_HEIGHT, textCode);
+
+      let textHex = ""+colorDetails[colorData[0]][3]; 
+       
+      doc.text(5 + idx % 6 * RECT_WIDTH, 22 + Math.trunc(idx/6) * RECT_HEIGHT, textHex);
+
+      let textCant = "("+colorData[2]+")"; //la cantidad de veces que aparece ese color
+       
+      doc.text(5 + idx % 6 * RECT_WIDTH, 26 + Math.trunc(idx/6) * RECT_HEIGHT, textCant);
+
+
+    }
+
+
+    //draw Leyenda
+
+    doc.addPage();
+    drawHeader(doc, xBlocks, blockSize, yBlocks, totalPanels);
+
+    let y = 40;
+    let x = 10;
+
+    for (let idx = 0; idx < colorInfo.length; idx++) {    
+      let colorData = colorInfo[idx];
+     
+
+      doc.setDrawColor(0, 0, 0);
+      doc.setFillColor(colorData[1][0], colorData[1][1], colorData[1][2]);
+      doc.rect(x , y-3, 10, 3, "FD");
+      doc.setDrawColor(0, 0, 0);
+
       let text =
         "Color " +
         (idx + 1) +
-        ": " + "(" +
+        ": " + colorDetails[colorData[0]][0] +","+colorDetails[colorData[0]][1]+","
+        +colorDetails[colorData[0]][2]+","
+        +colorDetails[colorData[0]][3]
+        +"(" +
         colorData[2] + //la cantidad de veces que aparece ese color
         ")";
       doc.text(x + 12, y, text);
@@ -340,70 +368,39 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
       verticalPanels -= 1;
 
     }
-    //transformToOneDimension();//transforma la matriz de posiciones de los bloques en un array 1 dimension
 
-  //print stickers 
-  doc.addPage();
-  const maringTop = 10;
-  const maringLeft = 10;
+    //print stickers 
+    /* doc.addPage();
+    const maringTop = 10;
+    const maringLeft = 10;
 
-  const colorCount = 30; //cantidad de colores por defecto
-  const stickerWidth = Math.floor(( 216 - (2*maringLeft) ) / 5);
-  const stickerHeight = Math.floor(( 279 - (2*maringTop) ) / 6);
+    const colorCount = 30; //cantidad de colores por defecto
+    const stickerWidth = Math.floor(( 216 - (2*maringLeft) ) / 5);
+    const stickerHeight = Math.floor(( 279 - (2*maringTop) ) / 6);
 
-  for (let index = 0; index < colorCount; index++) {
-    let positionX = index % 5;
-    let positionY = Math.floor(index/ 5);
-    const colorNum = index + 1;
+    for (let index = 0; index < colorCount; index++) {
+      let positionX = index % 5;
+      let positionY = Math.floor(index/ 5);
+      const colorNum = index + 1;
 
-    if(leyenda[index]) {
-      doc.text(
-        maringTop + positionX * stickerWidth + stickerWidth/2 ,
-        maringTop + positionY * stickerWidth + stickerHeight/2,
-        colorNum.toString() + " ("+leyenda[index][2].toString()+")",
-        null,
-        null,
-        "center"
-      );
-    }
-  }
+      if(leyenda[index]) {
+        doc.text(
+          maringTop + positionX * stickerWidth + stickerWidth/2 ,
+          maringTop + positionY * stickerWidth + stickerHeight/2,
+          colorNum.toString() + " ("+leyenda[index][2].toString()+")",
+          null,
+          null,
+          "center"
+        );
+      }
+    }  */
     
     // Save the PDF in base64 format
-    //doc.save();
+    doc.save("pixeles.pdf");
     const pdf1 = btoa(doc.output());
     return { pdf1, leyenda, json };
   };
-
-  const calculateRotations = (cmykBlanco, dimensionBloque, cantidadBloques) => {
-    // Datos de referencia para cobertura de acrílico y pasos de motor
-    cmykBlanco.pop();//aqui elimino el blanco que es el ultimo elemento de la lista
-    const referencia = {
-      1: { ml: 0.6, motorSteps: 258 },
-      2: { ml: 1.93, motorSteps: 830 },
-      3: { ml: 4.2, motorSteps: 1806 }
-    };
-
-    // Obtener los datos de referencia para la dimensión del bloque
-    const datosBloque = referencia[dimensionBloque];
-    if (!datosBloque) {
-      throw new Error('Dimension de bloque no válida');
-    }
-
-    const totalPorcentaje = cmykBlanco.reduce((acc, val) => acc + val, 0);//suma todos los valores
-
-    //const pasosPorMililitro = datosBloque.motorSteps / datosBloque.ml;
-    const PASOS_POR_MILIMETROS = 430;
-    let mililitrosTotal = 0;
-    // Calcular los pasos del motor para cada componente de CMYK + Blanco
-    const pasosPorComponente = cmykBlanco.map(componente => {//guarda en un arreglo los pasos por cada componente cmykw
-      const mililitrosPorComponente = (componente / totalPorcentaje) * datosBloque.ml * cantidadBloques;
-      mililitrosTotal += mililitrosPorComponente;
-      return Math.round(mililitrosPorComponente * PASOS_POR_MILIMETROS);
-    });
-    console.log(pasosPorComponente, mililitrosTotal);
-
-    return {pasosPorComponente, mililitrosTotal};
-  }
+  
 
   const getImageWidthHeight = (xBlocks, yBlocks) => {
     const docWidth = 190; // El ancho máximo permitido del documento
@@ -514,8 +511,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
       {mobile && (
         <button id="buy_panel" onClick={handleBuy}>
           <span>
-              WOODXEL Panel 
-              {pixelatedImage ? <span className="price-tag">{'$'+calculatePrice()}</span> : ''}
+              WOODXEL Panel              
           </span>
         </button>
       )}
@@ -523,8 +519,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, blockSize, xBlocks, yBlocks, han
         <Tippy content='Buy your panel now'>
           <button id="buy_panel" onClick={handleBuy}>
           <span>
-              WOODXEL Panel 
-              {pixelatedImage ? <span className="price-tag">{'$'+calculatePrice()}</span> : ''}
+              WOODXEL Panel               
           </span>
           </button>
         </Tippy>

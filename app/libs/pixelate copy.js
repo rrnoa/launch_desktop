@@ -3,63 +3,41 @@ import paletteList from "./lignum_palette";
 
 export default function pixelateImg(croppedImageSrc, xBlocks, yBlocks) {
 
-  let c = 0;
-  function RGBtoXYZ(r, g, b) {
-    r /= 255; g /= 255; b /= 255;
-    r = r > 0.04045 ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
-    g = g > 0.04045 ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
-    b = b > 0.04045 ? Math.pow((b + 0.055) / 1.055, 2.4) : b / 12.92;
-    r *= 100; g *= 100; b *= 100;
-    let x = r * 0.4124 + g * 0.3576 + b * 0.1805;
-    let y = r * 0.2126 + g * 0.7152 + b * 0.0722;
-    let z = r * 0.0193 + g * 0.1192 + b * 0.9505;
-    return [x, y, z];
+  /**
+   * given actualColor, check from the paletteColors the most aproximated color
+   * @param {array} actualColor rgb color to compare [int,int,int]
+   * @returns {array} aproximated rgb color
+   */
+  function similarColor(actualColor) {
+    let selectedColor = [];
+    let currentSim = colorSim(actualColor, paletteList[0][4]);
+    let nextColor;
+    paletteList.forEach((color) => {
+      nextColor = colorSim(actualColor, color[4]);
+      if (nextColor <= currentSim) {
+        selectedColor = color[4];
+        currentSim = nextColor;
+      }
+    });
+    return selectedColor;
   }
 
-  function XYZtoLAB(x, y, z) {
-      let refX = 95.047;
-      let refY = 100.000;
-      let refZ = 108.883;
-      x /= refX; y /= refY; z /= refZ;
-      x = x > 0.008856 ? Math.pow(x, 1/3) : (7.787 * x) + (16 / 116);
-      y = y > 0.008856 ? Math.pow(y, 1/3) : (7.787 * y) + (16 / 116);
-      z = z > 0.008856 ? Math.pow(z, 1/3) : (7.787 * z) + (16 / 116);
-      let L = (116 * y) - 16;
-      let a = 500 * (x - y);
-      let b = 200 * (y - z);
-      return [L, a, b];
+  /**
+   * color similarity between colors, lower is better
+   * @param {array} rgbColor array of ints to make a rgb color: [int,int,int]
+   * @param {array} compareColor array of ints to make a rgb color: [int,int,int]
+   * @returns {number} limits [0-441.6729559300637]
+   */
+
+  function colorSim(rgbColor, compareColor) {
+    let i;
+    let max;
+    let d = 0;
+    for (i = 0, max = rgbColor.length; i < max; i++) {
+      d += (rgbColor[i] - compareColor[i]) * (rgbColor[i] - compareColor[i]);
+    }
+    return Math.sqrt(d);
   }
-
-  function RGBtoLAB(r, g, b) {
-      let xyz = RGBtoXYZ(r, g, b);
-      let lab = XYZtoLAB(...xyz);
-      return lab;
-  }
-
-  function colorDistanceLab(color1, color2) {
-      return Math.sqrt(Math.pow(color1[0] - color2[0], 2) + Math.pow(color1[1] - color2[1], 2) + Math.pow(color1[2] - color2[2], 2));
-  }
-
-  function similarColor(actualColorRGB) {
-    console.log(++c);
-      let actualColorLAB = RGBtoLAB(...actualColorRGB);
-      let closestColorInfo = []; // Guarda la información detallada del color tomada de la paleta [nombre, número, hex]
-      let smallestDistance = Infinity;
-      let selectedColorLAB;
-
-      paletteList.forEach((color) => {
-          // Los valores L, a, b están directamente disponibles en las posiciones 3, 4, 5 del arreglo color
-          selectedColorLAB = [parseFloat(color[5]), parseFloat(color[6]), parseFloat(color[7])];
-          let distance = colorDistanceLab(actualColorLAB, selectedColorLAB);
-          if (distance < smallestDistance) {
-              closestColorInfo = [color[0], color[1], color[2], color[3], color[4],]; // paleta,nombre, codigo, hex
-              smallestDistance = distance;
-          }
-      });
-
-      return { selectedColor: closestColorInfo[4], infoColorPalette: closestColorInfo }; // Retorna el hex del color más similar y la información detallada
-  }
-
 
   // Set canvas size
   return new Promise((resolve, reject) => {
@@ -72,8 +50,7 @@ export default function pixelateImg(croppedImageSrc, xBlocks, yBlocks) {
         mozImageSmoothingEnabled: false,
         webkitImageSmoothingEnabled: false,
         imageSmoothingEnabled: false,
-      };   
-
+      };
 
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d", ctxSettings);
@@ -111,7 +88,6 @@ export default function pixelateImg(croppedImageSrc, xBlocks, yBlocks) {
         canvas.height
       );
       let allColors = [];
-      let colorDetails = [];
       // Get image data in form of array of pixels (RGBA) not array of arrays
       let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const imData = imageData.data;
@@ -165,10 +141,9 @@ export default function pixelateImg(croppedImageSrc, xBlocks, yBlocks) {
       let kmeansResult = kmeans(allColors, 30);
       //let colorPalette = [];
       let i = 0;
-      let colorCache = {}; // Este objeto almacenará los colores ya procesados.
       // Replace colors with cluster centroids
       for (let y = 0; y < height; y += yBlockSize) {
-        let newColor, simColor;
+        let newColor;
         for (let x = 0; x < width; x += xBlockSize) {
           let color = allColors[i];
           let clusterFound = false;
@@ -180,22 +155,9 @@ export default function pixelateImg(croppedImageSrc, xBlocks, yBlocks) {
                 newColor[0] = Math.floor(newColor[0]);
                 newColor[1] = Math.floor(newColor[1]);
                 newColor[2] = Math.floor(newColor[2]);
+                let simColor = similarColor(newColor);
+                allColors[i] = newColor;
 
-                // Convertir newColor a string para usar como clave en el caché
-                let colorKey = `rgb(${newColor[0]},${newColor[1]},${newColor[2]})`;
-
-                if (!colorCache[colorKey]) {
-                  // Si el color no está en el caché, buscar un color similar y almacenarlo en el caché.
-                  simColor = similarColor(newColor);
-                  colorCache[colorKey] = { selectedColor: simColor.selectedColor, infoColorPalette: simColor.infoColorPalette };
-                } else {
-                  // Si el color ya está en el caché, utilizar ese resultado
-                  simColor = colorCache[colorKey];
-                }
-                
-
-                allColors[i] = colorCache[colorKey].selectedColor;
-                colorDetails[i] = colorCache[colorKey].infoColorPalette;
                 clusterFound = true;
                 break;
               }
@@ -206,21 +168,27 @@ export default function pixelateImg(croppedImageSrc, xBlocks, yBlocks) {
           }
           //Set color for the entire block
           ctx.clearRect(x, y, xBlockSize, yBlockSize);
-          //buscar color similar en la paleta         
+          //buscar color similar en la paleta
           
+          let simColor = similarColor(newColor);
+          console.log(newColor , simColor);
           color =
-            "rgb(" + simColor.selectedColor[0] + "," + simColor.selectedColor[1] + "," + simColor.selectedColor[2] + ")";
+            "rgb(" + simColor[0] + "," + simColor[1] + "," + simColor[2] + ")";
           ctx.fillStyle = color;
           ctx.fillRect(x, y, xBlockSize, yBlockSize);
           i++;
         }
       }
 
+      // change color for similar in palette
+      //convertPalette(xBlockSize, yBlockSize);
+      // Create a dictionary of colors and their counts
+      //countColors(allColors);
+
       //Display image and set download link
       resolve({
         imageURL: canvas.toDataURL(),
         allColors: allColors,
-        colorDetails: colorDetails
       });
     };
     croppedImage.onerror = (error) => {

@@ -13,9 +13,6 @@ import getCroppedImg from '@/app/libs/cropImage';
 import { Brightness, Contrast, Locked, Moon, Sun,Tilt,Undo,Unlocked, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
 import Export3d from '@/app/components/Export3d';
 import { Blocks } from 'react-loader-spinner';
-import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { resolve } from 'styled-jsx/css';
 
 
 export default function Main() {
@@ -59,18 +56,9 @@ export default function Main() {
 	const croppedAreaPixelsRef = useRef(null);
 
 	const isSliderChangeRef = useRef(false);
-	const meshes = useRef([]);//contiene las mallas de los bloques
-	const svgShape = useRef();//contiene la silueta del hombre
 
 	const sceneRef = useRef();
 	const renderRef = useRef();
-
-	
-
-	// Función para cambiar el tema
-	const toggleTheme = () => {
-		setTheme(theme === 'light' ? 'dark' : 'light');
-	};
 
 	// Efecto para actualizar el atributo data-theme
 	useEffect(() => {		
@@ -79,12 +67,7 @@ export default function Main() {
 		sceneRef.current = new THREE.Scene();
 		renderRef.current = new THREE.WebGLRenderer({ antialias: true});		
 
-	},[]);
-		
-	// Efecto para actualizar el atributo data-theme
-	/* useEffect(() => {
-		document.documentElement.setAttribute('data-theme', theme);
-	}, [theme]);	 */
+	},[]);	
 
 	// Función para avanzar al siguiente paso
 	const goToNextStep = () => {
@@ -280,6 +263,9 @@ export default function Main() {
 								handleLoading = {setIsLoading}
 								sceneRef = {sceneRef.current }
 								renderRef = {renderRef.current}
+								rotation = {rotation}
+								contrast = {contrast}
+								brightness = {brightness}
 								
 								/>
 							)}                   
@@ -451,6 +437,7 @@ export default function Main() {
 							<BuyPanel
 							pixelatedImage = {pixelInfo.pixelatedImage}
 							colorsArray = {pixelInfo.colorsArray}
+							colorDetails = {pixelInfo.colorDetails}
 							blockSize = {blockSize}
 							xBlocks = {Math.floor(width / blockSize)}
 							yBlocks = {Math.floor(height / blockSize)}
