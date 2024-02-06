@@ -5,7 +5,7 @@ import '@/app/css/mobile-style.css'
 import Cropper from "react-easy-crop";
 import "react-easy-crop/react-easy-crop.css";
 import getCroppedImg from '@/app/libs/cropImage';
-import Scene3dMobile from "@/app/components/Scene3dMobile";
+import Scene3D from "@/app/components/Scene3d";
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import BuyPanel from '@/app/components/BuyPanel';
 import { Brightness, Contrast, Moon, Sun, Tilt, Undo, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
@@ -281,7 +281,7 @@ export default function Mobile() {
 				    />
                 )}
                 {(currentStep == 3 || currentStep == 4) && (							
-					<Scene3dMobile
+					<Scene3D
                         width={width*0.0254}
                         height={height*0.0254}
                         blockSize={blockSize*0.0254}
