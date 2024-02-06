@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import pixelateImg from '@/app/libs/pixelate';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 
 const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupRefChange, theme='light', setProductImg, handleLoading, sceneRef, renderRef }) => {

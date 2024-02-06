@@ -41,7 +41,6 @@ export default function pixelateImg(croppedImageSrc, xBlocks, yBlocks) {
   }
 
   function similarColor(actualColorRGB) {
-    console.log(++c);
       let actualColorLAB = RGBtoLAB(...actualColorRGB);
       let closestColorInfo = []; // Guarda la información detallada del color tomada de la paleta [nombre, número, hex]
       let smallestDistance = Infinity;
@@ -87,7 +86,7 @@ export default function pixelateImg(croppedImageSrc, xBlocks, yBlocks) {
 
       //este es el tamaño del bloque en pixeles
       //xBlocks va a depender del tamaño en "pulgadas" que se seleccionó en la interfaz puede ser (1,2,3)
-      //si pulgas es igual a 2, xBlockc va a ser la mitad los bloque cuando había 1 pulgada
+      //si pulgas es igual a 2, xBlock va a ser la mitad los bloque cuando había 1 pulgada
       // xBlockSize seria el tamaño en píxeles de la base(cuadrada) del bloque que se va a pintar
 
       let xBlockSize = Math.max(Math.floor(canvasWidth / xBlocks), 1);

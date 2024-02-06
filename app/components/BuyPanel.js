@@ -10,7 +10,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
   const handleBuy = async (event) => {
 
     event.preventDefault();
-    //handleLoading(true);
+    handleLoading(true);
     //en lugar de convertir todos los colores debería convertir solo los que van en la leyenda    
 
     const pdf2 = await drawReportPdf2( ///pdf para imprimir en los paneles de madera      
@@ -38,7 +38,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
     formData.append("pdf2", pdf2); 
 
     //fetch("https://lignumcd.local/wp-admin/admin-ajax.php", {
-    /* fetch("https://lignumcd.com/wp-admin/admin-ajax.php", {
+    fetch("https://lignumcd.com/wp-admin/admin-ajax.php", {
       method: "POST",
       //credentials: 'include',
       body: formData
@@ -58,7 +58,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
       .catch((error) => {
         console.error("Fetch error:", error);
         alert("Connection Error. Please, reload page");
-      }); */
+      });
   };
 
   const calculatePrice = ()=> {
@@ -188,7 +188,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
 
 
   // Guardar el PDF generado
-  doc.save('cuadriculas_colores.pdf');
+  //doc.save('cuadriculas_colores.pdf');
   const pdf2 = btoa(doc.output());
   return  pdf2;
 
@@ -396,7 +396,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
     }  */
     
     // Save the PDF in base64 format
-    doc.save("pixeles.pdf");
+    //doc.save("pixeles.pdf");
     const pdf1 = btoa(doc.output());
     return { pdf1, leyenda, json };
   };
@@ -458,40 +458,6 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
     colorInfoArray.sort((a, b) => a[0] - b[0]);
 
     return colorInfoArray;
-  };
-
-  const rgbToCmykWithWhite = (r, g, b) => {
-    var c = 1 - r / 255;
-    var m = 1 - g / 255;
-    var y = 1 - b / 255;
-    var k = Math.min(c, Math.min(m, y));
-    if (k === 1) {
-      return [0, 0, 0, 100, 0]; // Negro
-    }
-    c = ((c - k) / (1 - k)) * 100;
-    m = ((m - k) / (1 - k)) * 100;
-    y = ((y - k) / (1 - k)) * 100;
-    k = k * 100;
-    
-    var w = 100 - Math.max(c, m, y, k); // Componente blanco para aumentar la luminosidad
-    c = Math.round(c * 100) / 100; //2 lugares decimales
-    m = Math.round(m * 100) / 100; //2 lugares decimales
-    y = Math.round(y * 100) / 100; //2 lugares decimales
-    k = Math.round(k * 100) / 100; //2 lugares decimales
-    w = Math.round(w * 100) / 100; //2 lugares decimales
-    return [c, m, y, k, w];
-  };
-
-  const convertColorsToCmykWithWhite = (arr) => {
-    var result = [];
-    for (var i = 0; i < arr.length; i++) {
-      var r = arr[i][0];
-      var g = arr[i][1];
-      var b = arr[i][2];
-      var cmykW = rgbToCmykWithWhite(r, g, b);
-      result.push(cmykW);
-    }
-    return result;
   };
 
   const drawHeader = (doc, xBlocks, blockSize, yBlocks, totalPanels) => {
