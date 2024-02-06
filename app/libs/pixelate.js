@@ -41,7 +41,6 @@ export default function pixelateImg(croppedImageSrc, xBlocks, yBlocks) {
   }
 
   function similarColor(actualColorRGB) {
-    console.log(++c);
       let actualColorLAB = RGBtoLAB(...actualColorRGB);
       let closestColorInfo = []; // Guarda la información detallada del color tomada de la paleta [nombre, número, hex]
       let smallestDistance = Infinity;

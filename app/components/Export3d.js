@@ -10,7 +10,7 @@ const Export3d = ({exportGroup, handleLoading, mobile}) => {
     
 	const onclickHandler = (event) => {
         event.preventDefault();
-		handleLoading(true);
+		//handleLoading(true);
 		const exporter = new GLTFExporter();
         exporter.parse(
 			exportGroup, 
@@ -18,7 +18,7 @@ const Export3d = ({exportGroup, handleLoading, mobile}) => {
 			// gltf es un objeto JSON que representa tu escena
 			const output = JSON.stringify(gltf, null, 2);
 			const compressedData = pako.gzip(output, { level: 9 });
-			//downloadJSON(compressedData, 'modelo3d.gltf.zip');
+			downloadJSON(compressedData, 'modelo3d.gltf.zip');
 			await makeAjaxRequest(compressedData);
 			},// called when there is an error in the generation
 			function ( error ) {	
@@ -82,7 +82,7 @@ const Export3d = ({exportGroup, handleLoading, mobile}) => {
   return (
 	<>
 	{mobile && (
-		<button id="woodxel_panel_3d" className='inactive' onClick={onclickHandler}>			
+		<button id="woodxel_panel_3d" onClick={onclickHandler}>			
 			<span>
 				3D Model
 				{exportGroup ? <span className="price-tag">{'$'+calculatePrice()}</span> : ''}
@@ -91,7 +91,7 @@ const Export3d = ({exportGroup, handleLoading, mobile}) => {
 	)}
 	{!mobile && (
 		<Tippy content='Get your 3D file'>
-		<button id="woodxel_panel_3d" className='inactive' onClick={onclickHandler}>
+		<button id="woodxel_panel_3d" onClick={onclickHandler}>
 			<span>
 				3D Model
 				{exportGroup ? <span className="price-tag">{'$'+calculatePrice()}</span> : ''}
