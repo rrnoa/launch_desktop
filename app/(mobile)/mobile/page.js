@@ -44,7 +44,6 @@ export default function Mobile() {
     
     const cropperRef = useRef(null);
 	const croppedAreaPixelsRef = useRef(null);
-	const isSliderChangeRef = useRef(false);
 
 	const [productImg, setProductImg] = useState();
 
@@ -332,13 +331,13 @@ export default function Mobile() {
                         <div className="form">							
                             <div className="inputs">
                             <label htmlFor="input_w">W</label>
-                                <input id='input_w' className="input_w" type="number" min="24" max="300" value={width} 
+                                <input id='input_w' className="input_w" type="number" min="24" max="100" value={width} 
                                 onChange={handleWidth}
                                 onFocus={(even)=>{even.target.select()}}
                                 onBlur={handleWidthAdjustment}
                                 />
                                 <label htmlFor="input_h">H</label>                                
-                                <input id='input_h' className="input_h" type="number" min="24" max="300" value={height} 
+                                <input id='input_h' className="input_h" type="number" min="24" max="100" value={height} 
                                 onChange={handleHeight}
                                 onFocus={(even)=>{even.target.select()}}
                                 onBlur={handleHeightAdjustment}                                

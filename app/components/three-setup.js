@@ -105,11 +105,15 @@ export const configWall = (height) => {
     return wallMesh;
 }
 
-export const animate = (renderer, scene, camera) => {
+export const animate = (renderer, scene, camera, width, height, setProductImg, snapshot, countAnimate) => {
     let frameId;
-    function animation() {      
+    function animation() {
       frameId = requestAnimationFrame(animation);
       renderer.render(scene, camera);
+        if(countAnimate === 0){
+            snapshot(renderer, width, height, setProductImg);
+            countAnimate ++;
+        }
     }
     animation();
 

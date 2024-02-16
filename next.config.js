@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    basePath: "/launch",
+    //basePath: "/launch",
     reactStrictMode: false,
     output: "export",
 }

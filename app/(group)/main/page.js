@@ -74,10 +74,10 @@ export default function Main() {
 
 		sceneRef.current = new THREE.Scene();
 		renderRef.current = new THREE.WebGLRenderer({ antialias: true});
-		/* const onboardingShown = localStorage.getItem('onboardingShown');
+		const onboardingShown = localStorage.getItem('onboardingShown');
 		if (!onboardingShown) {
 		  setModalIsOpen(true);
-		}	 */	
+		}
 
 	},[]);
 

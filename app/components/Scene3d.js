@@ -45,10 +45,10 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 		sceneRef.add( floorMesh );						
 		sceneRef.add( wallMesh );
 						
-		const cancelAnimation = animate(renderRef,sceneRef,camera);
+		let cancelAnimation;
 		
-			pixelateImg(croppedImg, xBlocks, yBlocks)
-				.then((data) => {
+		pixelateImg(croppedImg, xBlocks, yBlocks)
+			.then((data) => {
 					//despues de pixelada la imagen entonces se crea la escena
 						const { imageURL, allColors, colorDetails } = data;
 						allColorsRef.current = allColors;
@@ -78,7 +78,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 										setTimeout(() => {
 											meshesRef.current.push(gltf.scene.children[0]);
 											resolve(gltf); // Resolver la promesa después de la demora
-										  }, 500); // Demora de 5000 milisegundos (5 segundos)
+										  }, 300); // Demora de 300 milisegundos (0.3 segundos)
 									},
 									undefined, // Función de progreso
 									(error) => { 
@@ -94,7 +94,10 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 							paintFrame(meshesRef.current, allColorsRef.current, sceneRef, width, height, blockSize, onGroupRefChange, exportGroupRef);
 							handleLoading(false);
 							if (!btnSizeClick) goToNextStep(); //para saber si el evento proviene de hace click sobre 1,2,3
-							snapshot(renderRef, width, height, setProductImg);
+							let countAnimate = 0; //para solo ejecutar el snapshot una sola vez
+							//aqui se controlla mediante un callback sincronizar el frame render con el snapshoot, para que no de imagen en negro.
+							cancelAnimation = animate(renderRef, sceneRef, camera, width, height, setProductImg, snapshot, countAnimate);
+							
 						}).catch(error => {
 							console.error("Hubo un error al cargar uno o más modelos:", error);
 							alert("An issue occurred while loading the content. Please try refreshing the page.")
@@ -128,12 +131,10 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 						registerWindowsListener(()=>onResize(camera));
 						
 					}
-				})
-				.finally(() => {
+			})
+			.finally(() => {
 					
-				});
-		
-		
+			});		
 
 		const onResize = (camera) => {
 			if (canvasRef.current && renderRef) {
@@ -215,7 +216,6 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 
     return (
 		 <>
-		 	{console.log('re-render Scene-3D')}
     		<div ref={canvasRef} style={{ width: '100%', height: '100%'}} />
 		{/* <button onClick={toggleSnap}>Imagen</button> */}
 		</>
@@ -231,7 +231,7 @@ const snapshot = (renderRef, width, height, setProductImg) => {
     const regionHeight = regionWidth;
 
     let canvas = renderRef.domElement;
-
+	console.log("snapshot", canvas, width, height);
     // Calcula el centro del canvas original
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
@@ -249,7 +249,9 @@ const snapshot = (renderRef, width, height, setProductImg) => {
     tempCtx.drawImage(canvas, x, y, regionWidth, regionHeight, 0, 0, regionWidth, regionHeight);
 
     // Obtén la imagen de la región como data URL
-    var dataURL = tempCanvas.toDataURL('image/jpeg', 1); // 80% de calidad
+    var dataURL = tempCanvas.toDataURL('image/jpeg', 1); //100 % calidad
+
+	//downloadResizedImage(dataURL);
     setProductImg(dataURL);
 }
 
@@ -452,6 +454,16 @@ const getAvailableRotations = (index, blockInfos, currentXBlocks) => {
 		mesh1.applyMatrix4(matrix);
 		exportGroupRef.current.add(mesh1);
 	}
+}
+
+function downloadResizedImage(dataURL) {
+    // Crear un enlace para la descarga
+	var link = document.createElement('a');
+    link.href = dataURL;
+    link.download = "thumb.png"; // Nombre de archivo predeterminado, puede ajustar según sea necesario
+    document.body.appendChild(link); // Agregar el enlace al documento
+    link.click(); // Simular click para descargar 
+	document.body.removeChild(link); // Limpiar y remover el enlace del documento
 }
 
 export default Escena3D;

@@ -51,7 +51,6 @@ const Export3d = ({exportGroup, handleLoading, mobile}) => {
 		})
 		.then(text => {
 			//const data = JSON.parse(text); // Luego trata de parsear el texto a JSON
-			console.log(text);
 			//window.location.href = "https://lignumcd.local/checkout/";
 			window.location.href = "https://lignumcd.com/checkout/";
 		})
