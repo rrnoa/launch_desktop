@@ -1,4 +1,4 @@
-//import './globals.css'
+import './globals.css'
 //import './css/bootstrap.css';
 //import './css/jquery-ui.css';
 //import './css/jquery-ui.theme.css';
@@ -14,7 +14,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body><div id="myAppRoot">{children}</div></body>
     </html>
   )
 }

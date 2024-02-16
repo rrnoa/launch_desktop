@@ -119,12 +119,12 @@ html {
 
 .step.inactive {
     pointer-events: none; /* Deshabilita eventos de clic */
-    opacity: 0.4; /* Efecto de velo gris */
+    opacity: 0.2; /* Efecto de velo gris */
 }
 
 button.inactive {
     pointer-events: none; /* Deshabilita eventos de clic */
-    opacity: 0.4; /* Efecto de velo gris */
+    opacity: 0.2; /* Efecto de velo gris */
 }
 
 svg.btn-icons {
@@ -470,12 +470,12 @@ div.buttons-list button.active {
 }
 
 .step-item2-inner12 {
-    margin-top: 2.2vh;
+    margin-top: 1vh;
 }
 
 #slider-range-min {
     border-radius: 10px;
-    margin-bottom: 1.976vh;
+    margin-bottom: 3vh;
 }
 
 input[type=range] {

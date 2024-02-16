@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    //basePath: "/before",
-    reactStrictMode: true,
+    //basePath: "/launch",
+    reactStrictMode: false,
     output: "export",
 }
 

@@ -2,13 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import pixelateImg from '@/app/libs/pixelate';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
+import { configCamera, configRender, configLights, configFloor, configWall, animate, configControls } from './three-setup';
 
-const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupRefChange, theme='light', setProductImg, handleLoading, sceneRef, renderRef }) => {
-    const canvasRef = useRef();
-	const animationFrameId = useRef(); // Referencia para almacenar el ID del frame de animación
-	//const dennisMaterialRef = useRef(null);
+const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupRefChange, theme='light', setProductImg, handleLoading, sceneRef, renderRef, goToNextStep, btnSizeClick }) => {
+    const canvasRef = useRef(null);
+	const dennisMaterialRef = useRef(null);
 	const exportGroupRef = useRef(null);
 
 	const inch = 0.0254;
@@ -28,7 +27,26 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 		const yBlocks = Math.round(height / blockSize);
 		let backColor = theme === 'light' ? 0xdee2e6 : 0x121212;
 		sceneRef.background = new THREE.Color(backColor);
-		handleLoading(true);		
+		handleLoading(true);
+
+		const paintAreaWidth = canvasRef.current?.offsetWidth;
+		const paintAreaHeight = canvasRef.current?.offsetHeight;
+		const camera = configCamera(paintAreaWidth, paintAreaHeight, width, height);			
+		configRender(renderRef, canvasRef.current, paintAreaWidth, paintAreaHeight);
+		const directionalLight = configLights(width, height);				
+		configControls(camera, renderRef);
+		const floorMesh = configFloor(height);
+		const wallMesh = configWall(height);						
+	
+		const ambientlight = new THREE.AmbientLight(0xffffff, 3);						
+	
+		sceneRef.add(ambientlight);
+		sceneRef.add(directionalLight);	
+		sceneRef.add( floorMesh );						
+		sceneRef.add( wallMesh );
+						
+		const cancelAnimation = animate(renderRef,sceneRef,camera);
+		
 			pixelateImg(croppedImg, xBlocks, yBlocks)
 				.then((data) => {
 					//despues de pixelada la imagen entonces se crea la escena
@@ -42,64 +60,10 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 	
 					if (typeof window !== "undefined") {
 	
-						const paintAreaWidth = canvasRef.current?.offsetWidth;
-						const paintAreaHeight = canvasRef.current?.offsetHeight;
-						let camera = configCamera(paintAreaWidth, paintAreaHeight);			
-						configRender(paintAreaWidth, paintAreaHeight);
-						let directionalLight = configLights();					
 						
-						canvasRef.current?.appendChild(renderRef.domElement);
-	
-						const ambientlight = new THREE.AmbientLight(0xffffff, 3);
-						
-						configControls(camera);
-	
-						sceneRef.add(ambientlight);
-						sceneRef.add(directionalLight);
-	
-						const floorWidth = 1000;
-						const floorDepth = 600;
-						const floorGeometry = new THREE.PlaneGeometry( floorWidth, floorDepth );
-						const floorColor = theme === 'light' ?0xbbbbbb : 0x121212;
-						const floorMaterial = new THREE.MeshStandardMaterial( { color: floorColor } );
-	
-						floorMaterial.side = THREE.DoubleSide;
-						const floorMesh = new THREE.Mesh( floorGeometry, floorMaterial );
-						floorMesh.rotateX(Math.PI/2);
-						floorMesh.position.set(0, - height/2 -0.001, floorDepth/2 - 3 );
-						floorMesh.receiveShadow = false;
-						sceneRef.add( floorMesh );
-	
-						const wallHeight = 30;
-						const wallWidth = 100;
-						const wallGeometry = new THREE.PlaneGeometry( wallWidth, wallHeight );
-						const wallColor = theme === 'light' ? 0xffffff : 0x121212;
-						const wallMaterial = new THREE.MeshStandardMaterial( { color: wallColor } );
-						wallMaterial.side = THREE.DoubleSide;
-						const wallMesh = new THREE.Mesh( wallGeometry, wallMaterial );
-						//la altura del muro / 2, menos la mitad de la altura del cuadro
-						wallMesh.position.set(0, wallHeight/2 - Math.ceil(height/2) , -inch );
-						wallMesh.receiveShadow = true;
-						wallMesh.castShadow = false;
-						sceneRef.add( wallMesh );
-						
-						// Render the scene and camera
-						const animate = () => {
-							//animationFrameId.current = requestAnimationFrame(renderScene);
-							requestAnimationFrame(animate);
-							renderRef.render(sceneRef, camera);
-							if(snap.current){
-								snapshot(width, height);
-								snap.current = false;
-							}
-						};
-					  
-						// Call the renderScene function to start the animation loop
-						animate();	
 	
 						const loaderSvg = new SVGLoader();
-						//cargar la geometría
-	
+						//cargar la geometría	
 						meshesRef.current = [];
 						
 						const loadModelPromises = models.map((modelUrl) => {
@@ -109,9 +73,12 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 									3, // Número máximo de intentos
 									2000, // Retraso entre intentos
 									(gltf) => { 
-										console.log('Modelo cargado:', gltf); 
-										meshesRef.current.push(gltf.scene.children[0]);
-										resolve(gltf); // Resolver la promesa cuando se carga el modelo
+										/* meshesRef.current.push(gltf.scene.children[0]);
+										resolve(gltf); // Resolver la promesa cuando se carga el modelo */
+										setTimeout(() => {
+											meshesRef.current.push(gltf.scene.children[0]);
+											resolve(gltf); // Resolver la promesa después de la demora
+										  }, 500); // Demora de 5000 milisegundos (5 segundos)
 									},
 									undefined, // Función de progreso
 									(error) => { 
@@ -125,8 +92,9 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 						Promise.all(loadModelPromises).then(() => {
 							console.log("Todos los modelos han sido cargados, incluyendo reintentos.");
 							paintFrame(meshesRef.current, allColorsRef.current, sceneRef, width, height, blockSize, onGroupRefChange, exportGroupRef);
-							handleLoading(false); 
-							snap.current = true;
+							handleLoading(false);
+							if (!btnSizeClick) goToNextStep(); //para saber si el evento proviene de hace click sobre 1,2,3
+							snapshot(renderRef, width, height, setProductImg);
 						}).catch(error => {
 							console.error("Hubo un error al cargar uno o más modelos:", error);
 							alert("An issue occurred while loading the content. Please try refreshing the page.")
@@ -182,90 +150,14 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 		let cr = canvasRef.current; //guardar una referencia por si cambia el valor
 			
 		// Función de limpieza
-		return () => {
-			console.log("desmontando");		
-			if (cr && renderRef.domElement && cr.contains(renderRef.domElement)) {
-				cr.removeChild(renderRef.domElement);
-			}
-			renderRef.dispose();
+		return () => {	
+			console.log("desmontando");	
 			unRegisterWindowListener(onResize);
-			//gui.destroy();
-			cancelAnimationFrame(animationFrameId.current);
-			removeObjWithChildren(sceneRef);
-				
+			cancelAnimation(); // Cancelling the animation frame here
+			cr.removeChild(renderRef.domElement);
+			removeObjWithChildren(sceneRef);				
 		};
     }, [blockSize]); // Dependencias del efecto
-
-
-	const configControls = (camera) => {
-		//config cotrols
-		const controls = new OrbitControls(camera, renderRef.domElement);
-		//controls.minDistance = Math.max(5, Math.hypot(width, height)/4);
-		controls.minDistance = 0.5;
-		controls.maxDistance = 20;
-		controls.enablePan = false;
-		//controls.maxPolarAngle = THREE.MathUtils.degToRad(92);
-		controls.minPolarAngle = THREE.MathUtils.degToRad(45);
-		controls.maxPolarAngle = controls.getPolarAngle();
-		controls.maxAzimuthAngle = THREE.MathUtils.degToRad(60);
-		controls.minAzimuthAngle = THREE.MathUtils.degToRad(-60);
-		controls.update();
-
-		return controls;
-	}
-
-	const configCamera = (paintAreaWidth, paintAreaHeight) => {
-		const camera = new THREE.PerspectiveCamera(45, paintAreaWidth / paintAreaHeight, 0.1, 100);
-		const cameraZPosition = Math.max( width, height)+2;
-		camera.position.z = cameraZPosition;
-		camera.updateProjectionMatrix();
-		return camera;
-	}
-
-	const configRender = (paintAreaWidth, paintAreaHeight) => {
-		renderRef.setSize(paintAreaWidth, paintAreaHeight);
-		renderRef.setPixelRatio(window.devicePixelRatio);
-		renderRef.shadowMap.enabled = true;
-		//renderer.shadowMap.type = THREE.PCFSoftShadowMap;					
-		//renderer.shadowMap.type = THREE.PCFShadowMap;
-		renderRef.shadowMap.type = THREE.VSMShadowMap;
-		renderRef.toneMappingExposure = 1;
-		//renderer.toneMapping = THREE.LinearToneMapping;
-		renderRef.toneMapping = THREE.ACESFilmicToneMapping;
-	}
-
-	const configLights = () => {
-		const directionalLight = new THREE.DirectionalLight(0xffffff, 3)
-	
-		//DirectionalLightControl(gui, directionalLight);
-		directionalLight.castShadow = true;
-		directionalLight.position.x = 0.5;
-		directionalLight.position.y = 2;
-		directionalLight.position.z = 1;
-		directionalLight.shadow.camera.far = 20;
-
-		directionalLight.shadow.camera.top = height / 2 + 0.1;
-		directionalLight.shadow.camera.left = - (width) / 2 - 0.1 ;
-		directionalLight.shadow.camera.right = (width ) / 2 + 0.1;
-		directionalLight.shadow.camera.bottom = - (height) / 2 - 0.1;
-		directionalLight.shadow.mapSize.width = 1024;
-		directionalLight.shadow.mapSize.height = 1024; 
-
-		directionalLight.shadow.radius = 2;
-		directionalLight.shadow.blurSamples = 4;
-		//directionalLight.shadow.bias = 0.00002;
-		directionalLight.shadow.bias = -0.0001;
-		//DirectionalLightControl(gui,directionalLight);
-		//let shadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
-		//const helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
-		
-		//scene.add( helper );
-		
-		//scene.add(shadowHelper);
-		directionalLight.shadow.camera.updateProjectionMatrix();
-
-		return directionalLight;
-	}
 
 
 	const registerWindowsListener = (action) =>{		
@@ -275,56 +167,6 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 	const unRegisterWindowListener = (action) => {
 		window.removeEventListener('resize', action);
 	}
-
-	const snapshot = (width, height) => {		
-
-		const point1 = [0.6096, 200];
-		const point2 = [1.27, 320];
-
-		const regionWidth = interpolateLinear(Math.max(width,height), point1, point2);
-		const regionHeight = regionWidth;
-
-		let canvas = renderRef.domElement;
-
-		// Calcula el centro del canvas original
-		const centerX = canvas.width / 2;
-		const centerY = canvas.height / 2;
-
-		const x = centerX - regionWidth / 2;
-		const y = centerY - regionHeight / 2;
-
-		// Crea un canvas temporal y captura la región
-		const tempCanvas = document.createElement('canvas');
-		tempCanvas.width = regionWidth;
-		tempCanvas.height = regionHeight;
-		const tempCtx = tempCanvas.getContext('2d');
-
-		// Dibuja la región centrada en el canvas temporal
-		tempCtx.drawImage(canvas, x, y, regionWidth, regionHeight, 0, 0, regionWidth, regionHeight);
-
-		// Obtén la imagen de la región como data URL
-		var dataURL = tempCanvas.toDataURL('image/jpeg', 1); // 80% de calidad
-		// Opcional: si quieres descargar la imagen
-		/* var link = document.createElement('a');
-		link.href = dataURL;
-		link.download = 'mi-captura.jpg';
-		link.click(); */
-		setProductImg(dataURL);
-	}
-
-	const interpolateLinear = (x, point1, point2) => {
-		const [x0, y0] = point1;
-		const [x1, y1] = point2;
-	
-		// Asegúrate de que x1 y x0 no sean iguales para evitar división por cero
-		if (x1 === x0) {
-			console.error("Error: x0 y x1 no pueden ser iguales.");
-			return null;
-		}
-	
-		return y0 + ((y1 - y0) / (x1 - x0)) * (x - x0);
-	}
-
 	//limpiar la escena
 	//Se estan quedando Mesh sin eliminar, se puede comprobar en la Memory
 	const removeObjWithChildren = (obj) => {
@@ -333,7 +175,6 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 		}
 		if (obj.geometry) {
 		  obj.geometry.dispose();
-		  //console.log('eliminando geometrias');
 
 		}
 		if (obj.material) {
@@ -357,15 +198,12 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 		  } else {
 			if (obj.material.map) {
 			  obj.material.map.dispose();
-			  //console.log('eliminando texturas');
 			}
 			if (obj.material.metalnessMap) {
 				obj.material.metalnessMap.dispose();
-				//console.log('eliminando texturas');
 			}
 			if (obj.material.normalMap) {
 				obj.material.normalMap.dispose();
-				//console.log('eliminando texturas');
 			}
 			obj.material.dispose();
 		  }
@@ -383,6 +221,50 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 		</>
     );
 };// -------------------FIN del componente-----------------------
+
+const snapshot = (renderRef, width, height, setProductImg) => {		
+
+    const point1 = [0.6096, 200];
+    const point2 = [1.27, 320];
+
+    const regionWidth = interpolateLinear(Math.max(width,height), point1, point2);
+    const regionHeight = regionWidth;
+
+    let canvas = renderRef.domElement;
+
+    // Calcula el centro del canvas original
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    const x = centerX - regionWidth / 2;
+    const y = centerY - regionHeight / 2;
+
+    // Crea un canvas temporal y captura la región
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = regionWidth;
+    tempCanvas.height = regionHeight;
+    const tempCtx = tempCanvas.getContext('2d');
+
+    // Dibuja la región centrada en el canvas temporal
+    tempCtx.drawImage(canvas, x, y, regionWidth, regionHeight, 0, 0, regionWidth, regionHeight);
+
+    // Obtén la imagen de la región como data URL
+    var dataURL = tempCanvas.toDataURL('image/jpeg', 1); // 80% de calidad
+    setProductImg(dataURL);
+}
+
+const interpolateLinear = (x, point1, point2) => {
+    const [x0, y0] = point1;
+    const [x1, y1] = point2;
+
+    // Asegúrate de que x1 y x0 no sean iguales para evitar división por cero
+    if (x1 === x0) {
+        console.error("Error: x0 y x1 no pueden ser iguales.");
+        return null;
+    }
+
+    return y0 + ((y1 - y0) / (x1 - x0)) * (x - x0);
+}
 
 function loadModelWithRetry(url, maxAttempts, delay, onLoad, onProgress, onError) {
 	const loader = new GLTFLoader();

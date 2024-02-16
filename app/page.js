@@ -12,7 +12,6 @@ export default function Home() {
 
   useEffect(()=>{
     //const is = isMobile ? '/mobile' : '/main';
-    console.log("Cambiar mobile/main");
     setIs(isMobile);
     setDisable(false);
   },[]);
@@ -118,7 +117,7 @@ export default function Home() {
               <div className="secondary-headline-3">From this</div>
               <img className="photo" alt="Photo" src="images/photo-1544376798-89aa6b82c6cd-4.png"/>
             </div>
-            <div className="frame-6"><div className="secondary-headline-3">To This</div>
+            <div className="frame-6"><div className="secondary-headline-3">To this</div>
             <img className="mask-group-2" alt="Art" src="images/mask-group.png"/></div>
           </div>          
         </div>        
@@ -145,7 +144,7 @@ export default function Home() {
               </div>
             </div>           
             <div className="bottom">
-              <p className="text-wrapper">Woodxel @ 2023. All rights reserved.
+              <p className="text-wrapper">Woodxel @ 2024. All rights reserved.
               </p>
               <div className="footer-components-2">
                   <div className="div-wrapper">

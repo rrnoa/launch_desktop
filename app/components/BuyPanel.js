@@ -4,6 +4,7 @@ import { jsPDF } from "jspdf";
 import svgNumbers from "@/app/libs/svg";
 import "@/app/libs/svg2pdf.umd.min.js";
 import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css'; // optional
 
 const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks, yBlocks, handleLoading, productImg, mobile}) => {
 
@@ -24,8 +25,8 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
       yBlocks,
       blockSize,
       pixelatedImage,
-    );   
-
+    );
+    
     const jsonCMYK = JSON.stringify(json);
 
     const formData = new FormData();
@@ -35,12 +36,12 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
     formData.append("pixelated_img_url", productImg);
 
     formData.append("pdf1", pdf1);
-    formData.append("pdf2", pdf2); 
+    formData.append("pdf2", pdf2);
 
     //fetch("https://lignumcd.local/wp-admin/admin-ajax.php", {
     fetch("https://lignumcd.com/wp-admin/admin-ajax.php", {
       method: "POST",
-      //credentials: 'include',
+      credentials: 'include',
       body: formData
       })
       .then(response => {
@@ -153,14 +154,14 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
         let colorIdx = currentX + currentY * xBlocks;
         let color = colorsArray[colorIdx];
         let idx = findColorIndex(colorInfo, color);
-        let xRect = dx + xi * tileSize;
-        let yRect = dy + yi * tileSize;
-        await doc.svg(svgNumbers[idx], {
+        /* await doc.svg(svgNumbers[idx], {
           x: xRect + tileSize / 2 - 3,
           y: yRect + tileSize / 2 + 2 - 4,
           width: 4,
           height: 4,
-        });
+        }); */
+
+        doc.text((idx+1)+"", dx + tileSize/2 + xi*tileSize -2, dy + tileSize/2 + yi*tileSize + 2);
 
         // Incrementa count después de dibujar cada número
         count++;
@@ -176,8 +177,8 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
     }
 
     doc.addPage();
-    doc. text("Order number:", 20, 20);
-    doc. text("Panel: "+ currentPage + "/" + totalPaginas, 20, 25);
+    doc.text("Order number:", 20, 20);
+    doc.text("Panel: "+ currentPage + "/" + totalPaginas, 20, 25);
     if (count < colorsArray.length) {
       doc.addPage(); // Agrega una página en blanco
       currentPage++; // Incrementa el número de la página actual
@@ -189,7 +190,9 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
 
   // Guardar el PDF generado
   //doc.save('cuadriculas_colores.pdf');
-  const pdf2 = btoa(doc.output());
+  //const pdf2 = btoa(doc.output());
+  const pdf2 = doc.output('blob');
+
   return  pdf2;
 
   };
@@ -244,7 +247,6 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
       doc.setFillColor(colorData[1][0], colorData[1][1], colorData[1][2]);
       doc.rect(5 + idx % 6 * RECT_WIDTH, 5 + Math.trunc(idx/6) * RECT_HEIGHT, RECT_WIDTH, RECT_HEIGHT, "FD");
       doc.setDrawColor(0, 0, 0);
-
 
       let textPaleta =
         "" +
@@ -397,7 +399,9 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
     
     // Save the PDF in base64 format
     //doc.save("pixeles.pdf");
-    const pdf1 = btoa(doc.output());
+    //const pdf1 = btoa(doc.output());
+    const pdf1 = doc.output('blob');
+
     return { pdf1, leyenda, json };
   };
   
@@ -477,7 +481,8 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
       {mobile && (
         <button id="buy_panel" onClick={handleBuy}>
           <span>
-              WOODXEL Panel              
+              WOODXEL Panel
+              {pixelatedImage ? <span className="price-tag">{'$'+calculatePrice()}</span> : ''}           
           </span>
         </button>
       )}
@@ -485,7 +490,8 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
         <Tippy content='Buy your panel now'>
           <button id="buy_panel" onClick={handleBuy}>
           <span>
-              WOODXEL Panel               
+              WOODXEL Panel
+              {pixelatedImage ? <span className="price-tag">{'$'+calculatePrice()}</span> : ''}
           </span>
           </button>
         </Tippy>

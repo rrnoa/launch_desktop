@@ -11,9 +11,14 @@ import BuyPanel from '@/app/components/BuyPanel';
 import { Brightness, Contrast, Moon, Sun, Tilt, Undo, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
 import { Blocks } from  'react-loader-spinner';
 import Export3d from '@/app/components/Export3d';
+import OnboardingModal from '@/app/components/OnboardingModal'; 
+import CustomTippyContent from '@/app/components/TippyContent';
 
 
 export default function Mobile() {
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+	const [showTips, setShowTips] = useState(false);
+	const [currentTip, setCurrentTip] = useState(1);
     const [viewportHeight, setViewportHeight] = useState(0);
     const [theme, setTheme] = useState('light'); // Valor predeterminado
     /*Opciones del crop */
@@ -31,7 +36,8 @@ export default function Mobile() {
 	const [brightness, setBrightness] = useState(100);
     const [pixelInfo, setPixelInfo] = useState({ // informacion de la imagen pixelada
 		colorsArray: [],
-		croppedImg: ""
+        pixelatedImage: "",
+        colorDetails: []
 	});	
 
     const [isLoading, setIsLoading] = useState(false);
@@ -47,9 +53,9 @@ export default function Mobile() {
 
 	const [exportGroupRef, setExportGroupRef] = useState();
 
-
-
     useEffect(() => {
+        console.log('Useffect page crea la escena y el WebGLRenderer');
+
         if (typeof window !== 'undefined') {
             const handleResize = () => {
               setViewportHeight(window.innerHeight);
@@ -60,18 +66,17 @@ export default function Mobile() {
             window.addEventListener('resize', handleResize);
 
             sceneRef.current = new THREE.Scene();
-		    renderRef.current = new THREE.WebGLRenderer({ antialias: true});		
+		    renderRef.current = new THREE.WebGLRenderer({ antialias: true});
+            
+            const onboardingShown = localStorage.getItem('onboardingShown');
+            if (!onboardingShown) {
+                setModalIsOpen(true);
+            }
       
             // Limpiar el event listener al desmontar el componente
             return () => window.removeEventListener('resize', handleResize);
           }
       }, []);
-
-    // Efecto para actualizar el atributo data-theme
-	useEffect(() => {
-		console.log('data-theme', theme);
-		document.documentElement.setAttribute('data-theme', theme);
-	}, [theme]);
 
     const handleExportGroupRef= (group)=>{
 		setExportGroupRef(group);
@@ -140,25 +145,10 @@ export default function Mobile() {
 	};
 
     // Manejador para cuando el usuario suelta el control deslizante
-	const handleSliderChangeComplete = () => {
+/* 	const handleSliderChangeComplete = () => {
         console.log("handleSliderChangeComplete");
 		isSliderChangeRef.current = false;
-	};
-
-    const handleExportScene = (scene) => {
-		const exporter = new GLTFExporter();
-		
-        exporter.parse(scene, (gltf) => {
-			// gltf es un objeto JSON que representa tu escena
-			const output = JSON.stringify(gltf, null, 2);
-			downloadJSON(output, 'scene.gltf');
-		});
-    };
-
-    // Función para cambiar el tema
-	const toggleTheme = () => {
-		setTheme(theme === 'light' ? 'dark' : 'light');
-	}; 
+	}; */
     
     /**
 	 * Cambia tamaño de bloques
@@ -193,9 +183,6 @@ export default function Mobile() {
     }
 
     const handlerConfirmImage = async () => {
-       /*  console.log("confirm", contrast);
-        await updatePreviewImage();
-        resetImgFilters(); */
         setActiveButton("");
     }
 
@@ -286,14 +273,14 @@ export default function Mobile() {
                         height={height*0.0254}
                         blockSize={blockSize*0.0254}
                         croppedImg = {previewImage}
-                        onExport={handleExportScene}
+                        onGroupRefChange={handleExportGroupRef}//cuando se cree el grupo en la escena 3d
                         theme={theme}
-                        handleLoading={setIsLoading}
                         setPixelInfo = {setPixelInfo}
                         setProductImg = {setProductImg}
+                        handleLoading={setIsLoading}
                         sceneRef = {sceneRef.current }
                         renderRef = {renderRef.current}
-						onGroupRefChange={handleExportGroupRef}//cuando se cree el grupo en la escena 3d
+						
 					/>
 				) }
             </div>            
@@ -432,6 +419,7 @@ export default function Mobile() {
                             <BuyPanel
                             pixelatedImage = {pixelInfo.pixelatedImage}
                             colorsArray = {pixelInfo.colorsArray}
+							colorDetails = {pixelInfo.colorDetails}
                             blockSize = {blockSize}
                             xBlocks = {Math.floor(width / blockSize)}
                             yBlocks = {Math.floor(height / blockSize)}

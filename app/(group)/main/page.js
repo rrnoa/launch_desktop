@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react
 import * as THREE from 'three';
 import Cropper from "react-easy-crop";
 import "react-easy-crop/react-easy-crop.css";
+import '@/app/css/tooltips-style.css';
 import '@/app/css/style.css';
 import Scene3d from "@/app/components/Scene3d";
 import BuyPanel from '@/app/components/BuyPanel';
@@ -13,10 +14,15 @@ import getCroppedImg from '@/app/libs/cropImage';
 import { Brightness, Contrast, Locked, Moon, Sun,Tilt,Undo,Unlocked, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
 import Export3d from '@/app/components/Export3d';
 import { Blocks } from 'react-loader-spinner';
+import OnboardingModal from '@/app/components/OnboardingModal'; 
+import CustomTippyContent from '@/app/components/TippyContent';
 
 
 export default function Main() {
-
+	const [modalIsOpen, setModalIsOpen] = useState(false);
+	const [showTips, setShowTips] = useState(false);
+	const [currentTip, setCurrentTip] = useState(1);
+	const [showTipsStep2, setShowTipsStep2] = useState(true);
 	const [uploadedImage, setUploadedImage] = useState("");
 	const [previewImage, setPreviewImage] = useState(null);
 
@@ -27,8 +33,9 @@ export default function Main() {
 	
 	const [pixelInfo, setPixelInfo] = useState({ // informacion de la imagen pixelada
 		colorsArray: [],
-		croppedImg: ""
-	});
+        pixelatedImage: "",
+        colorDetails: []
+	});	
 
 	const [productImg, setProductImg] = useState();
 
@@ -59,19 +66,56 @@ export default function Main() {
 
 	const sceneRef = useRef();
 	const renderRef = useRef();
+	const btnSizeClick = useRef(false); ///para saber si se ha hehco click sobre alguno de los botones 1,2,3
 
 	// Efecto para actualizar el atributo data-theme
 	useEffect(() => {		
-		console.log('Useffect primero');
+		console.log('Useffect page crea la escena y el WebGLRenderer');
 
 		sceneRef.current = new THREE.Scene();
-		renderRef.current = new THREE.WebGLRenderer({ antialias: true});		
+		renderRef.current = new THREE.WebGLRenderer({ antialias: true});
+		/* const onboardingShown = localStorage.getItem('onboardingShown');
+		if (!onboardingShown) {
+		  setModalIsOpen(true);
+		}	 */	
 
-	},[]);	
+	},[]);
+
+	const onCancel = () => {
+		closeModal();
+		setShowTips(false);
+	}
+
+	const onContinue = () => {
+		closeModal();
+		setShowTips(true);
+	}
+	
+	const closeModal = () => {
+		setModalIsOpen(false);
+	};
+
+	const onCloseTippy = () => {
+		setShowTips(false);
+	}
+
+	const onNextTippy = () => {
+		setCurrentTip( prevTip => prevTip + 1);		
+	}
+
+	const onBackTippy = () => {
+		setCurrentTip(prevTip => prevTip - 1 );		
+	}
 
 	// Función para avanzar al siguiente paso
 	const goToNextStep = () => {
 		setCurrentStep(prevStep => prevStep + 1);
+	};
+
+	// se utiliza para cuando se termine de dibujar moverse al paso proximo
+	const goToStep4 = () => {
+		setCurrentStep(4);
+		setCurrentTip(8);
 	};
 	
 	  // Función para retroceder al paso anterior
@@ -109,32 +153,46 @@ export default function Main() {
 		transition: 'filter 0.3s ease, transform 0.3s ease'
 	  };
 
-    /** cuando se sube una imagen */
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-		  const img = URL.createObjectURL(file);
-          setUploadedImage(img);
-		  setCurrentState("crop");
-		  setCurrentStep(2);
-			//reset para cuando se carga desde el preview
-		  setActiveButton("rotate"); 
-		  setRotation(0);
-		  setContrast(100);
-		  setBrightness(100);		
-		  setWidth(24);
-		  setHeight(24);
-		  setCrop({ x: 0, y: 0});
-		  setZoom(1);
-        }
-    };
+
+/** cuando se sube una imagen */
+const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+		setIsLoading(true);
+        // Dimensiones y calidad de compresión máximas
+        const maxWidth = 1280;
+        const maxHeight = 1280;
+        const quality = 0.7; // Compresión al 70%
+
+        // Llame a la función de redimensionamiento y compresión
+        resizeAndCompressImage(file, maxWidth, maxHeight, quality, (compressedBlob) => {
+            // Continúe con el procesamiento aquí
+            const img = URL.createObjectURL(compressedBlob);
+            setUploadedImage(img);
+			setIsLoading(false); // Finalizar el indicador de carga
+            setCurrentState("crop");
+            setCurrentStep(2);
+            setCurrentTip(2);
+            // Reset para cuando se carga desde el preview
+            setActiveButton("rotate");
+            setRotation(0);
+            setContrast(100);
+            setBrightness(100);     
+            setWidth(24);
+            setHeight(24);
+            setCrop({ x: 0, y: 0});
+            setZoom(1);
+
+            //downloadResizedImage(compressedBlob);
+        });
+    }
+};
 
 	/**
 	 * Cambio en las dimensiones
 	 */
 	const handleWidth = (event) => {
 		console.log("cuando cambia");
-
 		let { min, max, value } = event.target;		
 		setWidth(value);
 	};	
@@ -161,7 +219,8 @@ export default function Main() {
         setBlockSize(value % 2 === 0 ? 2 : 1);
     }
 	//cuando se hace click sobre el candado
-	const handleInputsLock = () => {		
+	const handleInputsLock = () => {
+		setCurrentTip(5);
 		goToNextStep();
 	};	
 
@@ -169,7 +228,9 @@ export default function Main() {
 	 * Cambia tamaño de bloques
 	 */
 	const handlerBlockSize = (size) =>{
+		if(showTips) { btnSizeClick.current = true};
 		setBlockSize(size);
+		
 	}
 	/**
 	 * Click sobre uno de los botones de edicion
@@ -181,7 +242,7 @@ export default function Main() {
 	//Cuando se preciona el boton de mostrar el 3d
 	const handleView = () => {
 		setCurrentState("view");
-		goToNextStep();
+		setCurrentTip(8);		
 	}
 
 	const PreviewImg = () => {
@@ -199,10 +260,12 @@ export default function Main() {
 
 	const handleExportGroupRef= (group)=>{
 		setExportGroupRef(group);
-	}	
+	}
 	
   return (
-		<div className='app-container'>		
+		<div className='app-container'>
+			<OnboardingModal isOpen={modalIsOpen} onCancel={onCancel} onContinue={onContinue} />
+			{console.log("render page","tip:",currentTip, "step:", currentStep)}	
 			<header className="header-area">
 				<div className="header-item">
 					<div className="header-item-inner">
@@ -213,6 +276,21 @@ export default function Main() {
 			<div className="step-area" >
 				<div className="step-area-inner">
 					<div className="step-item" >
+						<Tippy
+							appendTo={() => document.body}
+							visible={showTips && currentTip == 8 && currentStep == 4 && !isLoading}
+							placement="right"
+							maxWidth={250}
+							offset={[0,-200]}
+							interactive={true}
+							content={<CustomTippyContent
+								title={"Step 3/5"}
+								message={"Puedes interactuar con el modelo utilizando el Scroll Wheel o click and drag your mouse"}
+								onCloseTippy={onCloseTippy}
+								onBackTippy={()=> {onBackTippy(); goToPreviousStep()}}
+								onNextTippy={onNextTippy}
+							/>}
+						>
 						<div className="step-item-inner">
 							{(
 								<div className="spinner" style={{ backgroundColor: theme === 'light'?'#ffffff':'#121212', display: isLoading ? "flex" : "none" }}>
@@ -227,99 +305,185 @@ export default function Main() {
 								</div>
 							)}
 							{currentState == "crop" && (
-								<Cropper
-								ref={cropperRef}
-								image={uploadedImage}
-								rotation={rotation}
-								onCropChange={setCrop}
-								onCropComplete={onCropComplete}
-								crop={crop}
-								zoom={zoom}
-								zoomSpeed={0.1}
-								aspect={width / height}
-								onZoomChange={(newZoom) => setZoom(newZoom)}
-								style={{ containerStyle: { width: '100%', height: '100%', borderRadius:'8px' }, mediaStyle: imageStyle }}
-								/>
+								<Tippy
+									interactive={true}
+									content={
+										<CustomTippyContent 										
+										onCloseTippy={onCloseTippy} 
+										title={"Step 3/5"}
+										message={"Ya puedes mover o hacer zoom sobre la imagen para ajustarla a tus deseos"}
+										onNextTippy={onNextTippy}
+										onBackTippy={()=> {onBackTippy(); setCurrentStep(2)}}
+									/>} 
+									visible={showTips && currentTip == 5} 
+									placement="right" 
+									maxWidth={250} 
+									offset={[0,300]}
+									appendTo={() => document.body}
+									>
+									<div>
+										<Cropper
+										ref={cropperRef}
+										image={uploadedImage}
+										rotation={rotation}
+										onCropChange={setCrop}
+										onCropComplete={onCropComplete}
+										crop={crop}
+										zoom={zoom}
+										zoomSpeed={0.1}
+										aspect={width / height}
+										onZoomChange={(newZoom) => setZoom(newZoom)}
+										style={{ containerStyle: { width: '100%', height: '100%', borderRadius:'8px' }, mediaStyle: imageStyle }}
+										/>
+									</div>									
+								</Tippy>
 							)}
 							{currentState=="upload" && (
 								<>							
-									<input type="file" onChange={handleImageChange} accept="image/*" title=""/>								
-									<div className="step-item-inner2" >
-										<UploadSvgrepo/>
-										<p style={{fontWeight: '700'}}>STEP 1: Upload your media or drop it here</p>
-									</div>
+									<input type="file" onChange={handleImageChange} accept="image/*" title=""/>
+										<Tippy
+										interactive={true}
+										content={<CustomTippyContent 										
+										onCloseTippy={onCloseTippy} 
+										title={"Step 1/5"}
+										message={"Primero selecciona tu imagen prefereida para que puedas tener un obra de arte rapida de ella...bla bla bla"}/>} 
+										visible={showTips && currentStep == 1} placement="top" maxWidth={250} offset={[0,25]}>
+									
+										<div className="step-item-inner2" >
+											<UploadSvgrepo/>
+											<p style={{fontWeight: '700'}}>STEP 1: Upload your media or drop it here</p>
+										</div>
+										</Tippy>
+																
 								</>                               
 							)}
-							{currentState == "view" && (							
-								<Scene3d 
-								width={width * 0.0254}
-								height={height * 0.0254}
-								blockSize={blockSize * 0.0254}
-								croppedImg = {previewImage}
-								onGroupRefChange={handleExportGroupRef}//cuando se cree el grupo en la escena 3d
-								theme={theme}
-								setPixelInfo = {setPixelInfo}
-								setProductImg = {setProductImg}
-								handleLoading = {setIsLoading}
-								sceneRef = {sceneRef.current }
-								renderRef = {renderRef.current}
-								rotation = {rotation}
-								contrast = {contrast}
-								brightness = {brightness}
-								
-								/>
+							{currentState == "view" && (
+									<Scene3d 
+										width={width * 0.0254}
+										height={height * 0.0254}
+										blockSize={blockSize * 0.0254}
+										croppedImg = {previewImage}
+										onGroupRefChange={handleExportGroupRef}//cuando se cree el grupo en la escena 3d
+										theme={theme}
+										setPixelInfo = {setPixelInfo}
+										setProductImg = {setProductImg}
+										handleLoading = {setIsLoading}
+										sceneRef = {sceneRef.current }
+										renderRef = {renderRef.current}
+										goToNextStep = {goToStep4}
+										btnSizeClick = {btnSizeClick.current}
+									/>								
 							)}                   
 						</div>
+						</Tippy>
 					</div>
 					<div className="step-item2">
-						<div className='step-item2-inside'>					
-						<div className={`step-item2-inner step-item2-inner10 ${currentStep === 1 ? "step inactive" : ""}`} style={{paddingBottom: '0px'}}>
-							<Tippy content='Click or drop a new image'>
-							<div className={`step-item2-inner11 ${isLoading ? "step inactive" : ""}`}>
-								<PreviewImg/>
-								<button className='action_buttons btn-preview-upload'>
-									<UploadPreview/>
-									{/* <img className="upload-icon" src="images/gallery-send-svgrepo.svg" alt="Upload" style={{cursor: 'pointer'}}></img> */}
-								</button>
-								
-								<input type="file" onChange={handleImageChange} accept="image/*" title=''/>							
+						<div className='step-item2-inside'>
+							<Tippy
+							visible={showTips && currentTip == 2}
+							placement="left"
+							maxWidth={250}
+							interactive={true}
+							appendTo={() => document.body}
+							content={<CustomTippyContent
+								title={"Step 1/5"}
+								message={"Siempre (Any time) puedes cambiar la imagen haciendo click en esta sección"}
+								onCloseTippy={onCloseTippy} 
+
+								onNextTippy={onNextTippy}
+							/>}>
+							<div className={`step-item2-inner step-item2-inner10 ${currentStep === 1 ? "step inactive" : ""}`} style={{paddingBottom: '0px'}}>
+								<Tippy content='Click or drop a new image'>
+								<div className={`step-item2-inner11 ${isLoading ? "step inactive" : ""}`}>
+									<PreviewImg/>
+									<button className='action_buttons btn-preview-upload'>
+										<UploadPreview/>
+										{/* <img className="upload-icon" src="images/gallery-send-svgrepo.svg" alt="Upload" style={{cursor: 'pointer'}}></img> */}
+									</button>
+									
+									<input type="file" onChange={handleImageChange} accept="image/*" title=''/>							
+								</div>
+								</Tippy>							
 							</div>
 							</Tippy>
-							
-						</div>
-						<div className={`step-item2-inner2 step-item2-inner10 ${currentStep === 1 || currentStep !== 2 ? "step inactive" : ""}`}>
-							<h2>STEP 2: Input panel size</h2>
-							
-							<div className="form">							
-								<div className="inputs">
-								<Tippy content='Input panel width'>
-									<input id='input_w' className="input_w" type="number" min="24" max="300" value={width} 
-									onChange={handleWidth}
-									onFocus={(even)=>{even.target.select()}}
-									onBlur={handleWidthAdjustment}
-									/>
-								</Tippy>				
-									<label htmlFor="input_w">W</label>
-								<Tippy content='Input panel height'>
-									<input id='input_h' className="input_h" type="number" min="24" max="300" value={height} 
-									onChange={handleHeight}
-									onFocus={(even)=>{even.target.select()}}
-									onBlur={handleHeightAdjustment}
-									/>
-								</Tippy>
-									<label htmlFor="input_h">H</label>											
+						
+						<div className={`step-item2-inner2 step-item2-inner10 ${currentStep === 1 || currentStep !== 2 || (showTips && currentTip == 2)? "step inactive" : ""}`}>
+							<h2>STEP 2: Enter panel dimentions</h2>
+							<div className="form">
+							<Tippy
+							visible={showTips && currentTip == 3}
+							placement="bottom"
+							appendTo={() => document.body}
+							maxWidth={250}
+							interactive={true}
+							content={<CustomTippyContent
+								title={"Step 2/5"}
+								message={"Especifica las dimensiones en pulgadas del cuadro Largo x Ancho"}
+								onCloseTippy={onCloseTippy}
+								onNextTippy={onNextTippy}
+							/>}>
+
+								<div className="inputs">									
+										<label htmlFor="input_w">W</label>
+										<Tippy content='Input panel width'>
+										<input id='input_w' className="input_w" type="number" min="24" max="300" value={width} 
+										onChange={handleWidth}
+										onFocus={(even)=>{even.target.select(); setCurrentTip(4)}}
+										onBlur={handleWidthAdjustment}
+										/>
+									</Tippy>
+									<label htmlFor="input_h">H</label>				
+									<Tippy content='Input panel height'>
+										<input id='input_h' className="input_h" type="number" min="24" max="300" value={height} 
+										onChange={handleHeight}
+										onFocus={(even)=>{even.target.select(); setShowTipsStep2(false)}}
+										onBlur={handleHeightAdjustment}
+										/>
+									</Tippy>
+										
 								</div>
+								</Tippy>		
+							
 								<Tippy content="Confirm">
-									<button className='action_buttons' onClick={handleInputsLock}>
-										{currentStep == 2 ?  <Unlocked/> : <Locked/>}
-									</button>	
+									<div>
+									<Tippy
+									visible={showTips && currentTip == 4}
+									placement="bottom"
+									maxWidth={250}
+									interactive={true}
+									content={<CustomTippyContent
+										title={"Step 2/5"}
+										message={"Haz click en el cadado para fijar los valores que seleccionaste"}
+										onCloseTippy={onCloseTippy}
+									/>}>
+										<button className='action_buttons' onClick={handleInputsLock}>
+											{currentStep == 2 ?  <Unlocked/> : <Locked/>}
+										</button>
+									</Tippy>	
+									</div>
+									
 								</Tippy>		
 															
 							</div>
 						</div>
-						<div className={`step-item2-inner3 step-item2-inner10 ${currentStep === 1 || currentStep !== 3 ? "step inactive" : ""}`}>
+						
+
+						<div className={`step-item2-inner3 step-item2-inner10 ${currentStep === 1 || currentStep !== 3 || isLoading || (showTips && currentTip == 5)? "step inactive" : ""}`}>
 							<h2>STEP 3: Edit your image</h2>
 							<div className='wrapper_edit_buttons'>
+							<Tippy
+							visible={showTips && currentTip == 6}
+							placement="left"
+							maxWidth={250}
+							interactive={true}
+							content={<CustomTippyContent
+								title={"Step 3/5"}
+								message={"Puedes hacer algunos ajustes a la imagen, interactuando con estos botones y el slider debajo"}
+								onCloseTippy={onCloseTippy}
+								onNextTippy={onNextTippy}
+								onBackTippy={onBackTippy}
+							/>}
+							>
 								<div className='buttons-list'>							
 									<IconButton 
 										isActive={activeButton == "rotate"?true:false} 
@@ -343,8 +507,10 @@ export default function Main() {
 									<Brightness color={activeButton == "brightness"?'#ffffff':'#344054'}/>
 									</IconButton>			
 								</div>
+							</Tippy>
+
 								<Tippy content="Back one step">
-									<button className='action_buttons' onClick={ () => goToPreviousStep()}>
+									<button className={`action_buttons ${ showTips ? "step inactive": ""}`} onClick={ () => goToPreviousStep()}>
 										<Undo/>
 									</button>
 								</Tippy>
@@ -402,13 +568,39 @@ export default function Main() {
 							</div>
 							<Tippy content='Show your 3D panel'>						
 							<div style={{display: 'flex', justifyContent: 'right'}}>
-								<button id="btn-preview" onClick={handleView}>3D Panel Preview</button>
+								<Tippy
+								visible={showTips && currentTip == 7 && currentStep == 3 && !isLoading}
+								placement="bottom"
+								maxWidth={250}
+								interactive={true}
+								content={<CustomTippyContent
+									title={"Step 3/5"}
+									message={"Haz click en este botón para construir el cuadro y ver el resultado"}
+									onCloseTippy={onCloseTippy}
+									onBackTippy={onBackTippy}
+								/>}
+								>
+									<button id="btn-preview" onClick={handleView}>3D Panel Preview</button>
+								</Tippy>
 							</div>
 							</Tippy>
 						</div>
-						<div className={`step-item2-inner5 step-item2-inner10 ${currentStep === 1 || currentStep !== 4 || isLoading ? "step inactive" : ""}`}>
+						<div className={`step-item2-inner5 step-item2-inner10 ${currentStep == 1 || currentStep !== 4 || isLoading || (showTips && currentTip == 8) ? "step inactive" : ""}`}>
 							<h2>STEP 4: Select block size</h2>
 							<div className='wrapper_edit_buttons'>
+							<Tippy
+								visible={showTips && currentTip == 9 && !isLoading && currentStep == 4}
+								placement="left"
+								maxWidth={250}
+								interactive={true}
+								content={<CustomTippyContent
+									title={"Step 4/5"}
+									message={"Seleccionando uno de estos botones puedes cambiar el tama;o de cada bloque"}
+									onCloseTippy={onCloseTippy}
+									onNextTippy={onNextTippy}
+									onBackTippy={onBackTippy}
+								/>}
+								>
 								<div className='buttons-list'>
 									<Tippy content="1” blocks">
 										<button className={blockSize == 1?"active":""} onClick={() => handlerBlockSize(1)}>1”</button>
@@ -424,15 +616,27 @@ export default function Main() {
 										</div>
 									</Tippy>
 								</div>
+							</Tippy>
 								<Tippy content="Back one step">
-									<button className='action_buttons' onClick={() => goToPreviousStep()}>
+									<button className={`action_buttons ${ showTips ? "step inactive": ""}`} onClick={() => goToPreviousStep()}>
 										<Undo/>
 									</button>
 								</Tippy>
 							</div>
 							
 						</div>
-						<div className={`step-item2-inner6 ${currentStep === 1 || currentStep !== 4 || isLoading ? "step inactive" : ""}`}>
+						<Tippy
+							visible={showTips && currentTip == 10 && currentStep == 4 }
+							placement="left"
+							maxWidth={250}
+							interactive={true}
+							content={<CustomTippyContent
+								title={"Step 5/5"}
+								message={"Haz tu pedido ahora puedes tener un cuadro físico o un modelo 3d"}
+								onCloseTippy={onCloseTippy} 
+							/>}
+							>
+						<div className={`step-item2-inner6 ${currentStep !== 4 || isLoading || (showTips && currentTip != 10) ? "step inactive" : ""}`}>
 							<h2>STEP 5: Buying options</h2>
 							<BuyPanel
 							pixelatedImage = {pixelInfo.pixelatedImage}
@@ -449,10 +653,55 @@ export default function Main() {
 							handleLoading = {setIsLoading}
 							/>
 						</div>
+						</Tippy>
 					</div>
 					</div>
 				</div>
 			</div>		
 		</div>
   )
+}
+
+function resizeAndCompressImage(file, maxWidth, maxHeight, quality, callback) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > maxWidth) {
+                    height *= maxWidth / width;
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width *= maxHeight / height;
+                    height = maxHeight;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Compresión de la imagen
+            canvas.toBlob(callback, 'image/jpeg', quality);
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function downloadResizedImage(blob) {
+    // Crear un enlace para la descarga
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = "resized-image.png"; // Nombre de archivo predeterminado, puede ajustar según sea necesario
+    document.body.appendChild(link); // Agregar el enlace al documento
+    link.click(); // Simular click para descargar
+    document.body.removeChild(link); // Limpiar y remover el enlace del documento
 }
