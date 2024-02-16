@@ -53,6 +53,9 @@ export default function Mobile() {
 
 	const [exportGroupRef, setExportGroupRef] = useState();
 
+	const btnSizeClick = useRef(false); ///para saber si se ha hehco click sobre alguno de los botones 1,2,3
+
+
     useEffect(() => {
         console.log('Useffect page crea la escena y el WebGLRenderer');
 
@@ -86,17 +89,31 @@ export default function Mobile() {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-		  const img = URL.createObjectURL(file);
-          setUploadedImage(img);
-		  setCurrentStep(1);
-			//reset para cuando se carga desde el preview
-		  setRotation(0);
-		  setContrast(100);
-		  setBrightness(100);		
-		  setWidth(24);
-		  setHeight(24);
-		  setCrop({ x: 0, y: 0});
-		  setZoom(1);
+            setIsLoading(true);
+            // Dimensiones y calidad de compresión máximas
+            const maxWidth = 800;
+            const maxHeight = 800;
+            const quality = 0.7; // Compresión al 70%
+
+            // Llame a la función de redimensionamiento y compresión
+            resizeAndCompressImage(file, maxWidth, maxHeight, quality, (compressedBlob) => {
+                // Continúe con el procesamiento aquí
+                const img = URL.createObjectURL(compressedBlob);
+                setUploadedImage(img);
+			    setIsLoading(false); // Finalizar el indicador de carga
+                
+                setCurrentStep(1);
+                //reset para cuando se carga desde el preview
+                setRotation(0);
+                setContrast(100);
+                setBrightness(100);		
+                setWidth(24);
+                setHeight(24);
+                setCrop({ x: 0, y: 0});
+                setZoom(1);
+
+                //downloadResizedImage(compressedBlob);
+            });
         }
     };
 
@@ -127,6 +144,12 @@ export default function Mobile() {
         goToNextStep();
     }
 
+    // se utiliza para cuando se termine de dibujar moverse al paso proximo
+	const goToStep4 = () => {
+		/* setCurrentStep(4);
+		setCurrentTip(8); */
+	};
+
     // Función para avanzar al siguiente paso
 	const goToNextStep = () => {
 		setCurrentStep(prevStep => prevStep + 1); 
@@ -143,12 +166,6 @@ export default function Mobile() {
 		//filter: `brightness(${brightness}%) contrast(${contrast}%)`,		
 		transition: 'filter 0.3s ease, transform 0.3s ease'
 	};
-
-    // Manejador para cuando el usuario suelta el control deslizante
-/* 	const handleSliderChangeComplete = () => {
-        console.log("handleSliderChangeComplete");
-		isSliderChangeRef.current = false;
-	}; */
     
     /**
 	 * Cambia tamaño de bloques
@@ -280,6 +297,8 @@ export default function Mobile() {
                         handleLoading={setIsLoading}
                         sceneRef = {sceneRef.current }
                         renderRef = {renderRef.current}
+                        goToNextStep = {goToStep4}
+                        btnSizeClick = {btnSizeClick.current}
 						
 					/>
 				) }
@@ -287,7 +306,7 @@ export default function Mobile() {
         </div>
         <div className={`bottom-area ${isLoading || currentStep == 0 ? "step inactive" : ""}`}>
                 {(currentStep === 0 || currentStep === 1) && (
-                    <h2>STEP 2: Input panel size</h2>                    
+                    <h2>STEP 2: Enter panel dimentions</h2>                    
                 )}
                 { currentStep === 2 && activeButton=="" && (
                     <h2>STEP 3: Edit your image</h2>
@@ -312,19 +331,19 @@ export default function Mobile() {
                     <div>                        
                         <div className="form">							
                             <div className="inputs">
+                            <label htmlFor="input_w">W</label>
                                 <input id='input_w' className="input_w" type="number" min="24" max="300" value={width} 
                                 onChange={handleWidth}
                                 onFocus={(even)=>{even.target.select()}}
                                 onBlur={handleWidthAdjustment}
                                 />
-                                <label htmlFor="input_w">W</label>
+                                <label htmlFor="input_h">H</label>                                
                                 <input id='input_h' className="input_h" type="number" min="24" max="300" value={height} 
                                 onChange={handleHeight}
                                 onFocus={(even)=>{even.target.select()}}
-                                onBlur={handleHeightAdjustment}
-                                
+                                onBlur={handleHeightAdjustment}                                
                                 />
-                                <label htmlFor="input_h">H</label>										
+                                								
                             </div>                            
                                 <div className='action_buttons' onClick={goToPreviousStep}>
                                     <Undo/>
@@ -456,4 +475,38 @@ export default function Mobile() {
             </div>
     </div>
   )
+}
+
+function resizeAndCompressImage(file, maxWidth, maxHeight, quality, callback) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > maxWidth) {
+                    height *= maxWidth / width;
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width *= maxHeight / height;
+                    height = maxHeight;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Compresión de la imagen
+            canvas.toBlob(callback, 'image/jpeg', quality);
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
 }
