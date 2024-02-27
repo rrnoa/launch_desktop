@@ -27,7 +27,6 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 		const yBlocks = Math.round(height / blockSize);
 		let backColor = theme === 'light' ? 0xdee2e6 : 0x121212;
 		sceneRef.background = new THREE.Color(backColor);
-		handleLoading(true);
 
 		const paintAreaWidth = canvasRef.current?.offsetWidth;
 		const paintAreaHeight = canvasRef.current?.offsetHeight;
@@ -46,11 +45,13 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 		sceneRef.add( wallMesh );
 						
 		let cancelAnimation;
-		
+		console.log("vamos a pixelar")
 		pixelateImg(croppedImg, xBlocks, yBlocks)
 			.then((data) => {
+				console.log("termin'e de pixelar");
 					//despues de pixelada la imagen entonces se crea la escena
-						const { imageURL, allColors, colorDetails } = data;
+						const { imageURL, allColors, colorDetails } = data;					
+						
 						allColorsRef.current = allColors;
 						setPixelInfo({ //esta informaci'on la utiliza BuyPanel.js para construir reportes
 							pixelatedImage: imageURL, 
@@ -58,9 +59,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 							colorDetails: colorDetails
 						});
 	
-					if (typeof window !== "undefined") {
-	
-						
+					if (typeof window !== "undefined") {						
 	
 						const loaderSvg = new SVGLoader();
 						//cargar la geometría	
@@ -93,7 +92,9 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 							console.log("Todos los modelos han sido cargados, incluyendo reintentos.");
 							paintFrame(meshesRef.current, allColorsRef.current, sceneRef, width, height, blockSize, onGroupRefChange, exportGroupRef);
 							handleLoading(false);
-							if (!btnSizeClick) goToNextStep(); //para saber si el evento proviene de hace click sobre 1,2,3
+							if (goToNextStep && !btnSizeClick) goToNextStep(); //para saber si el evento proviene de hace click sobre 1,2,3
+							// si es sobre preview btnSizeClick=false y entonces ira al nuevo paso
+							//pero si es sobre 1,2,3 btnSizeClick = true y no va ir para otro paso si se están mostrando los tooltips
 							let countAnimate = 0; //para solo ejecutar el snapshot una sola vez
 							//aqui se controlla mediante un callback sincronizar el frame render con el snapshoot, para que no de imagen en negro.
 							cancelAnimation = animate(renderRef, sceneRef, camera, width, height, setProductImg, snapshot, countAnimate);
@@ -109,7 +110,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 								const path = paths[i];
 							
 								const material = new THREE.MeshStandardMaterial({
-									color: new THREE.Color(0xdee2e6),
+									color: new THREE.Color(0xc2c2c2),
 									side: THREE.DoubleSide,
 									depthWrite: false,								
 								});
@@ -120,6 +121,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 									const shape = shapes[j];
 									const geometry = new THREE.ShapeGeometry(shape);
 									const mesh = new THREE.Mesh(geometry, material);
+
 									mesh.scale.set(0.0032, -0.0032, 0.0032);
 									mesh.name = "Man Shape";
 									mesh.position.set(-1.36 - width/2 - 0.5, - height/2 + 1.79, inch);
@@ -217,7 +219,6 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
     return (
 		 <>
     		<div ref={canvasRef} style={{ width: '100%', height: '100%'}} />
-		{/* <button onClick={toggleSnap}>Imagen</button> */}
 		</>
     );
 };// -------------------FIN del componente-----------------------
@@ -231,7 +232,6 @@ const snapshot = (renderRef, width, height, setProductImg) => {
     const regionHeight = regionWidth;
 
     let canvas = renderRef.domElement;
-	console.log("snapshot", canvas, width, height);
     // Calcula el centro del canvas original
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;

@@ -8,37 +8,22 @@ import getCroppedImg from '@/app/libs/cropImage';
 import Scene3d from "@/app/components/Scene3d";
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import BuyPanel from '@/app/components/BuyPanel';
-import { Brightness, Contrast, BackSpace, Crop, Moon, Sun, Tilt, Undo, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
+import { Brightness, Contrast, Moon, Sun, Tilt, Undo, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
 import { Blocks } from  'react-loader-spinner';
 import Export3d from '@/app/components/Export3d';
-import OnboardingMobile from '@/app/components/OnboardingMobile'; 
+import OnboardingModal from '@/app/components/OnboardingModal'; 
 import CustomTippyContent from '@/app/components/TippyContent';
-import Keyboard from 'react-simple-keyboard';
-import 'react-simple-keyboard/build/css/index.css';
-import Tippy from '@tippyjs/react';
-import 'tippy.js/dist/tippy.css'; // optional
-import Head from 'next/head';
 
 
 export default function Mobile() {
-    
-    const [isKeyboard1Visible, setIsKeyboard1Visible] = useState(false);
-    const [isKeyboard2Visible, setIsKeyboard2Visible] = useState(false);
-
-    const widthRef = useRef(null);
-    const heightRef = useRef(null);
-    const keyboard1Ref = useRef();
-    const keyboard2Ref = useRef();
-
-
     const [modalIsOpen, setModalIsOpen] = useState(false);
 	const [showTips, setShowTips] = useState(false);
 	const [currentTip, setCurrentTip] = useState(1);
     const [viewportHeight, setViewportHeight] = useState(0);
     const [theme, setTheme] = useState('light'); // Valor predeterminado
     /*Opciones del crop */
-    const [width, setWidth] = useState(0);
-    const [height, setHeight] = useState(0);
+    const [width, setWidth] = useState(24);
+    const [height, setHeight] = useState(24);
     const [crop, setCrop] = useState({ x: 0, y: 0});
     const [zoom, setZoom] = useState(1);
 	const [blockSize, setBlockSize] = useState(2);//1,2,3	
@@ -54,7 +39,8 @@ export default function Mobile() {
         pixelatedImage: "",
         colorDetails: []
 	});	
-    
+    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+    const [inputName, setInputName] = useState(""); // Para saber cuál input está activo
 
     const [isLoading, setIsLoading] = useState(false);
     
@@ -86,10 +72,10 @@ export default function Mobile() {
             sceneRef.current = new THREE.Scene();
 		    renderRef.current = new THREE.WebGLRenderer({ antialias: true});
             
-           /*  const onboardingShown = localStorage.getItem('onboardingShown');
+            const onboardingShown = localStorage.getItem('onboardingShown');
             if (!onboardingShown) {
                 setModalIsOpen(true);
-            } */
+            }
       
             // Limpiar el event listener al desmontar el componente
             return () => window.removeEventListener('resize', handleResize);
@@ -118,18 +104,16 @@ export default function Mobile() {
 			    setIsLoading(false); // Finalizar el indicador de carga
                 
                 setCurrentStep(1);
-                setCurrentTip(2);
                 //reset para cuando se carga desde el preview
                 setRotation(0);
                 setContrast(100);
                 setBrightness(100);		
-                setWidth(0);
-                setHeight(0);
+                setWidth(24);
+                setHeight(24);
                 setCrop({ x: 0, y: 0});
                 setZoom(1);
-                setIsKeyboard1Visible(false);
-                setIsKeyboard2Visible(false);
 
+                //downloadResizedImage(compressedBlob);
             });
         }
     };
@@ -148,10 +132,6 @@ export default function Mobile() {
     //Cuando se hace click sobre el boton Next y estamos en crop
     //para que no haga crop cuando se hace zoom
     const handleCropClick = async () => {
-        handleInputAdjustment("height");
-        handleInputAdjustment("width");
-        setIsKeyboard1Visible(false);
-        setIsKeyboard2Visible(false);
 		if (!cropperRef.current || width==0 || height == 0) {
 			return;
 		}
@@ -163,7 +143,13 @@ export default function Mobile() {
 		setPreviewImage(croppedImage);
 
         goToNextStep();
-    }    
+    }
+
+    // se utiliza para cuando se termine de dibujar moverse al paso proximo
+	const goToStep4 = () => {
+		setCurrentStep(4);
+		setCurrentTip(9);
+	};
 
     // Función para avanzar al siguiente paso
 	const goToNextStep = () => {
@@ -172,12 +158,13 @@ export default function Mobile() {
 	
 	  // Función para retroceder al paso anterior
 	const goToPreviousStep = () => {        
-		setCurrentStep(prevStep => prevStep - 1);       
+		setCurrentStep(prevStep => prevStep - 1);
+        console.log("currentStep", currentStep);        
 	};
 
     // Estilos para aplicar brillo, contraste y rotación en tiempo real
 	const imageStyle = {
-		filter: `brightness(${brightness}%) contrast(${contrast}%)`,		
+		//filter: `brightness(${brightness}%) contrast(${contrast}%)`,		
 		transition: 'filter 0.3s ease, transform 0.3s ease'
 	};
     
@@ -185,27 +172,33 @@ export default function Mobile() {
 	 * Cambia tamaño de bloques
 	 */
 	const handlerBlockSize = (size) =>{
-		setIsLoading(true);
 		setBlockSize(size);
 	}
 
-    const handleInputAdjustment = (input) => {
+    const handleWidth = (event) => {
+		let { min, max, value } = event.target;		
+		setWidth(value);
+	};	
+    // cuando pierde e foco
+    const handleWidthAdjustment = (event) => {
+        let { min, max, value } = event.target;
+        value = Math.max(Number(min), Math.min(Number(max), Number(value)));
+        setWidth(value);
+        setBlockSize(value % 2 === 0 ? 2 : 1);
+    }
+	
+	const handleHeight = (event) => {
+		let { min, max, value } = event.target;
+		setHeight(value);
+	};
 
-		if(input == "width") {
-            let { min, max, value } = {min: 24, max:100, value: width}
-            value = Math.max(Number(min), Math.min(Number(max), Number(value)));
-			setWidth(value);
-		} 
-		else {
-            let { min, max, value } = {min: 24, max:100, value: height}
-            value = Math.max(Number(min), Math.min(Number(max), Number(value)));
-			setHeight(value);
-		}
-        console.log( width % 2 === 0 && height % 2 === 0 ? 2 : 1);
-
-        setBlockSize( width % 2 === 0 && height % 2 === 0 ? 2 : 1);
-	}
-    
+    // cuando pierde e foco
+    const handleHeightAdjustment = (event) => {
+        let { min, max, value } = event.target;
+        value = Math.max(Number(min), Math.min(Number(max), Number(value)));
+        setHeight(value);
+        setBlockSize(value % 2 === 0 ? 2 : 1);
+    }
 
     const handlerConfirmImage = async () => {
         setActiveButton("");
@@ -226,122 +219,21 @@ export default function Mobile() {
         goToNextStep();
     }
 
-    const handleFocus = (name) => {      
-        // Selecciona el texto del input correspondiente
-       if (name === 'width' && widthRef.current) {
-          setIsKeyboard1Visible(true);
-          setIsKeyboard2Visible(false);
-          widthRef.current.select();
-          handleInputAdjustment("height");
-        } else if (name === 'height' && heightRef.current) {
-          setIsKeyboard1Visible(false);
-          setIsKeyboard2Visible(true);
-          heightRef.current.select();
-          handleInputAdjustment("width");
-
-        }         
-      };
-
-    const keyboardOptions = {
-        layout: {
-          default: ["1 2 3", "4 5 6", "7 8 9", "{bksp} 0 {hide}"],
-        },
-        display: {
-          '{bksp}': '⌫',
-          //'{hide}': '↓',
-          '{hide}': 'Done',
-        },
-        theme: "hg-theme-default hg-layout-numeric numeric-theme",
-        buttonTheme: [
-          {
-            class: "hg-highlight",
-            buttons: "0 1 2 3 4 5 6 7 8 9"
-          },
-        ],
-        
+    const handleFocus = (inputName) => {
+        setIsKeyboardVisible(true);
+        setInputName(inputName);
       };
     
-    // Añadido un método para ocultar el teclado
-    const hideKeyboard1 = () => {
-        setIsKeyboard1Visible(false);
-        handleInputAdjustment("width");
-    };
-
-    // Añadido un método para ocultar el teclado
-    const hideKeyboard2 = () => {
-        setIsKeyboard2Visible(false);
-        handleInputAdjustment("height");
-    };
-
-    const onChangeK1 = (input) => {
-        setWidth(input);
-    }
-
-    const onChangeK2 = (input) => {
-        setHeight(input);
-    }
-
-    const onCancel = () => {
-		closeModal();
-		setShowTips(false);
-	}
-
-	const onContinue = () => {
-		closeModal();
-		setShowTips(true);
-	}
-	
-	const closeModal = () => {
-		setModalIsOpen(false);
-	};
-
-    const onCloseTippy = () => {
-		setShowTips(false);
-	}
-
-	const onNextTippy = () => {
-		setCurrentTip( prevTip => prevTip + 1);		
-	}
-
-	const onBackTippy = () => {
-		setCurrentTip(prevTip => prevTip - 1 );		
-	}
-
+    const handleInput = (input) => {
+        if (inputName === "width") {
+            handleWidth(input);
+        } else if (inputName === "height") {
+             handleHeight(input);
+        }
+      };
 
   return (
-    <>
     <div className='main-wrapper' style={{ width: '100vw', height: viewportHeight}}>
-        {console.log("current step:", currentStep, "current tips:", currentTip)}
-        <OnboardingMobile isOpen={modalIsOpen} onCancel={onCancel} onContinue={onContinue} />
-        {isKeyboard1Visible && currentStep == 1 && (
-        <div className="keyboard-container">
-          <div className="keyboard-inner">
-            <Keyboard
-                keyboard1Ref={r => (keyboard1Ref.current = r)}
-                {...keyboardOptions}
-                onChange={onChangeK1}
-                onKeyPress={(button) => {
-                    if (button === "{hide}") hideKeyboard1();
-                }} 
-            />
-          </div>
-        </div>
-        )}
-
-        {isKeyboard2Visible && (
-        <div className="keyboard-container">
-            <div className="keyboard-inner">
-                <Keyboard
-                    keyboard2Ref={r => (keyboard2Ref.current = r)}
-                    {...keyboardOptions}
-                    onChange={onChangeK2}
-                    onKeyPress={(button) => {
-                        if (button === "{hide}") hideKeyboard2();
-                    }} 
-                />
-            </div>
-        </div>
-        )}
         <header className='mb-header'>
         <div className="mb-header-inner">
 				<div className="header-inner-item-1">
@@ -363,9 +255,9 @@ export default function Mobile() {
 				/>
 			</div>
                 {currentStep !== 0 && currentStep !== 3 && currentStep !== 4 && (
-
                     <div className="step-item2-inner11">
-                        <div className='action_buttons btn-preview-upload'>                           
+                        <div className='action_buttons btn-preview-upload'>
+                           {/*  <img src="images/gallery-send-svgrepo.png"/>         */}
                               <UploadPreview/>                        
                         </div>
                                 
@@ -375,28 +267,15 @@ export default function Mobile() {
                 }                
                 {currentStep === 0 && (
                     <>							
-						<input type="file" onChange={handleImageChange} accept="image/*" title=""/>
-                        <Tippy
-							interactive={true}
-							content={<CustomTippyContent 										
-							onCloseTippy={onCloseTippy} 
-							title={"Step 1/5"}
-							message={"Upload your image to start the transformation process. Images with clear quality produce the best transformation results."}/>}
-							visible={showTips && currentStep == 0 && currentTip == 1} placement="top" maxWidth={250} offset={[0,-10]}>							
+						<input type="file" onChange={handleImageChange} accept="image/*" title=""/>								
                          <div className="upload-description" >
                             <UploadSvgrepo/>                        
                             <h2>STEP 1: Upload your media</h2>
                         </div>
-                        </Tippy>
-                    </>
+                    </>                               
                     )
-                }                
+                }
                 {currentStep === 1 && (
-                    <img 
-                        src={uploadedImage}
-				    />
-                )}
-                {currentStep === 2 && (
                     <Cropper
 					ref={cropperRef}
                     image={uploadedImage}
@@ -411,6 +290,14 @@ export default function Mobile() {
 					style={{ containerStyle: { width: '100%', height: '100%', borderRadius:'8px' }, mediaStyle: imageStyle }}
                     />
                 )}
+                {currentStep === 2 && (
+                    <img 
+                        src={previewImage} 
+                        alt="Preview" 
+                        className='crop' 
+                        style={{filter: `brightness(${brightness}%) contrast(${contrast}%)`, transition: 'filter 0.3s ease, transform 0.3s ease', transform: ` rotate(${rotation}deg)`}}
+				    />
+                )}
                 {(currentStep == 3 || currentStep == 4) && (							
 					<Scene3d
                         width={width*0.0254}
@@ -423,7 +310,9 @@ export default function Mobile() {
                         setProductImg = {setProductImg}
                         handleLoading={setIsLoading}
                         sceneRef = {sceneRef.current }
-                        renderRef = {renderRef.current}                       
+                        renderRef = {renderRef.current}
+                        goToNextStep = {goToStep4}
+                        btnSizeClick = {btnSizeClick.current}
 						
 					/>
 				) }
@@ -457,55 +346,20 @@ export default function Mobile() {
                         <div className="form">							
                             <div className="inputs">
                             <label htmlFor="input_w">W</label>
-                            <Tippy
-								visible={showTips && currentTip == 2}
-								placement="bottom"
-								appendTo={() => document.body}
-								maxWidth={250}
-								interactive={true}
-								content={<CustomTippyContent
-									title={"Step 2/5"}
-									message={"Enter the width of your panel."}
-									onCloseTippy={onCloseTippy}
-									onNextTippy={onNextTippy}
-									/>}
-								>
-                                <input id='input_w' className="input_w" type="number" min="24" max="100" 
-                                value={width}
-                                ref={widthRef}
-                                onClick={() => handleFocus('width')}
-                                readOnly
+                                <input id='input_w' className="input_w" type="number" min="24" max="100" value={width} 
+                                onChange={handleWidth}
+                                onFocus={(even)=>{even.target.select()}}
+                                onBlur={handleWidthAdjustment}
                                 />
-                            </Tippy>
-                                <label htmlFor="input_h">H</label>
-                                <Tippy
-										visible={showTips && currentTip == 3}
-										placement="bottom"
-										appendTo={() => document.body}
-										maxWidth={350}
-										interactive={true}
-										content={<CustomTippyContent
-											title={"Step 2/5"}
-											message={"Enter the height of your panel."}
-											onCloseTippy={onCloseTippy}
-											onNextTippy={onNextTippy}
-											/>}
-										>
-                                <input id='input_h' className="input_h" type="number" min="24" max="100" 
-                                value={height}
-                                ref={heightRef}
-                                onClick={() => handleFocus('height')}
-                                readOnly                               
+                                <label htmlFor="input_h">H</label>                                
+                                <input id='input_h' className="input_h" type="number" min="24" max="100" value={height} 
+                                onChange={handleHeight}
+                                onFocus={(even)=>{even.target.select()}}
+                                onBlur={handleHeightAdjustment}                                
                                 />
-                            </Tippy>    								
+                                								
                             </div>                            
-                                <div className='action_buttons' onClick={()=>{
-                                                                            goToPreviousStep(); 
-                                                                            setIsKeyboard1Visible(false); 
-                                                                            setIsKeyboard2Visible(false);
-                                                                            setCurrentTip(1);                                                                            
-                                                                        }
-                                                                        }>
+                                <div className='action_buttons' onClick={goToPreviousStep}>
                                     <Undo/>
                                 </div>				
                         </div>
@@ -515,12 +369,6 @@ export default function Mobile() {
                     <div>                        
                         <div className='wrapper_edit_buttons'>
                             <div className='buttons-list'>
-                                <div
-                                    className='action_buttons'
-                                    onClick={() => editBtnHandler("rotate")}                                           
-                                >
-                                    <Tilt color='#344054'/>
-                                </div>
                                 <div
                                     className='action_buttons'
                                     onClick={() => editBtnHandler("contrast")}                                           
@@ -634,15 +482,13 @@ export default function Mobile() {
                       />
                     )}
                     {(currentStep == 0 || currentStep == 1) && (                       
-                        <button className={`step ${currentStep === 0 || width < 24 || width > 100 || height < 24 || height > 100 || isLoading?"inactive":""}`} 
-                        onClick={goToNextStep}>Next</button>
+                        <button className={`step ${currentStep === 0 || width < 24 || width > 300 || height < 24 || height > 300 || isLoading?"inactive":""}`} 
+                        onClick={handleCropClick}>Next</button>
                     )}
                 </div>
             </div>
     </div>
-    </>
   )
-
 }
 
 function resizeAndCompressImage(file, maxWidth, maxHeight, quality, callback) {

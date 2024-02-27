@@ -11,7 +11,7 @@ import BuyPanel from '@/app/components/BuyPanel';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css'; // optional
 import getCroppedImg from '@/app/libs/cropImage';
-import { Brightness, Contrast, Locked, Moon, Sun,Tilt,Undo,Unlocked, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
+import { Brightness, Contrast, Crop, Locked, Moon, Sun,Tilt,Undo,Unlocked, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
 import Export3d from '@/app/components/Export3d';
 import { Blocks } from 'react-loader-spinner';
 import OnboardingModal from '@/app/components/OnboardingModal'; 
@@ -22,9 +22,10 @@ export default function Main() {
 	const [modalIsOpen, setModalIsOpen] = useState(false);
 	const [showTips, setShowTips] = useState(false);
 	const [currentTip, setCurrentTip] = useState(1);
-	const [showTipsStep2, setShowTipsStep2] = useState(true);
 	const [uploadedImage, setUploadedImage] = useState("");
 	const [previewImage, setPreviewImage] = useState(null);
+	const imageReady = useRef();
+	const beforeView = useRef();
 
 	const [currentStep, setCurrentStep] = useState(1);
 	const [isLoading, setIsLoading] = useState(false);
@@ -41,7 +42,7 @@ export default function Main() {
 
   // Definir tus filtros y las imágenes de muestra para cada uno  
 
-	const [activeButton, setActiveButton] = useState("rotate"); 
+	const [activeButton, setActiveButton] = useState("crop"); 
 	const [rotation, setRotation] = useState(0);
 	const [contrast, setContrast] = useState(100);
 	const [brightness, setBrightness] = useState(100);
@@ -49,14 +50,14 @@ export default function Main() {
 	const [currentState, setCurrentState] = useState("upload");//upload,crop,view	
     
     /*Opciones del crop */
-    const [width, setWidth] = useState(24);
-    const [height, setHeight] = useState(24);
+    const [width, setWidth] = useState(Number(0));
+    const [height, setHeight] = useState(Number(0));
     const [crop, setCrop] = useState({ x: 0, y: 0});
     const [zoom, setZoom] = useState(1);
 	
 	const [exportGroupRef, setExportGroupRef] = useState();
 
-	const [blockSize, setBlockSize] = useState(2);//1,2,3	
+	const [blockSize, setBlockSize] = useState(1);//1,2,3	
 	
 	const cropperRef = useRef(null);
 
@@ -77,7 +78,7 @@ export default function Main() {
 		const onboardingShown = localStorage.getItem('onboardingShown');
 		if (!onboardingShown) {
 		  setModalIsOpen(true);
-		}
+		} 
 
 	},[]);
 
@@ -114,15 +115,30 @@ export default function Main() {
 
 	// se utiliza para cuando se termine de dibujar moverse al paso proximo
 	const goToStep4 = () => {
+		console.log("ve para el 4");
 		setCurrentStep(4);
-		setCurrentTip(8);
+		setCurrentTip(9);
 	};
+
+	const resetImgFilters = () => {
+        setRotation(0);
+		setContrast(100);
+		setBrightness(100);		
+    }
 	
 	  // Función para retroceder al paso anterior
 	const goToPreviousStep = () => {
 		setCurrentStep(prevStep => prevStep - 1);
-		if(currentState === 'view') setCurrentState('crop');
-	};	
+		if(currentState == "view") setCurrentState(beforeView.current);//lo manda para el estado que tenia antes de hacer el view
+		if(currentStep == 3) { //si estoy en edición de imagen
+			setPreviewImage(uploadedImage);
+			resetImgFilters();
+			setCurrentState('dimensions');
+			setActiveButton("crop");
+			setCrop({ x: 0, y: 0});
+			setZoom(1);
+		} 
+	};
 
 	// Actualiza el estado cuando el recorte se completa
 	const onCropComplete = (croppedArea, croppedAreaPixels) => {
@@ -130,16 +146,15 @@ export default function Main() {
 		if (!isSliderChangeRef.current) {//asegurance que cuandos e aha slider no se actualizae la iamgen
 			updatePreviewImage();
 		} 
-	};	
+	};
 
 	const updatePreviewImage = async () => {
 		if (!cropperRef.current) {
 			return;
-		  }
-		  const croppedImage = await getCroppedImg(uploadedImage, croppedAreaPixelsRef.current, rotation, brightness, contrast);
-		  // Suponiendo que getCroppedImg devuelve una URL de la imagen
-		  setPreviewImage(croppedImage);
-	  };
+		}
+		const croppedImage = await getCroppedImg(uploadedImage, croppedAreaPixelsRef.current, rotation);
+		setPreviewImage(croppedImage);
+	};
 
 		// Manejador para cuando el usuario suelta el control deslizante
 	const handleSliderChangeComplete = () => {
@@ -154,39 +169,40 @@ export default function Main() {
 	  };
 
 
-/** cuando se sube una imagen */
-const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-		setIsLoading(true);
-        // Dimensiones y calidad de compresión máximas
-        const maxWidth = 1280;
-        const maxHeight = 1280;
-        const quality = 0.7; // Compresión al 70%
+	/** cuando se sube una imagen */
+	const handleImageChange = (e) => {
+		const file = e.target.files[0];
+		if (file) {
+			setIsLoading(true);
+			// Dimensiones y calidad de compresión máximas
+			const maxWidth = 1280;
+			const maxHeight = 1280;
+			const quality = 0.7; // Compresión al 70%
 
-        // Llame a la función de redimensionamiento y compresión
-        resizeAndCompressImage(file, maxWidth, maxHeight, quality, (compressedBlob) => {
-            // Continúe con el procesamiento aquí
-            const img = URL.createObjectURL(compressedBlob);
-            setUploadedImage(img);
-			setIsLoading(false); // Finalizar el indicador de carga
-            setCurrentState("crop");
-            setCurrentStep(2);
-            setCurrentTip(2);
-            // Reset para cuando se carga desde el preview
-            setActiveButton("rotate");
-            setRotation(0);
-            setContrast(100);
-            setBrightness(100);     
-            setWidth(24);
-            setHeight(24);
-            setCrop({ x: 0, y: 0});
-            setZoom(1);
+			// Llame a la función de redimensionamiento y compresión
+			resizeAndCompressImage(file, maxWidth, maxHeight, quality, (compressedBlob) => {
+				// Continúe con el procesamiento aquí
+				const img = URL.createObjectURL(compressedBlob);
+				setUploadedImage(img);
+				setPreviewImage(img);
+				setIsLoading(false); // Finalizar el indicador de carga
+				setCurrentState("dimensions");
+				setCurrentStep(2);
+				setCurrentTip(2);
+				// Reset para cuando se carga desde el preview
+				setRotation(0);
+				setContrast(100);
+				setBrightness(100);     
+				setWidth(Number(0));
+				setHeight(Number(0));
+				setCrop({ x: 0, y: 0});
+				setZoom(1);
+				setBlockSize(1);
 
-            //downloadResizedImage(compressedBlob);
-        });
-    }
-};
+				//downloadResizedImage(compressedBlob);
+			});
+		}
+	};
 
 	/**
 	 * Cambio en las dimensiones
@@ -194,33 +210,31 @@ const handleImageChange = (e) => {
 	const handleWidth = (event) => {
 		console.log("cuando cambia");
 		let { min, max, value } = event.target;		
-		setWidth(value);
-	};	
+		setWidth(Number(value));
+	};
+	
+	const handleInputAdjustment = (event, input) => {
+		let { min, max, value } = event.target;
+		value = Math.max(Number(min), Math.min(Number(max), Number(value)));
 
-	// cuando pierde e foco
-    const handleWidthAdjustment = (event) => {
-		console.log("cuando pierde e foco");
-        let { min, max, value } = event.target;
-        value = Math.max(Number(min), Math.min(Number(max), Number(value)));
-        setWidth(value);
-        setBlockSize(value % 2 === 0 ? 2 : 1);
-    }
+		if(input == "width") {
+			setWidth(value);
+		} 
+		else {
+			setHeight(value);
+		}
+	}
 	
 	const handleHeight = (event) => {
 		let { min, max, value } = event.target;
-		setHeight(value);
+		setHeight(Number(value));
 	};
-
-	// cuando pierde e foco
-    const handleHeightAdjustment = (event) => {
-        let { min, max, value } = event.target;
-        value = Math.max(Number(min), Math.min(Number(max), Number(value)));
-        setHeight(value);
-        setBlockSize(value % 2 === 0 ? 2 : 1);
-    }
+	
 	//cuando se hace click sobre el candado
-	const handleInputsLock = () => {
-		setCurrentTip(5);
+	const handleInputsLock = () => {		
+		setActiveButton("crop");
+		setCurrentState("crop");
+		setCurrentTip(6);
 		goToNextStep();
 	};	
 
@@ -228,21 +242,28 @@ const handleImageChange = (e) => {
 	 * Cambia tamaño de bloques
 	 */
 	const handlerBlockSize = (size) =>{
+		setIsLoading(true);
 		if(showTips) { btnSizeClick.current = true};
-		setBlockSize(size);
-		
+		setBlockSize(size);		
 	}
 	/**
 	 * Click sobre uno de los botones de edicion
 	 */
 	const editBtnHandler = (btn) => {
-		setActiveButton(btn);	
+		setActiveButton(btn);
+		if(btn !== "crop") {
+			setCurrentState("imagen-edit");
+		} else {
+			setCurrentState("crop");
+		}
 	}	
 
 	//Cuando se preciona el boton de mostrar el 3d
-	const handleView = () => {
+	const handleView = async () => {
+		setIsLoading(true);
+		imageReady.current = await getCroppedImg(uploadedImage, croppedAreaPixelsRef.current, rotation, brightness, contrast);
+		beforeView.current = currentState; //almacena el estado antes de hacer el view
 		setCurrentState("view");
-		setCurrentTip(8);		
 	}
 
 	const PreviewImg = () => {
@@ -250,11 +271,12 @@ const handleImageChange = (e) => {
 		const isDefaultImage = (imageSrc === "images/default.jpeg");
 	
 		return (			
-				<img 
-					src={imageSrc} 
-					alt="Preview" 
-					className={isDefaultImage ? "default" : "crop"}
-				/>
+			<img
+			style={imageStyle} 
+			src={imageSrc} 
+			alt="Preview" 
+			className={isDefaultImage ? "default" : "crop"}
+		/>
 		);
 	}	
 
@@ -264,8 +286,8 @@ const handleImageChange = (e) => {
 	
   return (
 		<div className='app-container'>
+			{console.log("estado:",currentState, "step:", currentStep, "tips:" , currentTip, "width-height", width, height)}
 			<OnboardingModal isOpen={modalIsOpen} onCancel={onCancel} onContinue={onContinue} />
-			{console.log("render page","tip:",currentTip, "step:", currentStep)}	
 			<header className="header-area">
 				<div className="header-item">
 					<div className="header-item-inner">
@@ -278,14 +300,14 @@ const handleImageChange = (e) => {
 					<div className="step-item" >
 						<Tippy
 							appendTo={() => document.body}
-							visible={showTips && currentTip == 8 && currentStep == 4 && !isLoading}
+							visible={showTips && currentTip == 9 && currentStep == 4 && !isLoading}
 							placement="right"
 							maxWidth={250}
 							offset={[0,-200]}
 							interactive={true}
 							content={<CustomTippyContent
 								title={"Step 3/5"}
-								message={"Puedes interactuar con el modelo utilizando el Scroll Wheel o click and drag your mouse"}
+								message={"Interact with the 3D model by using the scroll wheel or clicking and dragging your mouse."}
 								onCloseTippy={onCloseTippy}
 								onBackTippy={()=> {onBackTippy(); goToPreviousStep()}}
 								onNextTippy={onNextTippy}
@@ -304,18 +326,28 @@ const handleImageChange = (e) => {
 									/>
 								</div>
 							)}
-							{currentState == "crop" && (
+							{currentState == "dimensions" && (
+								<img 
+									src={uploadedImage} 
+									alt="Preview" 
+									style={{maxHeight: '100%'}}
+								/>
+							)}
+							{currentState == "imagen-edit" && (
+								<PreviewImg/>
+							)}
+							{(currentState == "crop") && (
 								<Tippy
 									interactive={true}
 									content={
 										<CustomTippyContent 										
 										onCloseTippy={onCloseTippy} 
 										title={"Step 3/5"}
-										message={"Ya puedes mover o hacer zoom sobre la imagen para ajustarla a tus deseos"}
+										message={"Use zoom or drag to adjust the image within the selected dimensions."}
 										onNextTippy={onNextTippy}
-										onBackTippy={()=> {onBackTippy(); setCurrentStep(2)}}
+										onBackTippy={()=> {onBackTippy(); goToPreviousStep()}}
 									/>} 
-									visible={showTips && currentTip == 5} 
+									visible={showTips && currentTip == 6} 
 									placement="right" 
 									maxWidth={250} 
 									offset={[0,300]}
@@ -323,17 +355,17 @@ const handleImageChange = (e) => {
 									>
 									<div>
 										<Cropper
-										ref={cropperRef}
-										image={uploadedImage}
-										rotation={rotation}
-										onCropChange={setCrop}
-										onCropComplete={onCropComplete}
-										crop={crop}
-										zoom={zoom}
-										zoomSpeed={0.1}
-										aspect={width / height}
-										onZoomChange={(newZoom) => setZoom(newZoom)}
-										style={{ containerStyle: { width: '100%', height: '100%', borderRadius:'8px' }, mediaStyle: imageStyle }}
+											ref={cropperRef}
+											image={uploadedImage}
+											rotation={rotation}
+											onCropChange={setCrop}
+											onCropComplete={onCropComplete}
+											crop={crop}
+											zoom={zoom}
+											zoomSpeed={0.1}
+											aspect={width / height}
+											onZoomChange={(newZoom) => setZoom(newZoom)}
+											style={{ containerStyle: { width: '100%', height: '100%', borderRadius:'8px' }, mediaStyle: imageStyle }}
 										/>
 									</div>									
 								</Tippy>
@@ -346,7 +378,7 @@ const handleImageChange = (e) => {
 										content={<CustomTippyContent 										
 										onCloseTippy={onCloseTippy} 
 										title={"Step 1/5"}
-										message={"Primero selecciona tu imagen prefereida para que puedas tener un obra de arte rapida de ella...bla bla bla"}/>} 
+										message={"Upload your image to start the transformation process. Images with clear quality produce the best transformation results."}/>}
 										visible={showTips && currentStep == 1} placement="top" maxWidth={250} offset={[0,25]}>
 									
 										<div className="step-item-inner2" >
@@ -362,7 +394,7 @@ const handleImageChange = (e) => {
 										width={width * 0.0254}
 										height={height * 0.0254}
 										blockSize={blockSize * 0.0254}
-										croppedImg = {previewImage}
+										croppedImg = {imageReady.current}
 										onGroupRefChange={handleExportGroupRef}//cuando se cree el grupo en la escena 3d
 										theme={theme}
 										setPixelInfo = {setPixelInfo}
@@ -387,7 +419,7 @@ const handleImageChange = (e) => {
 							appendTo={() => document.body}
 							content={<CustomTippyContent
 								title={"Step 1/5"}
-								message={"Siempre (Any time) puedes cambiar la imagen haciendo click en esta sección"}
+								message={"You can upload a new image at any time by clicking or dragging and dropping onto this area."}
 								onCloseTippy={onCloseTippy} 
 
 								onNextTippy={onNextTippy}
@@ -408,55 +440,74 @@ const handleImageChange = (e) => {
 							</Tippy>
 						
 						<div className={`step-item2-inner2 step-item2-inner10 ${currentStep === 1 || currentStep !== 2 || (showTips && currentTip == 2)? "step inactive" : ""}`}>
-							<h2>STEP 2: Enter panel dimentions</h2>
-							<div className="form">
-							<Tippy
-							visible={showTips && currentTip == 3}
-							placement="bottom"
-							appendTo={() => document.body}
-							maxWidth={250}
-							interactive={true}
-							content={<CustomTippyContent
-								title={"Step 2/5"}
-								message={"Especifica las dimensiones en pulgadas del cuadro Largo x Ancho"}
-								onCloseTippy={onCloseTippy}
-								onNextTippy={onNextTippy}
-							/>}>
+							<h2>STEP 2: Panel dimensions in inches</h2>
+							<div className="form">						
 
 								<div className="inputs">									
 										<label htmlFor="input_w">W</label>
-										<Tippy content='Input panel width'>
-										<input id='input_w' className="input_w" type="number" min="24" max="300" value={width} 
-										onChange={handleWidth}
-										onFocus={(even)=>{even.target.select(); setCurrentTip(4)}}
-										onBlur={handleWidthAdjustment}
-										/>
+										<Tippy
+										visible={showTips && currentTip == 3}
+										placement="bottom"
+										appendTo={() => document.body}
+										maxWidth={250}
+										interactive={true}
+										content={<CustomTippyContent
+											title={"Step 2/5"}
+											message={"Enter the width of your panel in inches. Minimum value 24 maximum value 300."}
+											onCloseTippy={onCloseTippy}
+											onNextTippy={onNextTippy}
+											/>}
+										>
+										<div>
+											<Tippy content='Input panel width (Min:24, Max:300)'>
+												<input id='input_w' className="input_w" type="number" min="24" max="300" value={width} 
+												onChange={handleWidth}
+												onFocus={(even)=>{even.target.select()}}
+												onBlur={(event) => {handleInputAdjustment(event, 'width')}}
+												/>
+											</Tippy>
+										</div>
+										</Tippy>
+									<label htmlFor="input_h">H</label>
+									<Tippy
+										visible={showTips && currentTip == 4}
+										placement="bottom"
+										appendTo={() => document.body}
+										maxWidth={250}
+										interactive={true}
+										content={<CustomTippyContent
+											title={"Step 2/5"}
+											message={"Enter the height of your panel in inches. Minimum value 24 maximum value 300."}
+											onCloseTippy={onCloseTippy}
+											onNextTippy={onNextTippy}
+											/>}
+										>
+											
+									<div>
+										<Tippy content='Input panel height (Min:24, Max:300)'>											
+											<input id='input_h' className="input_h" type="number" min="24" max="300" value={height} 
+											onChange={handleHeight}
+											onFocus={(even)=>{even.target.select()}}
+											onBlur={(event) => {handleInputAdjustment(event, 'height')}}
+											/>
+										</Tippy>
+									</div>
 									</Tippy>
-									<label htmlFor="input_h">H</label>				
-									<Tippy content='Input panel height'>
-										<input id='input_h' className="input_h" type="number" min="24" max="300" value={height} 
-										onChange={handleHeight}
-										onFocus={(even)=>{even.target.select(); setShowTipsStep2(false)}}
-										onBlur={handleHeightAdjustment}
-										/>
-									</Tippy>
-										
 								</div>
-								</Tippy>		
 							
 								<Tippy content="Confirm">
 									<div>
 									<Tippy
-									visible={showTips && currentTip == 4}
+									visible={showTips && currentTip == 5}
 									placement="bottom"
 									maxWidth={250}
 									interactive={true}
 									content={<CustomTippyContent
 										title={"Step 2/5"}
-										message={"Haz click en el cadado para fijar los valores que seleccionaste"}
+										message={"Click the lock icon to confirm the dimensions you have entered."}
 										onCloseTippy={onCloseTippy}
 									/>}>
-										<button className='action_buttons' onClick={handleInputsLock}>
+										<button className={`action_buttons step ${ width < 24 || width > 300 || height < 24 || height > 300 || isLoading?"inactive":""}`} onClick={handleInputsLock}>
 											{currentStep == 2 ?  <Unlocked/> : <Locked/>}
 										</button>
 									</Tippy>	
@@ -472,26 +523,28 @@ const handleImageChange = (e) => {
 							<h2>STEP 3: Edit your image</h2>
 							<div className='wrapper_edit_buttons'>
 							<Tippy
-							visible={showTips && currentTip == 6}
+							visible={showTips && currentTip == 7}
 							placement="left"
 							maxWidth={250}
 							interactive={true}
+							appendTo={() => document.body}
 							content={<CustomTippyContent
 								title={"Step 3/5"}
-								message={"Puedes hacer algunos ajustes a la imagen, interactuando con estos botones y el slider debajo"}
+								message={"Make fine adjustments to your image using these buttons and the slider below."}
 								onCloseTippy={onCloseTippy}
 								onNextTippy={onNextTippy}
-								onBackTippy={onBackTippy}
+								onBackTippy={() => {setCurrentTip(5); goToPreviousStep();}}
 							/>}
 							>
-								<div className='buttons-list'>							
+								<div className='buttons-list'>
 									<IconButton 
-										isActive={activeButton == "rotate"?true:false} 
-										onClick={() => editBtnHandler("rotate")}
-										name = 'Rotate'
+											isActive={activeButton == "crop"?true:false} 
+											onClick={() => editBtnHandler("crop")}										
+											name = 'Crop'
 									>
-										<Tilt color={activeButton == "rotate"?'#ffffff':'#344054'}></Tilt>
+										<Crop color={activeButton == "crop"?'#ffffff':'#344054'}/>
 									</IconButton>
+									
 									<IconButton 
 											isActive={activeButton == "contrast"?true:false} 
 											onClick={() => editBtnHandler("contrast")}										
@@ -505,7 +558,8 @@ const handleImageChange = (e) => {
 											name = 'Brightness'
 									>
 									<Brightness color={activeButton == "brightness"?'#ffffff':'#344054'}/>
-									</IconButton>			
+									</IconButton>
+									
 								</div>
 							</Tippy>
 
@@ -518,24 +572,24 @@ const handleImageChange = (e) => {
 							</div>
 							
 							<div className="step-item2-inner12">
-								<div id="slider-range-min">	
+								<div id="slider-range-min">								
 										{
-											activeButton === 'rotate' && (
-												<input
-												type="range"
-												className="range--brand"
-												min="-45"
-												max="45"
-												value={rotation}
-												onChange={(e) => {
-													isSliderChangeRef.current = true;
-													setRotation(parseInt(e.target.value));
-												}}
-												onMouseUp={handleSliderChangeComplete}
-
-												/>
-											)	
-										}	{
+											activeButton == 'crop' && (
+											<input
+											type="range"
+											className="range--brand"
+											min="-45"
+											max="45"
+											value={rotation}
+											onChange={(e) => {
+												isSliderChangeRef.current = true;
+												setRotation(parseInt(e.target.value));
+											}}
+											onMouseUp={handleSliderChangeComplete}
+											/>
+											)
+										}	
+										{
 											activeButton == 'contrast' && (
 											<input
 											type="range"
@@ -544,8 +598,6 @@ const handleImageChange = (e) => {
 											max="200"
 											value={contrast}
 											onChange={e => setContrast(parseInt(e.target.value))}
-											onMouseUp={handleSliderChangeComplete}
-
 											/>
 											)
 										}
@@ -558,24 +610,23 @@ const handleImageChange = (e) => {
 											max="200"
 											value={brightness}
 											onChange={e => setBrightness(parseInt(e.target.value))}
-											onMouseUp={handleSliderChangeComplete}
-
 											/>
 											)
-										}					
+										}
+										{ <div className="range-indicator center"></div> }																
 										
 								</div>
 							</div>
 							<Tippy content='Show your 3D panel'>						
 							<div style={{display: 'flex', justifyContent: 'right'}}>
 								<Tippy
-								visible={showTips && currentTip == 7 && currentStep == 3 && !isLoading}
+								visible={showTips && currentTip == 8 && currentStep == 3 && !isLoading}
 								placement="bottom"
 								maxWidth={250}
 								interactive={true}
 								content={<CustomTippyContent
 									title={"Step 3/5"}
-									message={"Haz click en este botón para construir el cuadro y ver el resultado"}
+									message={"Click this button to build the frame and preview your 3D model."}
 									onCloseTippy={onCloseTippy}
 									onBackTippy={onBackTippy}
 								/>}
@@ -586,16 +637,17 @@ const handleImageChange = (e) => {
 							</Tippy>
 						</div>
 						<div className={`step-item2-inner5 step-item2-inner10 ${currentStep == 1 || currentStep !== 4 || isLoading || (showTips && currentTip == 8) ? "step inactive" : ""}`}>
-							<h2>STEP 4: Select block size</h2>
+							<h2>STEP 4: Select block size in inches</h2>
 							<div className='wrapper_edit_buttons'>
 							<Tippy
-								visible={showTips && currentTip == 9 && !isLoading && currentStep == 4}
+								visible={showTips && currentTip == 10 && !isLoading && currentStep == 4}
 								placement="left"
 								maxWidth={250}
 								interactive={true}
+								appendTo={() => document.body}
 								content={<CustomTippyContent
 									title={"Step 4/5"}
-									message={"Seleccionando uno de estos botones puedes cambiar el tama;o de cada bloque"}
+									message={"Select one of these buttons to change the block size of each piece. Options are disabled if the panel dimensions are not a multiple of the block size."}
 									onCloseTippy={onCloseTippy}
 									onNextTippy={onNextTippy}
 									onBackTippy={onBackTippy}
@@ -626,13 +678,13 @@ const handleImageChange = (e) => {
 							
 						</div>
 						<Tippy
-							visible={showTips && currentTip == 10 && currentStep == 4 }
+							visible={showTips && currentTip == 11 && currentStep == 4 }
 							placement="left"
 							maxWidth={250}
 							interactive={true}
 							content={<CustomTippyContent
 								title={"Step 5/5"}
-								message={"Haz tu pedido ahora puedes tener un cuadro físico o un modelo 3d"}
+								message={"Place your order now. You can choose to purchase a physical wooden panel or a 3D model."}
 								onCloseTippy={onCloseTippy} 
 							/>}
 							>

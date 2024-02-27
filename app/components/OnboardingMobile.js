@@ -20,7 +20,7 @@ const customStyles = {
     borderRadius: '4px',
     outline: 'none',
     padding: '20px',
-    width: '480px',
+    maxWidth: '300px',
     maxHeight: '80vh', // Controla la altura máxima del modal
     backgroundColor: 'rgb(24,24,27)'
   },
@@ -50,10 +50,10 @@ const OnboardingModal = ({ isOpen, onCancel, onContinue }) => {
 
   return (
     <Modal isOpen={isOpen} style={customStyles}>
-      <h2 style={{ color: '#ECEDEE', fontSize: '24px' }}>Take a moment to get comfortable</h2>
+      <h2 style={{ color: '#ECEDEE', fontSize: '22px' }}>For a better user experience use the desktop version.</h2>      
       <p style={{ color: '#E7E8E9', fontSize: '16px', marginTop: '10px' }}>
         We&apos;d love to show you around - it&apos;ll be fast, promise.
-      </p>
+      </p>      
       <div style={{ marginTop: '20px' }}>
         <label style={{ color: '#666', fontSize: '14px' }}>
           <input

@@ -2135,6 +2135,11 @@ react-modal@^3.16.1:
     react-lifecycles-compat "^3.0.0"
     warning "^4.0.3"
 
+react-simple-keyboard@^3.7.86:
+  version "3.7.86"
+  resolved "https://registry.yarnpkg.com/react-simple-keyboard/-/react-simple-keyboard-3.7.86.tgz#d942d7cf47de19162cc1c38f59db6b3ade287292"
+  integrity sha512-brdsxwbk3p9JvoliUb45FWeShc+LYKwhJKHFIucSqKn91R3jiiKFFFfe7UcCULdeLVnojZVYh1R9Ea5ueaZrag==
+
 react-slick@^0.29.0:
   version "0.29.0"
   resolved "https://registry.yarnpkg.com/react-slick/-/react-slick-0.29.0.tgz#0bed5ea42bf75a23d40c0259b828ed27627b51bb"

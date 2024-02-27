@@ -23,6 +23,13 @@ export const Locked = () => (
     </svg>
 );
 
+export const Crop = ({color}) => (
+    <svg className='btn-icons' viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 19H13C9.22876 19 7.34315 19 6.17157 17.8284C5 16.6569 5 14.7712 5 11V2" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M8 5H11C14.7712 5 16.6569 5 17.8284 6.17157C19 7.34315 19 9.22876 19 13V16M2 5H5M19 19V22" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+);
+
 export const Tilt = ({color}) => (
     <svg className='btn-icons' viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="3.52082" y="0.572529" width="20.0963" height="18.999" transform="rotate(8.92984 3.52082 0.572529)" stroke={color}/>
@@ -47,6 +54,7 @@ export const Contrast = ({color}) => (
     </g>
     </svg>
 );
+
 export const Undo = ({color}) => (
     <svg className='btn-icons' viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M4 7H15C17.7614 7 20 9.23857 20 12C20 14.7614 17.7614 17 15 17H8.00001M4 7L7 4M4 7L7 10" stroke="#344054" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -88,3 +96,5 @@ export const Sun = () => (
     <path d="M19.7778 19.7773L17.5558 17.5551" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
 );
+
+

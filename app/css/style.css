@@ -138,7 +138,7 @@ img.btn-icons {
 }
 
 .header-item-inner img {    
-    max-height: 35px;
+    max-height: 25px;
 }
 
 button:focus,
@@ -198,7 +198,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 3.29vh;
+    padding: 0 8vh;
     height: 80px;
 }
 
@@ -208,7 +208,7 @@ body {
 
 /*=== step area start ===*/
 .step-area {
-    height: 100%;
+    height: calc(100% - 80px);
 }
 
 .step-area-inner {
@@ -218,8 +218,7 @@ body {
 
 .step-item {
     width: 100%;
-    padding: 0 3.29vh 3.29vh 3.29vh;
-    /* min-height: 93.08vh; */
+    padding: 0 3.29vh 8vh 8vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -227,7 +226,7 @@ body {
 
 .step-item-inner {
     width: 100%;
-    border-radius: 8.66px;
+    border-radius: 8px;
     border: 1px dashed #9E9E9E;
     background: var(--color-fondo-claro);
     position: relative;
@@ -272,7 +271,7 @@ body {
 
 .step-item2 {    
     background: var(--color-fondo-claro);
-    padding: 0 0 3.29vh 0;
+    padding: 0 0 8vh 0;
    
 }
 
@@ -283,7 +282,7 @@ body {
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    padding: 0 3.29vh 0 3.29vh;
+    padding: 0 8vh 0 3.29vh;
     height: 100%;
 
 }
@@ -311,7 +310,7 @@ body {
 }
 
 .reactEasyCrop_CropArea.reactEasyCrop_CropAreaGrid{
-    color: rgb(255 255 255 / 60%) !important;
+    color: rgb(255 255 255 / 80%) !important;
 } 
 
 .step-item2-inner11 {
@@ -344,11 +343,12 @@ body {
     display: block; /* Elimina cualquier espacio extra debajo de la imagen */
 }
 
-.step-item2-inner .step-item2-inner11 img.crop {
+img.crop {
     max-width: 100%; /* La imagen no excederá el ancho del contenedor */
     max-height: 100%; /* La imagen no excederá el alto del contenedor */
     display: block; /* Elimina cualquier espacio extra debajo de la imagen */
 }
+
 
 .step-item2-inner11 svg.upload-icon {
     width: 2.6vh;
@@ -366,8 +366,8 @@ body {
 }
 
 .step-item2-inner10 {
-    padding-top: 2.2vh;
-    padding-bottom: 2.2vh;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
     /*border-bottom: 1px solid #E4E7EC;*/
     width: 100%;
 }
@@ -474,14 +474,44 @@ div.buttons-list button.active {
 }
 
 #slider-range-min {
+    position: relative;
     border-radius: 10px;
     margin-bottom: 3vh;
+    margin-top: 1.5vh;
+    display: flex;
 }
+
+.range-indicator {
+    position: absolute;
+    width: 4px;
+    background-color: rgb(221, 221, 221);
+  }
+  
+  .center {
+    left: calc(50% - 3px);
+    top: -6px; /* Más largo que los demás */
+    bottom: -6px;
+  }
+  
+  .quarter, .three-quarters {
+    top: 8px;
+    bottom: 1px;
+  }
+  
+  .quarter {
+    left: 25%;
+  }
+  
+  .three-quarters {
+    left: 75%;
+  }
 
 input[type=range] {
     -webkit-appearance: none; /* Necesario para deshacerse del estilo predeterminado en WebKit/Blink */
     width: 100%; /* Ancho completo para que ocupe el contenedor */
     /*margin: 10px 0; *//* Espacio alrededor para evitar que se toque con otros elementos */
+    position: relative;
+    z-index: 2;
   }
   
   /* Estilo para la pista */

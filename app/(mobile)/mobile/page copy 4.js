@@ -8,7 +8,7 @@ import getCroppedImg from '@/app/libs/cropImage';
 import Scene3d from "@/app/components/Scene3d";
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import BuyPanel from '@/app/components/BuyPanel';
-import { Brightness, Contrast, BackSpace, Crop, Moon, Sun, Tilt, Undo, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
+import { Brightness, Contrast, Moon, Sun, Tilt, Undo, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
 import { Blocks } from  'react-loader-spinner';
 import Export3d from '@/app/components/Export3d';
 import OnboardingMobile from '@/app/components/OnboardingMobile'; 
@@ -17,7 +17,6 @@ import Keyboard from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css'; // optional
-import Head from 'next/head';
 
 
 export default function Mobile() {
@@ -37,8 +36,8 @@ export default function Mobile() {
     const [viewportHeight, setViewportHeight] = useState(0);
     const [theme, setTheme] = useState('light'); // Valor predeterminado
     /*Opciones del crop */
-    const [width, setWidth] = useState(0);
-    const [height, setHeight] = useState(0);
+    const [width, setWidth] = useState(24);
+    const [height, setHeight] = useState(24);
     const [crop, setCrop] = useState({ x: 0, y: 0});
     const [zoom, setZoom] = useState(1);
 	const [blockSize, setBlockSize] = useState(2);//1,2,3	
@@ -86,10 +85,10 @@ export default function Mobile() {
             sceneRef.current = new THREE.Scene();
 		    renderRef.current = new THREE.WebGLRenderer({ antialias: true});
             
-           /*  const onboardingShown = localStorage.getItem('onboardingShown');
+            const onboardingShown = localStorage.getItem('onboardingShown');
             if (!onboardingShown) {
                 setModalIsOpen(true);
-            } */
+            }
       
             // Limpiar el event listener al desmontar el componente
             return () => window.removeEventListener('resize', handleResize);
@@ -123,13 +122,12 @@ export default function Mobile() {
                 setRotation(0);
                 setContrast(100);
                 setBrightness(100);		
-                setWidth(0);
-                setHeight(0);
+                setWidth(24);
+                setHeight(24);
                 setCrop({ x: 0, y: 0});
                 setZoom(1);
-                setIsKeyboard1Visible(false);
-                setIsKeyboard2Visible(false);
 
+                //downloadResizedImage(compressedBlob);
             });
         }
     };
@@ -177,7 +175,7 @@ export default function Mobile() {
 
     // Estilos para aplicar brillo, contraste y rotación en tiempo real
 	const imageStyle = {
-		filter: `brightness(${brightness}%) contrast(${contrast}%)`,		
+		//filter: `brightness(${brightness}%) contrast(${contrast}%)`,		
 		transition: 'filter 0.3s ease, transform 0.3s ease'
 	};
     
@@ -309,11 +307,10 @@ export default function Mobile() {
 
 
   return (
-    <>
     <div className='main-wrapper' style={{ width: '100vw', height: viewportHeight}}>
         {console.log("current step:", currentStep, "current tips:", currentTip)}
         <OnboardingMobile isOpen={modalIsOpen} onCancel={onCancel} onContinue={onContinue} />
-        {isKeyboard1Visible && currentStep == 1 && (
+        {isKeyboard1Visible && (
         <div className="keyboard-container">
           <div className="keyboard-inner">
             <Keyboard
@@ -332,7 +329,7 @@ export default function Mobile() {
         <div className="keyboard-container">
             <div className="keyboard-inner">
                 <Keyboard
-                    keyboard2Ref={r => (keyboard2Ref.current = r)}
+                    keyboard1Ref={r => (keyboard1Ref.current = r)}
                     {...keyboardOptions}
                     onChange={onChangeK2}
                     onKeyPress={(button) => {
@@ -393,7 +390,10 @@ export default function Mobile() {
                 }                
                 {currentStep === 1 && (
                     <img 
-                        src={uploadedImage}
+                        src={uploadedImage} 
+                        alt="Preview" 
+                        className='crop' 
+                        style={{filter: `brightness(${brightness}%) contrast(${contrast}%)`, transition: 'filter 0.3s ease, transform 0.3s ease', transform: ` rotate(${rotation}deg)`}}
 				    />
                 )}
                 {currentStep === 2 && (
@@ -473,7 +473,7 @@ export default function Mobile() {
                                 <input id='input_w' className="input_w" type="number" min="24" max="100" 
                                 value={width}
                                 ref={widthRef}
-                                onClick={() => handleFocus('width')}
+                                onFocus={() => handleFocus('width')}
                                 readOnly
                                 />
                             </Tippy>
@@ -494,7 +494,7 @@ export default function Mobile() {
                                 <input id='input_h' className="input_h" type="number" min="24" max="100" 
                                 value={height}
                                 ref={heightRef}
-                                onClick={() => handleFocus('height')}
+                                onFocus={() => handleFocus('height')}
                                 readOnly                               
                                 />
                             </Tippy>    								
@@ -515,12 +515,6 @@ export default function Mobile() {
                     <div>                        
                         <div className='wrapper_edit_buttons'>
                             <div className='buttons-list'>
-                                <div
-                                    className='action_buttons'
-                                    onClick={() => editBtnHandler("rotate")}                                           
-                                >
-                                    <Tilt color='#344054'/>
-                                </div>
                                 <div
                                     className='action_buttons'
                                     onClick={() => editBtnHandler("contrast")}                                           
@@ -635,14 +629,12 @@ export default function Mobile() {
                     )}
                     {(currentStep == 0 || currentStep == 1) && (                       
                         <button className={`step ${currentStep === 0 || width < 24 || width > 100 || height < 24 || height > 100 || isLoading?"inactive":""}`} 
-                        onClick={goToNextStep}>Next</button>
+                        onClick={handleCropClick}>Next</button>
                     )}
                 </div>
             </div>
     </div>
-    </>
   )
-
 }
 
 function resizeAndCompressImage(file, maxWidth, maxHeight, quality, callback) {

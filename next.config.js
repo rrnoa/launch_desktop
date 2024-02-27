@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    //basePath: "/launch",
+    //basePath: "/woodxel",
     reactStrictMode: false,
     output: "export",
 }

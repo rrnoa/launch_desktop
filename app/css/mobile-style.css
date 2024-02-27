@@ -35,6 +35,32 @@ html, body {
   /* overflow: hidden;  */ /* Esto evita el desplazamiento */
 }
 
+.hg-button-bksp::after {
+  content: url('/woodxel/images/backspace-svgrepo-com.svg');
+  display: block;
+}
+
+.hg-button-bksp span {
+  display: none; /* Oculta el texto placeholder */
+}
+
+.keyboard-container {
+  display: flex;
+  justify-content: center;
+  position: fixed;
+  left: 0;
+  width: 100%;
+  top: calc(50% - 132px);
+  z-index: 1000; 
+}
+
+.keyboard-inner {
+  max-width: 222px;
+  width: 100%;
+  padding: 0 25px;
+  margin: 0 auto;
+}
+
 .react-switch-bg svg{
   height: 12px;
   width: 12px;
@@ -311,6 +337,7 @@ div.buttons-list div, div.buttons-list button {
 
 img {
   max-width: 100%;
+  max-height: 100%;
 }
 
 img.crop {
