@@ -310,7 +310,7 @@ body {
 }
 
 .reactEasyCrop_CropArea.reactEasyCrop_CropAreaGrid{
-    color: rgb(255 255 255 / 80%) !important;
+    /*color: rgb(255 255 255 / 80%) !important;*/
 } 
 
 .step-item2-inner11 {
@@ -366,8 +366,8 @@ img.crop {
 }
 
 .step-item2-inner10 {
-    padding-top: 2vh;
-    padding-bottom: 2vh;
+    padding-top: 1vh;
+    padding-bottom: 1vh;
     /*border-bottom: 1px solid #E4E7EC;*/
     width: 100%;
 }
