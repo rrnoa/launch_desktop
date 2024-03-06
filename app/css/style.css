@@ -70,6 +70,19 @@ p {
     margin: 0;
 }
 
+#scroll-mark {
+    z-index: 4;
+    width: 7vh;
+    height: 7vh;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(255 255 255 / 80%) !important;
+    transition: opacity 2.5s ease-in-out;
+    opacity: 1;
+    border-radius: 40px;
+}
 ol,
 ul {
     list-style: none;
@@ -119,7 +132,7 @@ html {
 
 .step.inactive {
     pointer-events: none; /* Deshabilita eventos de clic */
-    opacity: 0.2; /* Efecto de velo gris */
+    opacity: 0.1; /* Efecto de velo gris */
 }
 
 button.inactive {
@@ -162,10 +175,6 @@ a:active {
     text-decoration: none;
 }
 
-img {
-    max-width: 100%;
-}
-
 body {    
     font-family: 'Roboto', sans-serif;
     font-size: 1rem;
@@ -198,8 +207,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 8vh;
-    height: 80px;
+    padding: 0 6vh;
+    height: 70px;
 }
 
 .header-item-inner2 {
@@ -208,17 +217,18 @@ body {
 
 /*=== step area start ===*/
 .step-area {
-    height: calc(100% - 80px);
+    height: calc(100% - 70px);
 }
 
 .step-area-inner {
     display: flex;
     height: 100%;
+    min-height: 520px;
 }
 
 .step-item {
     width: 100%;
-    padding: 0 3.29vh 8vh 8vh;
+    padding: 0 3.29vh 6vh 6vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -243,18 +253,17 @@ body {
     border-radius: 8.66px;
 }
 
-.step-item-inner input {
+.step-1{
+    width: 100%;
+    position: relative;
+}
+
+.step-1 input {
     position: absolute;
     width: 100%;
     height: 100%;
-    top: 0;
-    left: 0;
     opacity: 0;
     cursor: pointer;
-}
-
-.step-item-inner2 {
-    text-align: center;
 }
 
 .step-item-inner2 svg {
@@ -271,7 +280,7 @@ body {
 
 .step-item2 {    
     background: var(--color-fondo-claro);
-    padding: 0 0 8vh 0;
+    padding: 0 0 6vh 0;
    
 }
 
@@ -282,7 +291,7 @@ body {
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    padding: 0 8vh 0 3.29vh;
+    padding: 0 6vh 0 3.29vh;
     height: 100%;
 
 }
@@ -310,12 +319,13 @@ body {
 }
 
 .reactEasyCrop_CropArea.reactEasyCrop_CropAreaGrid{
-    /*color: rgb(255 255 255 / 80%) !important;*/
+    color: rgb(255 255 255 / 80%) !important;
 } 
 
 .step-item2-inner11 {
+    border-radius: 8px;
     width: 100%;
-    height: 20vh;
+    height: 25vh;
     max-height: 216px;
     position: relative;
     display: flex; /* Usando Flexbox para centrar */
@@ -325,16 +335,19 @@ body {
     border-radius: 0.6vh;
     background-color: var(--color-lienzo-claro);
 }
-
-.step-item2-inner11 input {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    cursor: pointer;
+.settings-tip button {
+    display: block;
+    background-color: transparent;
+    color: #ffffff;
 }
+.settings-tip span {
+    font-size: 0.8rem;
+}
+
+.settings-tip input {
+    width: 100%;
+}
+
 
 .step-item2-inner .step-item2-inner11 img.default {
     height: 100%; /* La imagen no excederá el ancho del contenedor */
@@ -349,6 +362,14 @@ img.crop {
     display: block; /* Elimina cualquier espacio extra debajo de la imagen */
 }
 
+.step-item .step-item-inner img {
+    max-width: 90%;
+    max-height: 90% !important;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
 
 .step-item2-inner11 svg.upload-icon {
     width: 2.6vh;
@@ -357,12 +378,15 @@ img.crop {
 
 .btn-preview-upload {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    top: 15px;
+    right: 15px;
     width: 3.84vh;
     height: 3.84vh;
     background-color: white;
     border-radius: 0.6vh;
+    padding: 2px;
+    box-shadow: 0px 1px 2px 1px rgb(0 0 0 / 20%);
+    border: 1px solid #344054;
 }
 
 .step-item2-inner10 {
@@ -393,6 +417,16 @@ img.crop {
     gap: 10px;
 }
 
+.step-item-inner input.drop {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
 .step-item2-inner2 input {
     color: #646464;
     font-size: 1rem;
@@ -401,8 +435,8 @@ img.crop {
     align-items: center;
     justify-content: center;
     text-align: center;
-    width: 8vh;
-    height: 3.84vh;   
+    width: 6vh;
+    height: 3.5vh;   
     border: 1px solid #E4E7EC;
     background: #FFF;
     border-radius: 0.6vh 0.6vh 0.6vh 0.6vh;
@@ -508,22 +542,18 @@ div.buttons-list button.active {
 
 input[type=range] {
     -webkit-appearance: none; /* Necesario para deshacerse del estilo predeterminado en WebKit/Blink */
-    width: 100%; /* Ancho completo para que ocupe el contenedor */
-    /*margin: 10px 0; *//* Espacio alrededor para evitar que se toque con otros elementos */
-    position: relative;
-    z-index: 2;
   }
   
   /* Estilo para la pista */
   input[type=range]::-webkit-slider-runnable-track {
     width: 100%;
-    height: 4px;
-    background: #ddd; /* Color de fondo de la pista */
-    border-radius: 4px; /* Bordes redondeados */
+    height: 2px;
+    background: #b7babd; /* Color de fondo de la pista */
+    border-radius: 2px; /* Bordes redondeados */
   }
   
   input[type=range]:focus::-webkit-slider-runnable-track {
-    background: #ccc; /* Color de fondo de la pista al enfocar */
+    background: #ffffff; /* Color de fondo de la pista al enfocar */
   }
   
   /* Estilo para el pulgar */
@@ -533,7 +563,7 @@ input[type=range] {
     height: calc(1.5vh ); /* ajusta el tamaño del pulgar */
     width: calc(1.5vh); /* mantiene la proporción del tamaño */
     border-radius: 50%; /* Hace el pulgar completamente redondo */
-    background: #344054; /* Color de fondo del pulgar */
+    background: #ffffff; /* Color de fondo del pulgar */
     margin-top: calc(-0.75vh + 2px); /* ajusta la alineación del pulgar */
     cursor: pointer; /* Cambia el cursor a un puntero para indicar que es deslizable */
   }
@@ -549,7 +579,7 @@ input[type=range] {
   /* Estilo para el pulgar al enfocarse/hover/activo */
   input[type=range]:focus::-webkit-slider-thumb,
   input[type=range]:hover::-webkit-slider-thumb {
-    background: #555; /* Color de fondo del pulgar al enfocar/hover */
+    background: #ddd; /* Color de fondo del pulgar al enfocar/hover */
   }
   
   /* Mozilla Firefox requiere un conjunto diferente de pseudo-elementos */
@@ -620,7 +650,7 @@ input[type=range] {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 60%;
+    width: 45%;
     height: 3.84vh;
     border-radius: 0.6vh;
     background: #344054;
@@ -674,7 +704,7 @@ ul li button.active {
     height: 3.84vh;
 }
 
-.step-item2-inner6 button, #btn-preview{
+.step-item2-inner6 button{
     color: #FFF;
     font-size: 1rem;
     font-weight: 400;
