@@ -501,6 +501,7 @@ div.buttons-list button.active {
     color: #FFF;
     border: none;
     background: linear-gradient(0deg, #344054 0%, #344054 100%), #FFF;
+    pointer-events: none;
 }
 
 .step-item2-inner12 {
@@ -664,7 +665,7 @@ input[type=range] {
 
 ul li button.active {
     color: #fff;
-    background: #344054; 
+    background: #344054;
 }
 
 .step-item2-inner6 {
