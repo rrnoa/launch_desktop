@@ -519,7 +519,7 @@ export default function Main() {
 											zoomSpeed={0.1}
 											aspect={width / height}
 											onZoomChange={(newZoom) => setZoom(newZoom)}
-											style={{ containerStyle: { width: '95%', height: '95%', margin:'auto'}, mediaStyle: imageStyle }}
+											style={{ containerStyle: { width: '100%', height: '100%', margin:'auto'}, mediaStyle: imageStyle }}
 										/>
 									
 									{ showScrollIcon && <div id='scroll-mark'>										
