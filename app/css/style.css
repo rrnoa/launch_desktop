@@ -70,6 +70,21 @@ p {
     margin: 0;
 }
 
+
+.rotate-3d {
+    background-color: rgb(0 0 0 / 50%) !important;
+    transition: opacity 2.5s ease-in-out;
+    border-radius: 50%;
+    position: absolute;
+    left: calc(50% - 35px);
+    height: 55px;
+    width: 55px;
+    padding: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #scroll-mark {
     z-index: 4;
     width: 7vh;
@@ -78,10 +93,10 @@ p {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgb(255 255 255 / 80%) !important;
+    background-color: rgb(0 0 0 / 50%) !important;
     transition: opacity 2.5s ease-in-out;
     opacity: 1;
-    border-radius: 40px;
+    border-radius: 50%;
 }
 ol,
 ul {
@@ -94,6 +109,11 @@ html {
 
 .lil-gui {
     display: none !important;
+}
+#user_consent_privacy:checked, #user_consent_terms:checked {
+    color: #fff;
+    border-color: #ec6628;
+    background-color: #ec6628;
 }
 
 #feetsText {
@@ -238,7 +258,6 @@ body {
     width: 100%;
     border-radius: 8px;
     border: 1px dashed #9E9E9E;
-    background: var(--color-fondo-claro);
     position: relative;
     display: flex;
     align-items: center;
@@ -346,6 +365,7 @@ body {
 
 .settings-tip input {
     width: 100%;
+    height: 2px;
 }
 
 
@@ -378,15 +398,23 @@ img.crop {
 
 .btn-preview-upload {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    width: 3.84vh;
+    cursor: pointer;
+    top: 0px;
+    right: 0;
+    width: 15vh;
     height: 3.84vh;
     background-color: white;
-    border-radius: 0.6vh;
-    padding: 2px;
-    box-shadow: 0px 1px 2px 1px rgb(0 0 0 / 20%);
-    border: 1px solid #344054;
+    border-radius: 0 1vh 0 0.6vh;
+    box-shadow: rgba(0,0,0,.05) -1px 1px 1px 1px;
+    border: 1px solid #e5e7eb;
+    padding: 2px 10px;
+    border-top-style: none;
+    border-right-style: none;
+}
+.btn-preview-upload svg {
+    width: 2.2vh;
+    height: 2.2vh;
+    vertical-align: middle;
 }
 
 .step-item2-inner10 {
@@ -498,6 +526,7 @@ div.buttons-list button{
 }
 
 div.buttons-list button.active {
+    pointer-events: none; /* Deshabilita eventos de clic */
     color: #FFF;
     border: none;
     background: linear-gradient(0deg, #344054 0%, #344054 100%), #FFF;
@@ -560,20 +589,23 @@ input[type=range] {
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none; /* Necesario para deshacerse del estilo predeterminado en WebKit/Blink */
     border: none; /* Elimina cualquier borde predeterminado */
-    height: calc(1.5vh ); /* ajusta el tamaño del pulgar */
-    width: calc(1.5vh); /* mantiene la proporción del tamaño */
+    height: 1vh; /* ajusta el tamaño del pulgar */
+    width: 1vh; /* mantiene la proporción del tamaño */
     border-radius: 50%; /* Hace el pulgar completamente redondo */
     background: #ffffff; /* Color de fondo del pulgar */
-    margin-top: calc(-0.75vh + 2px); /* ajusta la alineación del pulgar */
+    margin-top: calc(-0.4vh); /* ajusta la alineación del pulgar */
     cursor: pointer; /* Cambia el cursor a un puntero para indicar que es deslizable */
   }
 
   input[type=range]::-moz-range-thumb {
-    height: calc(1.5vh ); /* ajusta el tamaño del pulgar */
-    width: calc(1.5vh); /* mantiene la proporción del tamaño */
-    border-radius: 50%;
-    background: #344054;
-    cursor: pointer;
+    -webkit-appearance: none; /* Necesario para deshacerse del estilo predeterminado en WebKit/Blink */
+    border: none; /* Elimina cualquier borde predeterminado */
+    height: 1vh; /* ajusta el tamaño del pulgar */
+    width: 1vh; /* mantiene la proporción del tamaño */
+    border-radius: 50%; /* Hace el pulgar completamente redondo */
+    background: #ffffff; /* Color de fondo del pulgar */
+    margin-top: calc(-0.4vh); /* ajusta la alineación del pulgar */
+    cursor: pointer; /* Cambia el cursor a un puntero para indicar que es deslizable */
   }
   
   /* Estilo para el pulgar al enfocarse/hover/activo */
@@ -587,14 +619,7 @@ input[type=range] {
     background: #ddd;
     border-radius: 4px;
   }
-  
-  input[type=range]::-moz-range-thumb {
-    height: 20px;
-    width: 20px;
-    border-radius: 50%;
-    background: #344054;
-    cursor: pointer;
-  }
+
   
   /* Para Internet Explorer */
   input[type=range]::-ms-track {
@@ -605,10 +630,10 @@ input[type=range] {
   }
   
   input[type=range]::-ms-thumb {
-    height: 1.976vh;
-    width: 1.976vh;
+    height: 1vh;
+    width: 1vh;
     border-radius: 50%;
-    background: #344054;
+    background: #ffffff;
     cursor: pointer;
   }
   
@@ -701,10 +726,13 @@ ul li button.active {
 
 #woodxel_panel_3d{
     margin-top: 10px;
-    height: 3.84vh;
+    height: 5.5vh;
+    position: absolute;
+    bottom: 40px;
+    width: 230px;
 }
 
-.step-item2-inner6 button{
+.step-item2-inner6 button, #woodxel_panel_3d{
     color: #FFF;
     font-size: 1rem;
     font-weight: 400;

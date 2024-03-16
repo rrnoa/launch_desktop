@@ -35,19 +35,36 @@ html, body {
   /* overflow: hidden;  */ /* Esto evita el desplazamiento */
 }
 
+input,
+input:focus,
+input:hover,
+input:active {
+  border: 2px solid transparent; /* Establece un borde transparente por defecto */
+  outline: none; /* Elimina el outline que algunos navegadores agregan en :focus */
+}
+
+.input_w.focused, .input_h.focused {
+  border: 2px solid #ec6628;
+}
+
+.hg-button-hide {
+  background-color: #ec6628 !important;
+  color: #ffffff;
+}
+
 .hg-button-bksp::after {
   content: url('/woodxel/images/backspace-svgrepo-com.svg');
   display: block;
 }
 
 .hg-button-bksp span {
-  display: none; /* Oculta el texto placeholder */
+  display: none;
 }
 
 .keyboard-container {
   display: flex;
   justify-content: center;
-  position: fixed;
+  position: absolute;
   left: 0;
   width: 100%;
   top: calc(50% - 132px);
@@ -71,7 +88,7 @@ html, body {
 }
 
 .reactEasyCrop_CropArea.reactEasyCrop_CropAreaGrid{
-  color: rgb(255 255 255 / 60%) !important;
+  /* color: rgb(255 255 255 / 60%) !important; */
 } 
 
 div.bottom-area {
@@ -112,6 +129,7 @@ a:visited, a:hover, a:active, a:link{
 }
 
 div.buttons-list .active {
+    pointer-events: none;
     color: #FFF;
     border: none;
     background: linear-gradient(0deg, #344054 0%, #344054 100%), #FFF;
@@ -141,21 +159,33 @@ div.buttons-list .active {
 .main-wrapper{
     display: flex;
     flex-direction: column;
-    /* height: 100vh;
-    width: 100vw; */
     overflow: hidden; /* Esto previene el desplazamiento */
 }
 
 .step-item2-inner11{
   position: absolute;
   z-index: 99;
-  top: 11px;
-  right: 11px;
+  top: 0;
+  left: 0;
 }
 
 header.mb-header{
     padding: 20px 25px;
     background: var(--color-fondo-claro);
+}
+
+div.finger-3d {
+  position: absolute;
+}
+
+div.finger-crop, div.finger-3d {
+  background-color: rgb(0 0 0 / 50%);
+  border-radius: 50%;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
 }
 
 .header-inner-item-1 img {
@@ -170,6 +200,7 @@ header.mb-header{
     flex-grow: 1;
     justify-content: space-between;
     overflow: hidden;
+    position: relative;
 }
 
 .mb-header-inner {
@@ -190,7 +221,7 @@ header.mb-header{
     flex-shrink: 0;
     border-radius: 8.66px;
     border: 1px dashed var(--grey-grey-500, #9E9E9E);
-    background: rgba(250, 250, 250, 0.70);
+    background: rgba(255, 255, 255);
     overflow: hidden;
 }
 
@@ -232,6 +263,27 @@ header.mb-header{
   justify-content: center;
   width: 100%;
   height: 42px;
+}
+
+.btn-preview-upload svg{
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.btn-preview-upload {  
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;  
+  width: 134px;
+  height: 30px;
+  background-color: white;
+  border-radius: 1vh 0 0.6vh 0;
+  box-shadow: rgba(0,0,0,.05) 1px 1px 1px 1px;
+  border: 1px solid #e5e7eb;
+  padding: 2px 10px;
+  border-top-style: none;
+  border-right-style: none;
 }
 
 span.notifications {
@@ -285,8 +337,8 @@ svg.btn-icons {
     align-items: center;
     justify-content: center;
     text-align: center;
-    width: 72px;
-    height:  35px;
+    width: 55px;
+    height: 33px;
     border: 1px solid #E4E7EC;
     background: #FFF;
     border-radius: 0.7vh 0.7vh 0.7vh 0.7vh;
