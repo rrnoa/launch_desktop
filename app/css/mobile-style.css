@@ -47,11 +47,6 @@ input:active {
   border: 2px solid #ec6628;
 }
 
-.hg-button-hide {
-  background-color: #ec6628 !important;
-  color: #ffffff;
-}
-
 .hg-button-bksp::after {
   content: url('/woodxel/images/backspace-svgrepo-com.svg');
   display: block;
@@ -92,7 +87,7 @@ input:active {
 } 
 
 div.bottom-area {
-  margin-top: 30px;
+  margin-bottom: 30px;
   padding: 0 25px 10px;
   height: 160px;
   min-height: 160px;
@@ -181,7 +176,7 @@ div.finger-3d {
 div.finger-crop, div.finger-3d {
   background-color: rgb(0 0 0 / 50%);
   border-radius: 50%;
-  padding: 12px;
+  padding: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -239,22 +234,26 @@ div.finger-crop, div.finger-3d {
     border-radius: 0.7vh;
     background: #344054;
     color: #FFF;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.2rem;
+    font-weight: 700;
     letter-spacing: 0;
     line-height: 17.4px;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 42px;
+    height: 50px;
+}
+
+.hg-functionBtn.hg-button-bksp, .hg-functionBtn.hg-button-hide {
+  background-color: #adb5bb !important;
 }
 
 #buy_panel, #woodxel_panel_3d {
   border-radius: 0.7vh;
   background: #344054;
   color: #FFF;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 600;
   letter-spacing: 0;
   line-height: 17.4px;
@@ -262,7 +261,7 @@ div.finger-crop, div.finger-3d {
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 42px;
+  height: 50px;
 }
 
 .btn-preview-upload svg{
@@ -307,8 +306,8 @@ svg.btn-icons {
 
 .bottom-area h2 {
     color: var(--color-text-hight-enfasis);
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 1.2rem;
+    font-weight: 500;
     display: flex;
     align-items: center;
     margin: 0;
@@ -367,8 +366,8 @@ svg.btn-icons {
 
 .upload-description h2 {
     color: var(--color-text-hight-enfasis);
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 1.2rem;
+    font-weight: 500;
     text-align: center;
 }
 

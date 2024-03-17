@@ -29,7 +29,6 @@ export default function Mobile() {
     
     const [isKeyboard1Visible, setIsKeyboard1Visible] = useState(false);
     const [isKeyboard2Visible, setIsKeyboard2Visible] = useState(false);
-    const [enableNext, setEnableNext] = useState(false);
 
     const widthRef = useRef(null);
     const heightRef = useRef(null);
@@ -176,8 +175,14 @@ export default function Mobile() {
 	};
 	
 	  // Función para retroceder al paso anterior
-	const goToPreviousStep = () => {        
-		setCurrentStep(prevStep => prevStep - 1);       
+	const goToPreviousStep = () => {          
+		setCurrentStep((prevStep) => {
+            if (prevStep === 1 ) {
+                setHeight(0);
+                setWidth(0);
+            }
+            return prevStep - 1;
+        });       
 	};
 
     // Estilos para aplicar brillo, contraste y rotación en tiempo real
@@ -230,7 +235,6 @@ export default function Mobile() {
     }
 
     const handleFocus = (name) => {
-        setEnableNext(false);    
         // Selecciona el texto del input correspondiente
        if (name === 'width' && widthRef.current) {
           setIsKeyboard1Visible(true);
@@ -262,17 +266,13 @@ export default function Mobile() {
         },
         display: {
           '{bksp}': '⌫',
-          '{hide}': 'Done',
+          "{hide}": "🞃",
         },
         theme: "hg-theme-default hg-layout-numeric numeric-theme",
         buttonTheme: [
           {
             class: "hg-highlight",
             buttons: "0 1 2 3 4 5 6 7 8 9"
-          },
-          {
-            class: (width >=24 && height>= 24) ? "hg-highlight" : "inactive", // Usa una clase para deshabilitar visualmente el botón
-            buttons: "{hide}"
           }
         ],
         
@@ -281,13 +281,11 @@ export default function Mobile() {
     // Añadido un método para ocultar el teclado
     const hideKeyboard1 = () => {
         setIsKeyboard1Visible(false);
-        setEnableNext(true);
     };
 
     // Añadido un método para ocultar el teclado
     const hideKeyboard2 = () => {
         setIsKeyboard2Visible(false);
-        setEnableNext(true);
     };
 
     const onChangeK1 = (input) => {
@@ -309,7 +307,7 @@ export default function Mobile() {
   return (
     <>
     <div className='main-wrapper' style={{ width: '100vw', height: viewportHeight}}>
-        {console.log("current step:", currentStep, "showFinger:", showFinger)}
+        {console.log("current step:", currentStep)}
         <OnboardingMobile isOpen={modalIsOpen} onContinue={onContinue} />
         
         <header className='mb-header'>
@@ -616,7 +614,7 @@ export default function Mobile() {
                       />
                     )}
                     {(currentStep == 0 || currentStep == 1) && (                       
-                        <button className={`step ${currentStep === 0 || !enableNext || isLoading?"inactive":""}`} 
+                        <button className={`step ${currentStep === 0 || width<24 || height<24 || height>100|| width>100 || isLoading?"inactive":""}`} 
                         onClick={()=>{goToNextStep(); setIsKeyboard1Visible(false); setIsKeyboard2Visible(false);}}>Next</button>
                     )}
                 </div>
