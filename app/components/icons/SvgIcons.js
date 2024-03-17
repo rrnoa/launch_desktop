@@ -2,7 +2,7 @@ import React from 'react';
 
 export const FingerZoomSvg = () => (
 <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
- width="60px" height="60px" viewBox="0 0 92.000000 92.000000"
+ width="50px" height="50px" viewBox="0 0 92.000000 92.000000"
  preserveAspectRatio="xMidYMid meet">
 
 <g transform="translate(0.000000,92.000000) scale(0.100000,-0.100000)"
