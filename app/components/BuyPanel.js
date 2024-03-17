@@ -68,10 +68,10 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
       pricePerSquareFoot = 175;
     }
     if (blockSize=== 2){
-        pricePerSquareFoot = 200;
+        pricePerSquareFoot = 480; //antes 200
     }
     if (blockSize=== 1){
-        pricePerSquareFoot = 225;
+        pricePerSquareFoot = 500; //antes 225
     }
     
     //let areaIn = outputWidth * outputHeight;
@@ -482,7 +482,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
         <button id="buy_panel" onClick={handleBuy}>
           <span>
               WOODXEL Panel
-              {pixelatedImage ? <span className="price-tag">{'$'+calculatePrice()}</span> : ''}           
+              {pixelatedImage ? <span className="price-tag">{'$'+calculatePrice()}</span> : ''}
           </span>
         </button>
       )}

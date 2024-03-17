@@ -4,9 +4,13 @@ import pixelateImg from '@/app/libs/pixelate';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import { configCamera, configRender, configLights, configFloor, configWall, animate, configControls } from './three-setup';
+import { FingerSvg } from './icons/SvgIcons';
 
-const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupRefChange, theme='light', setProductImg, handleLoading, sceneRef, renderRef, goToNextStep, btnSizeClick }) => {
-    const canvasRef = useRef(null);
+const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupRefChange, theme='light', setProductImg, handleLoading, sceneRef, renderRef, goToNextStep, btnSizeClick, mobile }) => {
+    
+    const [showFinger, setShowFinger] = useState(true);
+	
+	const canvasRef = useRef(null);
 	const dennisMaterialRef = useRef(null);
 	const exportGroupRef = useRef(null);
 
@@ -218,7 +222,13 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 
     return (
 		 <>
-    		<div ref={canvasRef} style={{ width: '100%', height: '100%'}} />
+    		<div onTouchStart={()=>{setShowFinger(false)}}			
+			ref={canvasRef} style={{ width: '100%', height: '100%'}} />
+			{ showFinger &&	mobile &&
+				<div className='finger-3d' onTouchStart={()=>{setShowFinger(false)}}  >
+					<FingerSvg/>
+				</div>
+			}
 		</>
     );
 };// -------------------FIN del componente-----------------------

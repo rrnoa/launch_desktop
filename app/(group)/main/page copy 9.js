@@ -23,7 +23,6 @@ export default function Main() {
 	const inputRef = useRef();
 
 	const [showScrollIcon, setShowScrollIcon] = useState(true);
-	const [showRotateIcon, setShowRotateIcon] = useState(true);
 	const [showSettings, setShowSettings] = useState(false);
 	const [modalIsOpen, setModalIsOpen] = useState(false);
 	const [showTips, setShowTips] = useState(false);
@@ -296,9 +295,23 @@ export default function Main() {
 			</header>
 			<div className="step-area" >
 				<div className="step-area-inner">
-					<div className="step-item" >						
-							<div className="step-item-inner" onMouseEnter={()=> setShowRotateIcon(false)} 
-									onMouseLeave={()=> setShowRotateIcon(true)} >								
+					<div className="step-item" >
+						<Tippy
+							appendTo={() => document.body}
+							visible={showTips && currentTip == 9 && currentStep == 4 && !isLoading}
+							placement="right"
+							maxWidth={250}
+							offset={[0,-200]}
+							interactive={true}
+							content={<CustomTippyContent
+								title={"Step 3/5"}
+								message={"Interact with the 3D model by using the scroll wheel or clicking and dragging your mouse."}
+								onCloseTippy={onCloseTippy}
+								onBackTippy={()=> {onBackTippy(); goToPreviousStep()}}
+								onNextTippy={onNextTippy}
+							/>}
+						>
+							<div className="step-item-inner">								
 								{(
 									<div className="spinner" style={{ backgroundColor: theme === 'light'?'#ffffff':'#121212', display: isLoading ? "flex" : "none" }}>
 										<Blocks
@@ -313,11 +326,20 @@ export default function Main() {
 								)}
 								{currentStep==1 && (
 									<>							
-										<input className='drop' type="file" onChange={handleImageChange} accept="image/*" title=""/>										
+										<input className='drop' type="file" onChange={handleImageChange} accept="image/*" title=""/>
+										<Tippy
+										interactive={true}
+										content={<CustomTippyContent 										
+										onCloseTippy={onCloseTippy} 
+										title={"Step 1/5"}
+										message={"Upload your image to start the transformation process. Images with clear quality produce the best transformation results."}/>}
+										visible={showTips && currentStep == 1} placement="top" maxWidth={250} offset={[0,25]}>
+										
 										<div className="step-item-inner2" >
 											<UploadPreview/>
 											<p style={{fontWeight: '700'}}>STEP 1: Upload your media or drop it here</p>
 										</div>
+										</Tippy>																	
 									</>
 								)}
 
@@ -370,14 +392,14 @@ export default function Main() {
 										handleLoading = {setIsLoading}
 										setCurrentStep = {setCurrentStep}
 										/>
-										{showRotateIcon && 
 										<div className='rotate-3d'>
 											<Rotate3dSvg/>
-										</div>}
+										</div>
 									</>
 																	
 								)}                   
 							</div>
+						</Tippy>
 					</div>
 					<div className="step-item2">
 						<div className='step-item2-inside'>
@@ -518,7 +540,24 @@ export default function Main() {
 								>
 									<button id="btn-preview" onClick={handleView}>3D Preview</button>
 								</Tippy>
-								<div style={{display: 'flex'}}>								
+								<div style={{display: 'flex'}}>
+								<Tippy
+									visible={currentStep == 3 && showSettings}
+									interactive={true}
+									maxWidth={500}
+									content={
+										<SettingsTip 
+											setShowSettings = {setShowSettings}
+											setBrightness = {setBrightness}
+											brightness={brightness}
+											setContrast={setContrast}
+											contrast={contrast}
+										/>}
+									placement='bottom'
+									appendTo={() => document.body}
+								>
+									<button className='action_buttons' onClick={()=>setShowSettings(!showSettings)}><Settings/></button>
+								</Tippy>
 								<button className='action_buttons' style={{marginLeft:'10px'}} onClick={goToPreviousStep}><Undo/></button>
 								</div>
 							</div>
@@ -549,7 +588,12 @@ export default function Main() {
 										<div>
 											<button className={`${blockSize == 2?"active":""} ${(width % 2 !== 0) || (height%2 !==0) ?"inactive":""}`} onClick={() => handlerBlockSize(2)}>2”</button>
 										</div>
-									</Tippy>									
+									</Tippy>
+									<Tippy content={(width % 3 !== 0) || (height%3 !==0) ?"Width and height must be 3x multiples ":"3” blocks"}>
+										<div>
+											<button className={`${blockSize == 3?"active":""} ${(width % 3 !== 0) || (height%3 !==0) ?"inactive":""}`} onClick={() => handlerBlockSize(3)}>3”</button>
+										</div>
+									</Tippy>
 								</div>
 							</Tippy>
 							<button className='action_buttons' onClick={goToPreviousStep}><Undo/></button>

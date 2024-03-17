@@ -29,13 +29,10 @@ const customStyles = {
 // Asegúrate de configurar el elemento raíz del modal correctamente
 Modal.setAppElement('body'); // Ajusta según tu necesidad
 
-const OnboardingModal = ({ isOpen, onCancel, onContinue }) => {
+const OnboardingModal = ({ isOpen,  onContinue }) => {
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
-  const handleCancelClick = () => {
-    onCancel();
-  };
-
+ 
   const handleContinueClick = () => {
     onContinue();
   };
@@ -51,9 +48,7 @@ const OnboardingModal = ({ isOpen, onCancel, onContinue }) => {
   return (
     <Modal isOpen={isOpen} style={customStyles}>
       <h2 style={{ color: '#ECEDEE', fontSize: '22px' }}>For a better user experience use the desktop version.</h2>      
-      <p style={{ color: '#E7E8E9', fontSize: '16px', marginTop: '10px' }}>
-        We&apos;d love to show you around - it&apos;ll be fast, promise.
-      </p>      
+      
       <div style={{ marginTop: '20px' }}>
         <label style={{ color: '#666', fontSize: '14px' }}>
           <input
@@ -67,7 +62,7 @@ const OnboardingModal = ({ isOpen, onCancel, onContinue }) => {
       </div>
       <div style={{ marginTop: '20px', textAlign: 'right' }}>
         <button
-          onClick={() => handleCancelClick()}
+          onClick={() => handleContinueClick()}
           style={{
             marginRight: '10px',
             padding: '10px 20px',
@@ -79,21 +74,8 @@ const OnboardingModal = ({ isOpen, onCancel, onContinue }) => {
             backgroundColor: 'rgb(24,24,27)'
           }}
         >
-          No thanks
-        </button>
-        <button
-          onClick={() => handleContinueClick()}
-          style={{
-            padding: '10px 20px',
-            background: 'white',
-            color: 'rgb(24,24,27)',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
-        >
-          Show me the highlights
-        </button>
+          Continue
+        </button>        
       </div>
     </Modal>
   );

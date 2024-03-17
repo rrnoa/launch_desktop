@@ -8,7 +8,7 @@ import getCroppedImg from '@/app/libs/cropImage';
 import Scene3d from "@/app/components/Scene3d";
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import BuyPanel from '@/app/components/BuyPanel';
-import { Brightness, Contrast, BackSpace, Crop, Moon, Sun, Tilt, Undo, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
+import { Brightness, Contrast, BackSpace, Crop, Moon, Sun, Tilt, Undo, UploadPreview, UploadSvgrepo, FingerSvg } from '@/app/components/icons/SvgIcons';
 import { Blocks } from  'react-loader-spinner';
 import Export3d from '@/app/components/Export3d';
 import OnboardingMobile from '@/app/components/OnboardingMobile'; 
@@ -18,9 +18,14 @@ import 'react-simple-keyboard/build/css/index.css';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css'; // optional
 import Head from 'next/head';
+import { positions } from '@mui/system';
 
 
 export default function Mobile() {
+    const [showFinger, setShowFinger] = useState(true);
+
+    const [isFocusedW, setIsFocusedW] = useState(false);
+    const [isFocusedH, setIsFocusedH] = useState(false);
     
     const [isKeyboard1Visible, setIsKeyboard1Visible] = useState(false);
     const [isKeyboard2Visible, setIsKeyboard2Visible] = useState(false);
@@ -32,7 +37,6 @@ export default function Mobile() {
 
 
     const [modalIsOpen, setModalIsOpen] = useState(false);
-	const [showTips, setShowTips] = useState(false);
 	const [currentTip, setCurrentTip] = useState(1);
     const [viewportHeight, setViewportHeight] = useState(0);
     const [theme, setTheme] = useState('light'); // Valor predeterminado
@@ -41,7 +45,7 @@ export default function Mobile() {
     const [height, setHeight] = useState(0);
     const [crop, setCrop] = useState({ x: 0, y: 0});
     const [zoom, setZoom] = useState(1);
-	const [blockSize, setBlockSize] = useState(2);//1,2,3	
+	const [blockSize, setBlockSize] = useState(1);//1,2,3	
     const [currentStep, setCurrentStep] = useState(0);
 	const [uploadedImage, setUploadedImage] = useState("");
 	const [previewImage, setPreviewImage] = useState(null);
@@ -86,10 +90,10 @@ export default function Mobile() {
             sceneRef.current = new THREE.Scene();
 		    renderRef.current = new THREE.WebGLRenderer({ antialias: true});
             
-           /*  const onboardingShown = localStorage.getItem('onboardingShown');
+           const onboardingShown = localStorage.getItem('onboardingShown');
             if (!onboardingShown) {
                 setModalIsOpen(true);
-            } */
+            }
       
             // Limpiar el event listener al desmontar el componente
             return () => window.removeEventListener('resize', handleResize);
@@ -201,9 +205,7 @@ export default function Mobile() {
             value = Math.max(Number(min), Math.min(Number(max), Number(value)));
 			setHeight(value);
 		}
-        console.log( width % 2 === 0 && height % 2 === 0 ? 2 : 1);
 
-        setBlockSize( width % 2 === 0 && height % 2 === 0 ? 2 : 1);
 	}
     
 
@@ -231,15 +233,27 @@ export default function Mobile() {
        if (name === 'width' && widthRef.current) {
           setIsKeyboard1Visible(true);
           setIsKeyboard2Visible(false);
+          setIsFocusedW(true);
           widthRef.current.select();
           handleInputAdjustment("height");
         } else if (name === 'height' && heightRef.current) {
           setIsKeyboard1Visible(false);
           setIsKeyboard2Visible(true);
+          setIsFocusedH(true);
           heightRef.current.select();
           handleInputAdjustment("width");
 
         }         
+      };
+
+      const handleBlur = (name) => {
+        if (name === 'width' && widthRef.current) {
+            setIsFocusedW(false);
+        } else if (name === 'height' && heightRef.current){
+            setIsFocusedH(false);
+
+        }
+        // Manejar la pérdida de enfoque si es necesario
       };
 
     const keyboardOptions = {
@@ -256,7 +270,7 @@ export default function Mobile() {
           {
             class: "hg-highlight",
             buttons: "0 1 2 3 4 5 6 7 8 9"
-          },
+          }
         ],
         
       };
@@ -279,40 +293,21 @@ export default function Mobile() {
 
     const onChangeK2 = (input) => {
         setHeight(input);
-    }
-
-    const onCancel = () => {
-		closeModal();
-		setShowTips(false);
-	}
+    }   
 
 	const onContinue = () => {
 		closeModal();
-		setShowTips(true);
 	}
 	
 	const closeModal = () => {
 		setModalIsOpen(false);
 	};
 
-    const onCloseTippy = () => {
-		setShowTips(false);
-	}
-
-	const onNextTippy = () => {
-		setCurrentTip( prevTip => prevTip + 1);		
-	}
-
-	const onBackTippy = () => {
-		setCurrentTip(prevTip => prevTip - 1 );		
-	}
-
-
   return (
     <>
     <div className='main-wrapper' style={{ width: '100vw', height: viewportHeight}}>
         {console.log("current step:", currentStep, "current tips:", currentTip)}
-        <OnboardingMobile isOpen={modalIsOpen} onCancel={onCancel} onContinue={onContinue} />
+        <OnboardingMobile isOpen={modalIsOpen} onContinue={onContinue} />
         {isKeyboard1Visible && currentStep == 1 && (
         <div className="keyboard-container">
           <div className="keyboard-inner">
@@ -328,7 +323,7 @@ export default function Mobile() {
         </div>
         )}
 
-        {isKeyboard2Visible && (
+        {isKeyboard2Visible &&  currentStep == 1 &&(
         <div className="keyboard-container">
             <div className="keyboard-inner">
                 <Keyboard
@@ -352,6 +347,9 @@ export default function Mobile() {
 
         <div className="mb-step-area">
             <div className='canvas-area'>
+            { (isKeyboard1Visible || isKeyboard2Visible) && 
+                <div style={{position: 'absolute', backgroundColor: '#070707b3', width: '100%', height: '100%'}}></div>
+            }
             <div className="spinner" style={{ backgroundColor: theme === 'light'?'#ffffff':'#121212', display: isLoading ? "flex" : "none" }}>
 			 <Blocks
 				visible={true}
@@ -365,8 +363,9 @@ export default function Mobile() {
                 {currentStep !== 0 && currentStep !== 3 && currentStep !== 4 && (
 
                     <div className="step-item2-inner11">
-                        <div className='action_buttons btn-preview-upload'>                           
-                              <UploadPreview/>                        
+                        <div className='btn-preview-upload'>                           
+                              <UploadPreview/>
+                              <span>Change image</span>
                         </div>
                                 
                         <input type="file" onChange={handleImageChange} accept="image/*" title=''/>							
@@ -376,18 +375,11 @@ export default function Mobile() {
                 {currentStep === 0 && (
                     <>							
 						<input type="file" onChange={handleImageChange} accept="image/*" title=""/>
-                        <Tippy
-							interactive={true}
-							content={<CustomTippyContent 										
-							onCloseTippy={onCloseTippy} 
-							title={"Step 1/5"}
-							message={"Upload your image to start the transformation process. Images with clear quality produce the best transformation results."}/>}
-							visible={showTips && currentStep == 0 && currentTip == 1} placement="top" maxWidth={250} offset={[0,-10]}>							
+                       
                          <div className="upload-description" >
-                            <UploadSvgrepo/>                        
+                            <UploadPreview/>                        
                             <h2>STEP 1: Upload your media</h2>
                         </div>
-                        </Tippy>
                     </>
                     )
                 }                
@@ -397,6 +389,11 @@ export default function Mobile() {
 				    />
                 )}
                 {currentStep === 2 && (
+                   <div
+                    onTouchStart={()=>{setShowFinger(false)}} 
+                    onMouseDown={()=>{setShowFinger(false)}}
+                    style={{ width: '100%', height: '100%', position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                   >
                     <Cropper
 					ref={cropperRef}
                     image={uploadedImage}
@@ -410,9 +407,16 @@ export default function Mobile() {
                     onZoomChange={(newZoom) => setZoom(newZoom)}
 					style={{ containerStyle: { width: '100%', height: '100%', borderRadius:'8px' }, mediaStyle: imageStyle }}
                     />
+                    { showFinger &&
+                        <div className='finger-crop' onTouchStart={()=>{setShowFinger(false)}}  >
+                            <FingerSvg/>
+                        </div>
+                    }
+                    </div>
+                    
                 )}
-                {(currentStep == 3 || currentStep == 4) && (							
-					<Scene3d
+                {(currentStep == 3 || currentStep == 4) && (
+                    <Scene3d
                         width={width*0.0254}
                         height={height*0.0254}
                         blockSize={blockSize*0.0254}
@@ -423,9 +427,9 @@ export default function Mobile() {
                         setProductImg = {setProductImg}
                         handleLoading={setIsLoading}
                         sceneRef = {sceneRef.current }
-                        renderRef = {renderRef.current}                       
-						
-					/>
+                        renderRef = {renderRef.current}
+                        mobile = {true}					
+					/>					
 				) }
             </div>            
         </div>
@@ -456,48 +460,24 @@ export default function Mobile() {
                     <div>                        
                         <div className="form">							
                             <div className="inputs">
-                            <label htmlFor="input_w">W</label>
-                            <Tippy
-								visible={showTips && currentTip == 2}
-								placement="bottom"
-								appendTo={() => document.body}
-								maxWidth={250}
-								interactive={true}
-								content={<CustomTippyContent
-									title={"Step 2/5"}
-									message={"Enter the width of your panel."}
-									onCloseTippy={onCloseTippy}
-									onNextTippy={onNextTippy}
-									/>}
-								>
-                                <input id='input_w' className="input_w" type="number" min="24" max="100" 
+                                <label htmlFor="input_w">W</label>
+                            
+                                <input id='input_w' className={`input_w ${isFocusedW ? 'focused' : ''}`}  type="number" min="24" max="100" 
                                 value={width}
                                 ref={widthRef}
                                 onClick={() => handleFocus('width')}
+                                onBlur={() => handleBlur('width')}
                                 readOnly
                                 />
-                            </Tippy>
                                 <label htmlFor="input_h">H</label>
-                                <Tippy
-										visible={showTips && currentTip == 3}
-										placement="bottom"
-										appendTo={() => document.body}
-										maxWidth={350}
-										interactive={true}
-										content={<CustomTippyContent
-											title={"Step 2/5"}
-											message={"Enter the height of your panel."}
-											onCloseTippy={onCloseTippy}
-											onNextTippy={onNextTippy}
-											/>}
-										>
-                                <input id='input_h' className="input_h" type="number" min="24" max="100" 
+                                
+                                <input id='input_h' className={`input_h ${isFocusedH ? 'focused' : ''}`} type="number" min="24" max="100" 
                                 value={height}
                                 ref={heightRef}
                                 onClick={() => handleFocus('height')}
+                                onBlur={() => handleBlur('height')}
                                 readOnly                               
                                 />
-                            </Tippy>    								
                             </div>                            
                                 <div className='action_buttons' onClick={()=>{
                                                                             goToPreviousStep(); 
@@ -586,11 +566,8 @@ export default function Mobile() {
                                 
                                 <button className={`action_buttons ${blockSize == 2?"active":""} ${(width % 2 !== 0) || (height%2 !==0) ?"inactive":""}`} 
                                     onClick={() => handlerBlockSize(2)}>2”
-                                </button>
-                                
-                                <button className={`action_buttons ${blockSize == 3?"active":""} ${(width % 3 !== 0) || (height%3 !==0) ?"inactive":""}`} 
-                                    onClick={() => handlerBlockSize(3)}>3”
-                                </button>
+                                </button>                               
+                               
                             </div>
                                 <button className='action_buttons' onClick={() => goToPreviousStep()}>
                                 <Undo/>
@@ -630,12 +607,13 @@ export default function Mobile() {
                       <Export3d 
                       exportGroup={exportGroupRef}
                       handleLoading = {setIsLoading}
+                      setCurrentStep={setCurrentStep}
                       mobile={true}
                       />
                     )}
                     {(currentStep == 0 || currentStep == 1) && (                       
                         <button className={`step ${currentStep === 0 || width < 24 || width > 100 || height < 24 || height > 100 || isLoading?"inactive":""}`} 
-                        onClick={goToNextStep}>Next</button>
+                        onClick={()=>{goToNextStep(); setIsKeyboard1Visible(false); setIsKeyboard2Visible(false); console.log("next")}}>Next</button>
                     )}
                 </div>
             </div>
