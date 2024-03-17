@@ -8,7 +8,7 @@ import getCroppedImg from '@/app/libs/cropImage';
 import Scene3d from "@/app/components/Scene3d";
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import BuyPanel from '@/app/components/BuyPanel';
-import { Brightness, Contrast, BackSpace, Crop, Moon, Sun, Tilt, Undo, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
+import { Brightness, Contrast, Tilt, Undo, UploadPreview, FingerZoomSvg } from '@/app/components/icons/SvgIcons';
 import { Blocks } from  'react-loader-spinner';
 import Export3d from '@/app/components/Export3d';
 import OnboardingMobile from '@/app/components/OnboardingMobile'; 
@@ -256,16 +256,6 @@ export default function Mobile() {
         // Manejar la pérdida de enfoque si es necesario
       };
 
-      const handleBlur = (name) => {
-        if (name === 'width' && widthRef.current) {
-            setIsFocusedW(false);
-        } else if (name === 'height' && heightRef.current){
-            setIsFocusedH(false);
-
-        }
-        // Manejar la pérdida de enfoque si es necesario
-      };
-
     const keyboardOptions = {
         layout: {
           default: ["1 2 3", "4 5 6", "7 8 9", "{bksp} 0 {hide}"],
@@ -280,6 +270,10 @@ export default function Mobile() {
             class: "hg-highlight",
             buttons: "0 1 2 3 4 5 6 7 8 9"
           },
+          {
+            class: (width >=24 && height>= 24) ? "hg-highlight" : "inactive", // Usa una clase para deshabilitar visualmente el botón
+            buttons: "{hide}"
+          }
         ],
         
       };
@@ -315,8 +309,18 @@ export default function Mobile() {
   return (
     <>
     <div className='main-wrapper' style={{ width: '100vw', height: viewportHeight}}>
-        {console.log("current step:", currentStep, "current tips:", currentTip)}
-        <OnboardingMobile isOpen={modalIsOpen} onCancel={onCancel} onContinue={onContinue} />
+        {console.log("current step:", currentStep, "showFinger:", showFinger)}
+        <OnboardingMobile isOpen={modalIsOpen} onContinue={onContinue} />
+        
+        <header className='mb-header'>
+        <div className="mb-header-inner">
+				<div className="header-inner-item-1">
+					<a href="#"><img src={theme == 'dark'? "images/woodxel-white.png" :"images/woodxel-black.png"} alt=""/></a>					
+				</div>				
+			</div>	
+        </header>
+
+        <div className="mb-step-area">
         {isKeyboard1Visible && currentStep == 1 && (
         <div className="keyboard-container">
           <div className="keyboard-inner">
@@ -407,6 +411,13 @@ export default function Mobile() {
                     onZoomChange={(newZoom) => setZoom(newZoom)}
 					style={{ containerStyle: { width: '100%', height: '100%', borderRadius:'8px' }, mediaStyle: imageStyle }}
                     />
+                    { showFinger &&
+                        <div className='finger-crop' onTouchStart={()=>{setShowFinger(false)}}  >
+                            <FingerZoomSvg/>
+                        </div>
+                    }
+                    </div>
+                    
                 )}
                 {(currentStep == 3 || currentStep == 4) && (
                     <Scene3d
@@ -605,8 +616,8 @@ export default function Mobile() {
                       />
                     )}
                     {(currentStep == 0 || currentStep == 1) && (                       
-                        <button className={`step ${currentStep === 0 || width < 24 || width > 100 || height < 24 || height > 100 || isLoading?"inactive":""}`} 
-                        onClick={goToNextStep}>Next</button>
+                        <button className={`step ${currentStep === 0 || !enableNext || isLoading?"inactive":""}`} 
+                        onClick={()=>{goToNextStep(); setIsKeyboard1Visible(false); setIsKeyboard2Visible(false);}}>Next</button>
                     )}
                 </div>
             </div>
