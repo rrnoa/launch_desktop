@@ -64,7 +64,7 @@ input:active {
 .keyboard-container {
   display: flex;
   justify-content: center;
-  position: fixed;
+  position: absolute;
   left: 0;
   width: 100%;
   top: calc(50% - 132px);
@@ -185,6 +185,7 @@ div.finger-crop, div.finger-3d {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1;
 }
 
 .header-inner-item-1 img {

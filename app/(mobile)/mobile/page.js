@@ -8,7 +8,7 @@ import getCroppedImg from '@/app/libs/cropImage';
 import Scene3d from "@/app/components/Scene3d";
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import BuyPanel from '@/app/components/BuyPanel';
-import { Brightness, Contrast, BackSpace, Crop, Moon, Sun, Tilt, Undo, UploadPreview, UploadSvgrepo, FingerSvg } from '@/app/components/icons/SvgIcons';
+import { Brightness, Contrast, BackSpace, Crop, Moon, Sun, Tilt, Undo, UploadPreview, UploadSvgrepo } from '@/app/components/icons/SvgIcons';
 import { Blocks } from  'react-loader-spinner';
 import Export3d from '@/app/components/Export3d';
 import OnboardingMobile from '@/app/components/OnboardingMobile'; 
@@ -29,6 +29,7 @@ export default function Mobile() {
     
     const [isKeyboard1Visible, setIsKeyboard1Visible] = useState(false);
     const [isKeyboard2Visible, setIsKeyboard2Visible] = useState(false);
+    const [enableNext, setEnableNext] = useState(false);
 
     const widthRef = useRef(null);
     const heightRef = useRef(null);
@@ -228,22 +229,31 @@ export default function Mobile() {
         goToNextStep();
     }
 
-    const handleFocus = (name) => {      
+    const handleFocus = (name) => {
+        setEnableNext(false);    
         // Selecciona el texto del input correspondiente
        if (name === 'width' && widthRef.current) {
           setIsKeyboard1Visible(true);
           setIsKeyboard2Visible(false);
           setIsFocusedW(true);
           widthRef.current.select();
-          handleInputAdjustment("height");
         } else if (name === 'height' && heightRef.current) {
           setIsKeyboard1Visible(false);
           setIsKeyboard2Visible(true);
           setIsFocusedH(true);
           heightRef.current.select();
-          handleInputAdjustment("width");
 
         }         
+      };
+
+      const handleBlur = (name) => {
+        if (name === 'width' && widthRef.current) {
+            setIsFocusedW(false);
+        } else if (name === 'height' && heightRef.current){
+            setIsFocusedH(false);
+
+        }
+        // Manejar la pérdida de enfoque si es necesario
       };
 
       const handleBlur = (name) => {
@@ -262,7 +272,6 @@ export default function Mobile() {
         },
         display: {
           '{bksp}': '⌫',
-          //'{hide}': '↓',
           '{hide}': 'Done',
         },
         theme: "hg-theme-default hg-layout-numeric numeric-theme",
@@ -270,7 +279,7 @@ export default function Mobile() {
           {
             class: "hg-highlight",
             buttons: "0 1 2 3 4 5 6 7 8 9"
-          }
+          },
         ],
         
       };
@@ -278,13 +287,13 @@ export default function Mobile() {
     // Añadido un método para ocultar el teclado
     const hideKeyboard1 = () => {
         setIsKeyboard1Visible(false);
-        handleInputAdjustment("width");
+        setEnableNext(true);
     };
 
     // Añadido un método para ocultar el teclado
     const hideKeyboard2 = () => {
         setIsKeyboard2Visible(false);
-        handleInputAdjustment("height");
+        setEnableNext(true);
     };
 
     const onChangeK1 = (input) => {
@@ -307,7 +316,7 @@ export default function Mobile() {
     <>
     <div className='main-wrapper' style={{ width: '100vw', height: viewportHeight}}>
         {console.log("current step:", currentStep, "current tips:", currentTip)}
-        <OnboardingMobile isOpen={modalIsOpen} onContinue={onContinue} />
+        <OnboardingMobile isOpen={modalIsOpen} onCancel={onCancel} onContinue={onContinue} />
         {isKeyboard1Visible && currentStep == 1 && (
         <div className="keyboard-container">
           <div className="keyboard-inner">
@@ -337,15 +346,6 @@ export default function Mobile() {
             </div>
         </div>
         )}
-        <header className='mb-header'>
-        <div className="mb-header-inner">
-				<div className="header-inner-item-1">
-					<a href="#"><img src={theme == 'dark'? "images/woodxel-white.png" :"images/woodxel-black.png"} alt=""/></a>					
-				</div>				
-			</div>	
-        </header>
-
-        <div className="mb-step-area">
             <div className='canvas-area'>
             { (isKeyboard1Visible || isKeyboard2Visible) && 
                 <div style={{position: 'absolute', backgroundColor: '#070707b3', width: '100%', height: '100%'}}></div>
@@ -407,13 +407,6 @@ export default function Mobile() {
                     onZoomChange={(newZoom) => setZoom(newZoom)}
 					style={{ containerStyle: { width: '100%', height: '100%', borderRadius:'8px' }, mediaStyle: imageStyle }}
                     />
-                    { showFinger &&
-                        <div className='finger-crop' onTouchStart={()=>{setShowFinger(false)}}  >
-                            <FingerSvg/>
-                        </div>
-                    }
-                    </div>
-                    
                 )}
                 {(currentStep == 3 || currentStep == 4) && (
                     <Scene3d
@@ -613,7 +606,7 @@ export default function Mobile() {
                     )}
                     {(currentStep == 0 || currentStep == 1) && (                       
                         <button className={`step ${currentStep === 0 || width < 24 || width > 100 || height < 24 || height > 100 || isLoading?"inactive":""}`} 
-                        onClick={()=>{goToNextStep(); setIsKeyboard1Visible(false); setIsKeyboard2Visible(false); console.log("next")}}>Next</button>
+                        onClick={goToNextStep}>Next</button>
                     )}
                 </div>
             </div>
