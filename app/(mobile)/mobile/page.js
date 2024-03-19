@@ -12,13 +12,8 @@ import { Brightness, Contrast, Tilt, Undo, UploadPreview, FingerZoomSvg } from '
 import { Blocks } from  'react-loader-spinner';
 import Export3d from '@/app/components/Export3d';
 import OnboardingMobile from '@/app/components/OnboardingMobile'; 
-import CustomTippyContent from '@/app/components/TippyContent';
 import Keyboard from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
-import Tippy from '@tippyjs/react';
-import 'tippy.js/dist/tippy.css'; // optional
-import Head from 'next/head';
-import { positions } from '@mui/system';
 
 
 export default function Mobile() {
@@ -266,7 +261,7 @@ export default function Mobile() {
         },
         display: {
           '{bksp}': '⌫',
-          "{hide}": "🞃",
+          "{hide}": '↓',
         },
         theme: "hg-theme-default hg-layout-numeric numeric-theme",
         buttonTheme: [
