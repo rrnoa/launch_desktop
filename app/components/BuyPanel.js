@@ -11,7 +11,15 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
   const handleBuy = async (event) => {
 
     event.preventDefault();
-    handleLoading(true);
+
+
+
+
+    //handleLoading(true);  //activar estooooooooooooooooooooooooooooooooooooooooooooooo
+
+
+
+
     //en lugar de convertir todos los colores debería convertir solo los que van en la leyenda    
 
     const pdf2 = await drawReportPdf2( ///pdf para imprimir en los paneles de madera      
@@ -83,7 +91,8 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
 
   //Pdf para imprimir en el Panel de madera los números de los colores y la posición
   const drawReportPdf2 = async (xBlocks, yBlocks, blockSize ) => {
-
+    
+    //arreglo posicion del color, color[r,g,b] y cantidad, es una agrupacion de los colores
     const colorInfo = getColorInfo();
     let doc = new jsPDF({
       orientation: "p",
@@ -95,98 +104,60 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
     
     // Draw image of product for reference
     let currentPage = 1;
-    let xBase = 0;
     let yBase = 0;
     let count = 0;
     let dx = 10;
     let dy = 10;
-    //let tileSize = 8 * blockSize;
-    let tilesPerPage = 24 / blockSize;
-    let tileSize = (216-20) / tilesPerPage;
+
+    let tilesPerPage = 24 / blockSize; //24 ó 12 cantidad maxima de bloques de cada página
+    let pageWidth = (216-20);
+    let tileSize = pageWidth / tilesPerPage; //el tamaño(lado) de la cuadricula en mm
 
     let horizontalPages = Math.ceil(xBlocks / tilesPerPage);
     let verticalPages = Math.ceil(yBlocks / tilesPerPage);
 
     let totalPaginas = horizontalPages * verticalPages;
 
-    let v = 0;
+    let xGroups = distribuirEnGrupos(xBlocks, tilesPerPage);
+    let yGroups = distribuirEnGrupos(yBlocks, tilesPerPage);
 
-  // Draw report, 24 blocks per page, left to right and then top to bottom
-  while (count < colorsArray.length) {
+    let contando = 0;
+    let xBase = 0;
 
-    let currentX = xBase;
-    let currentY = yBase;
+    let countPixels = 0;
 
-    // Dibuja las líneas verticales y horizontales para formar una hoja de 24x24 cuadriculas
-    let yLineLength = Math.min(tilesPerPage, yBlocks - yBase);//con esto tengo la cantidad de bloques verticales de esta pagina
-    for (let xi = 0; xi <= tilesPerPage; xi++) {
-      currentX = xBase + xi;
-      if (currentX > xBlocks) {
-        break;
-      }   
-      let xLine = dx + xi * tileSize;
-      doc.line(xLine, dy, xLine, dy + yLineLength * tileSize); // Dibuja línea vertical
-    }
-
-    let xLineLength = Math.min(tilesPerPage, xBlocks - xBase);//con esto tengo la cantidad de bloques horizontales de esta pagina
-
-    for (let yi = 0; yi <= tilesPerPage ; yi++) {
-      currentY = yBase + yi;
-      if (currentY > yBlocks) {
-        break;
-      }
-      let yLine = dy + yi * tileSize;
-      doc.line(dx, yLine, dx + xLineLength * tileSize, yLine); // Dibuja línea horizontal
-    }
-
-    // Añade los números a las cuadriculas
-    for (let xi = 0; xi < tilesPerPage; xi++) {
-      currentX = xBase + xi;
-        if (currentX == xBlocks) {
-          break;
-        }
-      for (let yi = 0; yi < tilesPerPage; yi++) {
-        currentY = yBase + yi;
-          if (currentY >= yBlocks) {
-            break;
-          }
-
-        let colorIdx = currentX + currentY * xBlocks;
-        let color = colorsArray[colorIdx];
-        let idx = findColorIndex(colorInfo, color);
-        /* await doc.svg(svgNumbers[idx], {
-          x: xRect + tileSize / 2 - 3,
-          y: yRect + tileSize / 2 + 2 - 4,
-          width: 4,
-          height: 4,
-        }); */
-
-        doc.text((idx+1)+"", dx + tileSize/2 + xi*tileSize -2, dy + tileSize/2 + yi*tileSize + 2);
-
-        // Incrementa count después de dibujar cada número
-        count++;
-      }
-    }
-
-    // Cálculo para el desplazamiento de la base de las cuadrículas
-    if (currentX >= xBlocks - 1) {
+    yGroups.forEach((yElement, xIndex) => {
+      let yLength = yElement * tileSize; //longitud en mm de las verticales
+      console.log("countPixels",countPixels);
+      let currentX = countPixels;
       xBase = 0;
-      yBase += tilesPerPage;
-    } else {
-      xBase += tilesPerPage;
-    }
+      xGroups.forEach ((xElement, yIndex) => { //de izquierda a derecha
+        let xLength = xElement * tileSize;//longitud en mm de las horizontales       
 
-    doc.addPage();
-    doc.text("Order number:", 20, 20);
-    doc.text("Panel: "+ currentPage + "/" + totalPaginas, 20, 25);
-    if (count < colorsArray.length) {
-      doc.addPage(); // Agrega una página en blanco
-      currentPage++; // Incrementa el número de la página actual
-    }
-    doc.setLineWidth(0.1);
+        for (let row = 0; row <= yElement; row++) { //dibuja las lineas horizontales
+          doc.line(dx, dy + row * tileSize , xLength + dx , dy + row * tileSize);
+        }
 
-  } //end while
+        for (let column = 0; column <= xElement; column++) { //dibuja las lineas verticales
+          doc.line(dx + column * tileSize, dy, dx + column * tileSize, yLength + dy);
+        }
 
+        for (let i = 0; i < yElement; i++) { //cantidad de filas que tiene ese panel
+          //pos = pos + i * (xBlocks - xElement);
+          for (let j = 0; j < xElement; j++) {
+            let colorIdx = xBase + (i * xBlocks ) + j ;  //(i * xBlocks) es el salto
+            countPixels++;
+            let color = colorsArray[colorIdx + currentX];
+            let idx = findColorIndex(colorInfo, color);
+            doc.text((idx+1)+"", dx + tileSize/2 + j*tileSize -2, dy + tileSize/2 + i*tileSize + 2);
+          }
+        }//termina una pagina
+        if(countPixels < colorsArray.length) doc.addPage();
+        xBase += xElement;
+        console.log(xBase);
+      });//termina de pintar de izquierda a derecha
+      //
+    });
 
   // Guardar el PDF generado
   //doc.save('cuadriculas_colores.pdf');
@@ -196,7 +167,6 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
   return  pdf2;
 
   };
-
 
   const drawReportPdf1 = async (
     xBlocks,
@@ -226,8 +196,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
     let tilesPerPage = 24 / blockSize;
     let horizontalPages = Math.ceil(xBlocks / tilesPerPage);//cantidad de paginas
     let verticalPages = Math.ceil(yBlocks / tilesPerPage);//cantidad de paginas
-    let horizontalPanels = xBlocks / tilesPerPage;//cantidad de panels (Ej. 2.3)
-    let verticalPanels = yBlocks / tilesPerPage;//cantidad de Paneles (Ej 1.4)
+
 
     const totalPanels = horizontalPages *  verticalPages;// total de paneles
     doc.setFontSize(12);
@@ -274,8 +243,6 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
 
 
     }
-
-
     //draw Leyenda
 
     doc.addPage();
@@ -329,17 +296,22 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
     doc.addPage();
     drawHeader(doc, xBlocks, blockSize, yBlocks, totalPanels);
     const docWidth = 192 //ancho del documento;
-    let division = docWidth / horizontalPages;//tama;o de cada panel
-    //let yDivision = docWidth / verticalPages;
+    let division = docWidth / horizontalPages;//tamaño máximo de cada panel para que quepan en la página
+
+    let gruposLargo = distribuirEnGrupos(xBlocks, tilesPerPage);
+    let gruposAlto = distribuirEnGrupos(yBlocks, tilesPerPage);
+
     let k = 1;
-    //let fontSize = Math.min(xDivision, yDivision);
-    for (var j = 0; j < verticalPages; j++) {
-      let yLength = (verticalPanels >= 1) ? division : division * verticalPanels;
-      for (var i = 0; i < horizontalPages; i++) {
-        let xLength = (horizontalPanels >= 1) ? division : division * horizontalPanels;
-        
-        let x0 =  dx + i * division;
-        let y0 =  dy + j * division;
+    let xLengthAnterior = 0;
+    let yLengthAnterior = 0;
+    for (var j = 0; j < gruposAlto.length; j++) {
+      let yLength =  (gruposAlto[j]/tilesPerPage) * division;//encontrar qué parte representa esa cantida 
+                                                              //del tamaño de un panel
+      for (var i = 0; i < gruposLargo.length; i++) {
+        let xLength = (gruposLargo[i] / tilesPerPage) * division;        
+
+        let x0 =  dx + i * xLengthAnterior; //dx dy son los margenes izquierdo/superior de la página
+        let y0 =  dy + j * yLengthAnterior;
         
         doc.setDrawColor(0, 0, 0);
         doc.setFillColor(255, 255, 255);
@@ -352,59 +324,27 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
         );      
         doc.setFontSize(12);
         doc.text(
-          dx + i * division + xLength / 2,
-          dy + j * division + yLength / 2,
-          k.toString(),
+          dx + i * xLengthAnterior + xLength / 2,
+          dy + j * yLengthAnterior + yLength / 2,
+          '(' + k.toString() + ') ' + gruposLargo[i] + 'x' + gruposAlto[j],
           null,
           null,
           "center"
-        );
-
-        // Actualiza el conteo de paneles restantes      
-        horizontalPanels -= 1;
-
+        ); 
         k++;
+        xLengthAnterior =  (gruposLargo[i] / tilesPerPage) * division;
       }
-      //restablecer horizontalPanels
-      horizontalPanels = xBlocks / tilesPerPage;
-      verticalPanels -= 1;
+
+      yLengthAnterior =  (gruposAlto[j]/tilesPerPage) * division;
 
     }
-
-    //print stickers 
-    /* doc.addPage();
-    const maringTop = 10;
-    const maringLeft = 10;
-
-    const colorCount = 30; //cantidad de colores por defecto
-    const stickerWidth = Math.floor(( 216 - (2*maringLeft) ) / 5);
-    const stickerHeight = Math.floor(( 279 - (2*maringTop) ) / 6);
-
-    for (let index = 0; index < colorCount; index++) {
-      let positionX = index % 5;
-      let positionY = Math.floor(index/ 5);
-      const colorNum = index + 1;
-
-      if(leyenda[index]) {
-        doc.text(
-          maringTop + positionX * stickerWidth + stickerWidth/2 ,
-          maringTop + positionY * stickerWidth + stickerHeight/2,
-          colorNum.toString() + " ("+leyenda[index][2].toString()+")",
-          null,
-          null,
-          "center"
-        );
-      }
-    }  */
     
     // Save the PDF in base64 format
-    //doc.save("pixeles.pdf");
     //const pdf1 = btoa(doc.output());
     const pdf1 = doc.output('blob');
 
     return { pdf1, leyenda, json };
   };
-  
 
   const getImageWidthHeight = (xBlocks, yBlocks) => {
     const docWidth = 190; // El ancho máximo permitido del documento
@@ -499,6 +439,20 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
     </> 
   )
 
+}
+//distrubuye el numero de bloque en grupos menores de 24
+function distribuirEnGrupos(numero, maxTamanoGrupo) {
+  let minGrupos = Math.ceil(numero / maxTamanoGrupo);
+  let tamanoBase = Math.floor(numero / minGrupos);
+  let excedente = numero % minGrupos;
+  let grupos = new Array(minGrupos).fill(tamanoBase);
+
+  // Distribuir el excedente para equilibrar los grupos tanto como sea posible
+  for (let i = 0; i < excedente; i++) {
+      grupos[i] += 1;
+  }
+
+  return grupos;
 }
 
 export default BuyPanel
