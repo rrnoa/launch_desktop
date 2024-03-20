@@ -11,14 +11,7 @@ const BuyPanel = ({pixelatedImage, colorsArray, colorDetails, blockSize, xBlocks
   const handleBuy = async (event) => {
 
     event.preventDefault();
-
-
-
-
-    //handleLoading(true);  //activar estooooooooooooooooooooooooooooooooooooooooooooooo
-
-
-
+    handleLoading(true); 
 
     //en lugar de convertir todos los colores debería convertir solo los que van en la leyenda    
 

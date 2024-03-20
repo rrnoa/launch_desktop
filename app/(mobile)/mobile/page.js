@@ -261,7 +261,7 @@ export default function Mobile() {
         },
         display: {
           '{bksp}': '⌫',
-          "{hide}": '↓',
+          "{hide}": '&#x25BC',
         },
         theme: "hg-theme-default hg-layout-numeric numeric-theme",
         buttonTheme: [
@@ -490,7 +490,7 @@ export default function Mobile() {
                     )}
                     { currentStep === 2 && activeButton=="" && (
                     <div>                        
-                        <div className='wrapper_edit_buttons'>
+                        <div className='form'>
                             <div className='buttons-list'>
                                 <div
                                     className='action_buttons'
@@ -507,7 +507,7 @@ export default function Mobile() {
                                 <div className='action_buttons' onClick={() => editBtnHandler("brightness")} >
                                     <Brightness color='#344054'/>  
                                 </div>                                
-                                </div>							
+                            </div>							
                             <div className='action_buttons' onClick={ () => goToPreviousStep()}>
                                 <Undo/>
                             </div>
@@ -556,7 +556,7 @@ export default function Mobile() {
                     )}
                     { currentStep == 3 && (
                         <div>
-                            <div className='wrapper_edit_buttons'>
+                            <div className='form'>
                             <div className='buttons-list'>
                                 <button className={`action_buttons ${blockSize == 1?"active":""}`} onClick={() => handlerBlockSize(1)}>1”
                                 </button>
@@ -566,9 +566,9 @@ export default function Mobile() {
                                 </button>                               
                                
                             </div>
-                                <button className='action_buttons' onClick={() => goToPreviousStep()}>
+                                <div className='action_buttons' onClick={() => goToPreviousStep()}>
                                 <Undo/>
-                                </button>
+                                </div>
                             </div>                            
 
                         </div>

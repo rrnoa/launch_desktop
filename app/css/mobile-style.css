@@ -50,6 +50,8 @@ input:active {
 .hg-button-bksp::after {
   content: url('/woodxel/images/backspace-svgrepo-com.svg');
   display: block;
+  width: 20px;
+  height: 20px;
 }
 
 .hg-button-bksp span {
@@ -371,11 +373,6 @@ svg.btn-icons {
     text-align: center;
 }
 
-.wrapper_edit_buttons {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;   
-}
 div.buttons-list {
     display: flex;
     align-items: center;

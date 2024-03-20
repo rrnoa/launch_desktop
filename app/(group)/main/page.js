@@ -16,7 +16,6 @@ import Export3d from '@/app/components/Export3d';
 import { Blocks } from 'react-loader-spinner';
 import OnboardingModal from '@/app/components/OnboardingModal'; 
 import CustomTippyContent from '@/app/components/TippyContent';
-import SettingsTip from '@/app/components/SettingsTip';
 
 
 export default function Main() { 
