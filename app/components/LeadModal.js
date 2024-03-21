@@ -84,6 +84,7 @@ const customStyles = {
     color: '#ec6628',
     textDecoration: 'none',
     backgroundColor: 'transparent',
+    cursor: 'pointer'
   }
 
 Modal.setAppElement('body'); // Ajusta según tu necesidad

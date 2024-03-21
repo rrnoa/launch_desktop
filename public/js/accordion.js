@@ -18,8 +18,8 @@
 				arrow: true,
 				// Opened/closed icon on the right hand side of the headline (either false or JSON containing symbols or image paths)
 				collapseIcons: {
-					opened: '<img src="img/a-up.png" alt="">',
-					closed: '<img src="img/a-dwon.png" alt="">'
+					opened: '<img src="images/a-up.png" alt="">',
+					closed: '<img src="images/a-dwon.png" alt="">'
 				},
 				// Collapse icon left or right
 				collapseIconsAlign: 'right',

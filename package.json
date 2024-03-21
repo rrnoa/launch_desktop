@@ -15,7 +15,6 @@
     "@popperjs/core": "^2.11.8",
     "@tippyjs/react": "^4.2.6",
     "add": "^2.0.6",
-    "jquery": "^3.7.1",
     "jspdf": "^2.5.1",
     "lzma-js": "^1.0.1",
     "next": "13.5.4",
