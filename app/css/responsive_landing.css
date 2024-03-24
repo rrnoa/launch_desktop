@@ -12,10 +12,7 @@ Medium Screen - Others
     .hidde-b {
         display: none;
     }
-
-    .hero-left {
-        margin-top: 120px;
-    }
+    
     .hero-right img {
         min-height: 685px;
     }
@@ -52,11 +49,7 @@ Medium Screen - Others
     .hero-left h2 {
         font-family: Jost;
         font-size: 54px;
-    }
-
-    .hero-left {
-        margin-top: 80px;
-    }
+    }    
     .hero-right img {
         min-height: inherit;
     }
@@ -89,9 +82,7 @@ Small Screen - Tablate
     .hero-right img {
         min-height: 400px;
     }
-    .hero-left {
-        margin-top: -5px;
-    }
+
     .hero-scrool-down {
         margin-top: 50px;
     }
@@ -473,10 +464,13 @@ footer {
 @media screen and (max-width: 360px) {	
     .hero-left p {
         margin-top: 0;
+        font-size: 15px;
+        line-height: 20px;
     }
 
     .hero-left h2{
-        font-size: 30px;
+        font-size: 24px;
+        line-height: 30px;
     }
 
 }
