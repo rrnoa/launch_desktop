@@ -1,102 +1,136 @@
 "use client";
-import Image from 'next/image'
-import Link from "next/link";
 import "@/app/css/landing2.css";
 import "@/app/css/bootstrap.min.css";
 import "@/app/css/owl.carousel.css";
 import "@/app/css/responsive_landing.css";
 import { isMobile } from 'react-device-detect';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Script from 'next/script';
 
+
 export default function Home() {
+    const [is, setIs] = useState();
 
     useEffect(() => {
         // Este código se ejecuta una vez que jQuery y los plugins han sido cargados
         // y el DOM está listo, ideal para inicializar tus plugins
-        console.log("ENrando al useeefect")
+        setIs(isMobile);
+
         if (window.jQuery) {
-            console.log("existe...........");
+            
             jQuery('.accordion').accordion({
                 collapsible: true,
             });
-        }
 
-          // Scroll to Top
-		/* jQuery('.scrolltotop').click(function(){
-			jQuery('html').animate({'scrollTop' : '0px'}, 400);
-			return false;
-		});
-		
-		jQuery(window).scroll(function(){
-			var upto = jQuery(window).scrollTop();
-			if(upto > 500) {
-				jQuery('.scrolltotop').fadeIn();
-			} else {
-				jQuery('.scrolltotop').fadeOut();
-			}
-		}); */
-
-		// accordion
-		
-		
-		
+            $("#owl-csel1").owlCarousel({
+                items: 2,
+                autoplay: true,
+                autoplayTimeout: 3000,
+                startPosition: 0,
+                rtl: false,
+                loop: true,
+                margin: 20,
+                dots: true,
+                nav: true,
+                // center:true,
+                // stagePadding: 2,
+                navText: [
+                            '<i class="fa-solid fa-arrow-left-long"></i>',
+                            '<i class="fa-solid fa-arrow-right-long"></i>'
+                        ],
+                navContainer: '.main-content .custom-nav',
+                responsive:{
+                    0: {
+                        items: 1.2,
+                        center:true,						
+                    },
+                    767: {
+                        items: 1.9,	
+                        center:true,						
+                    },
+                    1200: {
+                        items: 2,						
+                    }
+                }
+    
+            });
+            
+            $("#owl-csel2").owlCarousel({
+                items: 3,
+                autoplay: true,
+                autoplayTimeout: 3000,
+                startPosition: 0,
+                rtl: false,
+                loop: true,
+                margin: 10,
+                dots: true,
+                nav: true,
+                // center:true,
+                // stagePadding: 2,
+                navText: [
+                            '<i class="fa-solid fa-arrow-left-long"></i>',
+                            '<i class="fa-solid fa-arrow-right-long"></i>'
+                        ],
+                navContainer: '.main-content2 .custom-nav',
+                responsive:{
+                    0: {
+                        items: 1.3,
+                        center:true,						
+                    },
+                    767: {
+                        items: 1.9,	
+                        center:true,							
+                    },
+                    1200: {
+                        items: 3,						
+                    }
+                }
+    
+            });
+       
+        }        
+       
 
       }, []);
 
     return (    
-    <div>        
-        <Script src="js/owl.carousel.js" strategy="lazyOnload" />
-        <Script src="js/videopopup.js" strategy="lazyOnload" />
+    <div >
         <Script src="https://kit.fontawesome.com/e7f2043049.js" strategy="lazyOnload" />
+        {/* top section*/}
+        <div className="head-wrapper" style={{position: 'relative'}}>
+        <video className='video-hero' src='video/hero_section_desktop_lq.mp4' autoPlay loop muted playsInline preload="auto"></video>
 
-        {/* <!--  nev area start */}
-        <header>
-            <nav>
-                <div className="logo"><a href="#"><img src="images/woodxel-white.png" alt=""/></a></div>
-            </nav>
-        </header>
-        {/* <!--  nev area start */}
-
-        {/* <!-- hero-area-start */}
-        <section className="hero-area">
-            <div className="container">
-                <div className="row">
-                    <div className="col-md-6 col-lg-5 order2">
-                        <div className="hero-left">
-                            <h2>Transform <br/> Any Image into a <br/> Stunning Custom <br/> Wooden Panel</h2>
-                            <p>Combine powerful 3D design with <br/> artisanal craftsmanship</p>
-                            <div className="hero-btn">
-                                <a href="#">✨ Start Designing Now</a>
+            {/* <!--  nev area start */}
+            <header>
+                <nav style={{zIndex: 1, position: 'relative'}}>
+                    <div className="logo"><a href="#"><img src="images/woodxel-white.png" alt=""/></a></div>
+                </nav>
+            </header>
+            {/* <!-- hero-area-start */}
+            <section className="hero-area">
+                <div className="container">
+                    <div style={{zIndex: 1, textAlign: 'center'}}>
+                            <div className="hero-left">
+                                <h2 className="hidde-m">Transform Any Image into <br/> A Bespoke PixelArt Custom Wooden Panel</h2>
+                                <h2 className="hidde-b">Transform Any Image <br/> into A Bespoke PixelArt<br/> Custom Wooden Panel</h2>
+                                <p>WoodXEL is the ultimate solution for architects and interior designers seeking to create unique, high-quality custom wooden panels. Our platform combines an intuitive 3D design tool with expert craftsmanship to bring your vision to life.</p>
                             </div>
-                        </div>
+                        
                     </div>
-                    <div className="col-md-6 col-lg-7 order1">
-                        <div className="hero-right">
-                            <img src="images/hero.png" className="img-fluid" alt=""/>
-                        </div>
+                    <div className="hero-btn">
+                        <a href={is?"mobile":"main"}>✨ Start Designing Now</a>
+                    </div>
+                    <div className="hero-scrool-down" >
+                        <a href="#down-sce">SCROLL DOWN TO EXPLORE <img src="images/arrow.png" alt=""/></a>
                     </div>
                 </div>
-                <div className="hero-scrool-down">
-                    <a href="#down-sce">SCROLL DOWN TO EXPLORE <img src="images/arrow.png" alt=""/></a>
-                </div>
-            </div>
-        </section>
+            </section>
         {/* <!-- hero-area-end */}
 
-        {/* <!-- hero-btm-area-start */}
-        <div className="hero-btm-sections" id="down-sce">
-            <div className="container">
-                <div className="hero-btm-sections-contant">
-                    <p>WoodXEL is the ultimate solution for architects and interior designers seeking to create unique, high-quality custom wooden panels. Our platform combines an intuitive 3D design tool with expert craftsmanship to bring your vision to life.</p>
-                    <img src="images/images.png" className="img-fluid" alt=""/>
-                </div>
-            </div>
         </div>
-        {/* <!-- hero-btm-area-end */}
 
         {/* <!-- From Concept area start */}
-        <section className="from-concept-area">
+        <section className="from-concept-area" id="down-sce">
             <div className="container">
                 <div className="from-conc-title">
                     <h2>From Concept to Creation in 4 Steps</h2>
@@ -115,7 +149,7 @@ export default function Home() {
                             <div className="conts-icon">
                                 <img src="images/icon2.png" className="img-fluid" alt=""/>
                             </div>
-                            <p>Receive your free 3D model for visualization and client presentations</p>
+                            <p>Download your free 3D model for visualization and client presentations</p>
                         </div>
                     </div>
                     <div className="col-md-6 col-lg-3">
@@ -123,7 +157,7 @@ export default function Home() {
                             <div className="conts-icon">
                                 <img src="images/icon3.png" className="img-fluid" alt=""/>
                             </div>
-                            <p>Order your custom wooden panel, handcrafted to your exact specifications</p>
+                            <p>Order a custom wooden panel, handcrafted to your exact specifications</p>
                         </div>
                     </div>
                     <div className="col-md-6 col-lg-3">
@@ -144,21 +178,32 @@ export default function Home() {
             <div className="container">
                 <h2>Create Stunning Designs with WoodXEL</h2>
                 <div>
-                    <a  id="video1">
-                        <div className="dsk-img-VD">
-                            <img src="images/video.png" className="img-fluid" alt=""/>
-                        </div>
-                        <div className="mob-img-VD">
-                            <img src="images/videomobile.png" className="img-fluid" alt=""/>
-                        </div>
-                    </a>
+                    {/* {is ? 
+                    (<iframe
+                        src="https://player.vimeo.com/video/926523127"
+                        width="740"
+                        height="360"
+                        frameBorder="0"
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowFullScreen
+                        title="Vimeo video"
+                        ></iframe>
+                    ) :
+                    (
+                        <iframe
+                        src="https://player.vimeo.com/video/926513634"
+                        width="640"
+                        height="360"
+                        frameBorder="0"
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowFullScreen
+                        title="Vimeo video"
+                        ></iframe>
+                    )} */}
+                
                 </div>
-                <div id="vidBox">
-                    <div id="videCont">
-                        <video autoPlay={true} id="v1" loop controls>
-                            <source src="video/video.mp4" type="video/mp4"/>
-                        </video>
-                    </div>
+                <div className="hero-btn" style={{textAlign: 'center'}}>
+                    <a href={is?"mobile":"main"}>✨ Start Designing Now</a>
                 </div>
             </div>
         </section>
@@ -184,7 +229,7 @@ export default function Home() {
                             <div className="conts-icon">
                                 <img src="images/icon6.png" className="img-fluid" alt=""/>
                             </div>
-                            <p>Free 3D model with every design for easy visualization and presentations</p>
+                            <p>Free 3D model for easy visualization and presentations</p>
                         </div>
                     </div>
                     <div className="col-md-6 col-lg-3">
@@ -262,7 +307,7 @@ export default function Home() {
                     </div>
                 </div>
                 <div className="ts-btn">
-                    <a href="#">✨ Unlock Your Creativity with WoodXEL</a>
+                    <a href={is?"mobile":"main"}>✨ Unlock Your Creativity with WoodXEL</a>
                 </div>
             </div>
         </section>
@@ -374,13 +419,6 @@ export default function Home() {
         </div>
         {/* <!-- copyright */}
         
-
-        {/* <!-- Scroll-Top button */}
-        <a href="#" className="scrolltotop" style={{display: 'inline'}}>
-        <i className="fa-solid fa-arrow-up" aria-hidden="true"></i>
-        <span className="pluse"></span>
-        <span className="pluse2"></span>
-        </a>
     </div>
     )
 }

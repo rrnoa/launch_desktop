@@ -178,7 +178,7 @@ function LeadModal({ modalIsOpen, closeModal, setCurrentStep, compressModel }) {
         compressModel();
         setSending('false');
         closeModal();
-        setCurrentStep(1);
+        //setCurrentStep(1);
       }
       return response.json();
     })

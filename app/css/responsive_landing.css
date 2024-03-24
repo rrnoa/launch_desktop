@@ -9,6 +9,10 @@ Medium Screen - Others
         font-size: 54px;
     }
 
+    .hidde-b {
+        display: none;
+    }
+
     .hero-left {
         margin-top: 120px;
     }
@@ -18,9 +22,16 @@ Medium Screen - Others
 
 }
 @media screen and (min-width: 1201px) and (max-width: 1370px) {
+    .hero-btn {
+        bottom: -25px;
+    }
     .hero-left h2 {
         font-family: Jost;
         font-size: 54px;
+    }
+
+    .hidde-b {
+        display: none;
     }
 
     .hero-left {
@@ -32,12 +43,12 @@ Medium Screen - Others
 
 }
 
-
-
-
-
-
 @media screen and (min-width: 992px) and (max-width: 1200px) {
+
+    .hidde-b {
+        display: none;
+    }
+
     .hero-left h2 {
         font-family: Jost;
         font-size: 54px;
@@ -49,13 +60,6 @@ Medium Screen - Others
     .hero-right img {
         min-height: inherit;
     }
-
-
-
-
-
-
-
 }
 
 /*
@@ -69,8 +73,8 @@ Small Screen - Tablate
         text-align: center;
     }
     .hero-left h2 {
-        font-size: 40px;
-        line-height: 43px;
+        font-size: 35px;
+        line-height: 40px;
         margin-bottom: 13px;
         margin-top: 50px;
         
@@ -81,9 +85,7 @@ Small Screen - Tablate
         line-height: 25px;
       
         margin-bottom: 40px;
-    }
-
-  
+    }  
     .hero-right img {
         min-height: 400px;
     }
@@ -153,10 +155,10 @@ Small Screen - Tablate
     padding-left: 23px;
     padding-right: 32px;
   }
+  
   .accordion h3 {
-
 	padding-right: 68px;
-}
+  }
 .faq-area {
     background: var(--Light-Gray, #F3F3F3);
     padding: 93px 0;
@@ -256,9 +258,12 @@ Small Screen - Mobile
     .logo {
         text-align: center;
     }
+    .logo img {
+        height: 20px;
+    }
     .hero-left h2 {
-        font-size: 40px;
-        line-height: 43px;
+        font-size: 32px;
+        line-height: 40px;
         margin-bottom: 13px;
         text-align: center;
     }
@@ -267,11 +272,15 @@ Small Screen - Mobile
         font-weight: 400;
         line-height: 25px;
         text-align: center;
-        margin-bottom: 40px;
+        margin-top: 50px;
     }
 
-    .hero-btn {
-        text-align: center;
+    .hero-left p.hidde-m,  .hero-left h2.hidde-m{
+        display: none;
+    }
+
+    .hidde-b {
+        display: block !important;
     }
 
     .order1{
@@ -288,9 +297,6 @@ Small Screen - Mobile
     }
     .hero-scrool-down {
         display: none;
-    }
-    .hero-area {
-        padding-bottom: 140px;
     }
 
     .hero-btm-sections {
@@ -369,6 +375,7 @@ Small Screen - Mobile
     padding-left: 23px;
     padding-right: 32px;
   }
+
   .accordion h3 {
 
 	padding-right: 68px;
@@ -460,5 +467,16 @@ footer {
     padding: 93px 0;
   }
 
+
+}
+
+@media screen and (max-width: 360px) {	
+    .hero-left p {
+        margin-top: 0;
+    }
+
+    .hero-left h2{
+        font-size: 30px;
+    }
 
 }

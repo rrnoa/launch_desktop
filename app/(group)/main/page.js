@@ -296,7 +296,7 @@ export default function Main() {
 			<div className="step-area" >
 				<div className="step-area-inner">
 					<div className="step-item" >						
-							<div className="step-item-inner" onMouseEnter={()=> setShowRotateIcon(false)} 
+							<div className="step-item-inner" 
 									onMouseLeave={()=> setShowRotateIcon(true)} >								
 								{(
 									<div className="spinner" style={{ backgroundColor: theme === 'light'?'#ffffff':'#121212', display: isLoading ? "flex" : "none" }}>
@@ -370,7 +370,7 @@ export default function Main() {
 										setCurrentStep = {setCurrentStep}
 										/>
 										{showRotateIcon && 
-										<div className='rotate-3d'>
+										<div className='rotate-3d' onMouseEnter={()=> setShowRotateIcon(false)}>
 											<Rotate3dSvg/>
 										</div>}
 									</>

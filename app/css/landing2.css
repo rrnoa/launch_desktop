@@ -70,6 +70,10 @@ body {
     color: #535353;
 }
 
+div.vp-title {
+    display: none !important;
+}
+
 a,
 button {
     transition: all .2s ease;
@@ -79,7 +83,9 @@ button {
 
 a,
 a:hover {
-    text-decoration: none;
+    text-decoration: none !important;
+    color: #F6F3EF !important;
+    
 }
 
 ul {
@@ -220,28 +226,53 @@ label {
     }
 }
 
-/*==== nev area start===== */
+/*==== nav area start===== */
 
 header {
+    position: absolute;
     width: 100%;
     padding: 26px 64px;
     background: #475F59;
     border-bottom: 1px solid rgba(255, 255, 255, 0.30);
+    text-align: center;
 }
 
 .logo img {
     max-width: 200px;
 }
 
+
+
 /* =====hero-area-start===== */
+
+.hidde-b {
+    display: none;
+}
 
 .hero-area {
     background: #475F59;
-    padding: 22px 0;
+    padding: 0;
+    position: relative;
+    height: 100%;
+}
+
+.hero-area .container {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.hidde_b {
+    display: none;
 }
 
 .hero-left {
-    margin-top: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .hero-left h2 {
@@ -249,23 +280,26 @@ header {
     font-size: 56px;
     font-weight: 400;
     line-height: 56px;
-    text-align: left;
+    text-align: center;
     color: #fff;
     margin-bottom: 24px;
+    text-shadow: 1px 1px 2px rgb(215 202 202);
 }
 
 .hero-left p {
-    color: #F8C0C1;
+    color: #fff;
     font-family: Jost;
     font-size: 24px;
     font-weight: 400;
     line-height: 36px;
-    text-align: left;
-    margin-bottom: 50px;
+    text-align: center;
+    margin-bottom: 25px;
+    padding: 25px 0;
+    max-width: 710px;
 }
 
 .hero-btn a {
-    color: #F6F3EF;
+    color: #F6F3EF !important;
     text-align: center;
     font-size: 16px;
     font-style: normal;
@@ -276,6 +310,12 @@ header {
     border-radius: 4px;
     background: var(--Orange, #F46C38);
     transition: .3s;
+}
+
+.hero-btn{
+    position: relative;
+    z-index: 1;
+    bottom: -50px;
 }
 
 .hero-btn a:hover {
@@ -290,6 +330,11 @@ header {
     text-align: center;
     border-top: 1px solid #ffffff4d;
     padding-top: 16px;
+    position: absolute;
+    bottom: 0;
+    z-index: 1;
+    width: 100%;
+    margin-bottom: 16px;
 }
 
 .hero-scrool-down a {
@@ -315,7 +360,7 @@ header {
 
 .hero-btm-sections {
     background: var(--Light-Gray, #F3F3F3);
-    padding: 128px 0;
+    padding: 128px 0 64px 0;
 }
 
 .hero-btm-sections-contant {
@@ -341,7 +386,7 @@ header {
 /*======== From Concept area start ====*/
 
 .from-concept-area {
-    padding: 128px 0;
+    padding: 128px 0 64px 0;
     background-color: #fff;
 }
 
@@ -388,7 +433,18 @@ header {
 
 .design-video-area {
     background: var(--Light-Gray, #F3F3F3);
-    padding: 128px 0;
+    padding: 128px 0 64px 0;
+}
+
+.design-video-area .container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.head-wrapper {
+    height: 100vh;
+    max-height: 1920px;
 }
 
 .design-video-area h2 {
@@ -444,7 +500,15 @@ header {
     height: auto !important;
 }
 
-video {
+video.video-hero {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    z-index: 1;
+}
+
+video.tutorial {
     position: absolute;
     margin: auto;
     top: -150px;
@@ -479,7 +543,7 @@ video {
 
 .testimonials-area {
     background: #F3F3F3;
-    padding: 128px 0;
+    padding: 128px 0 64px 0;
 }
 
 .ts-title h2 {
@@ -736,7 +800,7 @@ video {
 
 .faq-area {
     background: var(--Light-Gray, #F3F3F3);
-    padding: 128px 0;
+    padding: 128px 0 64px 0;
 }
 
 .faqs-title h2 {

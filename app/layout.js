@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
           <Script src="js/jquery-3.6.0.min.js" strategy="beforeInteractive" />
           <Script src="js/bootstrap.bundle.min.js" strategy="beforeInteractive" />
           <Script src="js/accordion.js" strategy="beforeInteractive" />
-
+          <Script src="js/owl.carousel.js" strategy="beforeInteractive" />
         </div>
       </body>
 
