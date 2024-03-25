@@ -5,15 +5,17 @@ import "@/app/css/owl.carousel.css";
 import "@/app/css/responsive_landing.css";
 import { isMobile } from 'react-device-detect';
 import { useEffect, useState } from 'react';
+import  YoutubeEmbed  from '@/app/components/YoutubeEmbed'
 import Script from 'next/script';
+import Link from 'next/link'
+
 
 
 export default function Home() {
-    const [is, setIs] = useState();
+    const [is, setIs] = useState(null);
 
     useEffect(() => {
-        // Este código se ejecuta una vez que jQuery y los plugins han sido cargados
-        // y el DOM está listo, ideal para inicializar tus plugins
+       
         setIs(isMobile);
 
         if (window.jQuery) {
@@ -98,7 +100,7 @@ export default function Home() {
         <Script src="https://kit.fontawesome.com/e7f2043049.js" strategy="lazyOnload" />
         {/* top section*/}
         <div className="head-wrapper" style={{position: 'relative'}}>
-        <video className='video-hero' src='video/hero_section_desktop_lq.mp4' autoPlay loop muted playsInline preload="auto"></video>
+        { <video className='video-hero' src='video/hero_section_desktop_lq.mp4' autoPlay loop muted playsInline preload="auto"></video> }
 
             {/* <!--  nev area start */}
             <header>
@@ -118,10 +120,10 @@ export default function Home() {
                         
                     </div>
                     <div className="hero-btn">
-                        <a href={is?"mobile":"main"}>✨ Start Designing Now</a>
+                        <a className={is === null? "inactive": ""} href={is?"mobile":"main"}>✨ Start Designing Now</a>
                     </div>
                     <div className="hero-scrool-down" >
-                        <a href="#down-sce">SCROLL DOWN TO EXPLORE <img src="images/arrow.png" alt=""/></a>
+                        <a href="#down-sce"><img src="images/arrow.png" alt=""/></a>
                     </div>
                 </div>
             </section>
@@ -177,33 +179,17 @@ export default function Home() {
         <section className="design-video-area">
             <div className="container">
                 <h2>Create Stunning Designs with WoodXEL</h2>
-                <div>
-                    {/* {is ? 
-                    (<iframe
-                        src="https://player.vimeo.com/video/926523127"
-                        width="740"
-                        height="360"
-                        frameBorder="0"
-                        allow="autoplay; fullscreen; picture-in-picture"
-                        allowFullScreen
-                        title="Vimeo video"
-                        ></iframe>
-                    ) :
-                    (
-                        <iframe
-                        src="https://player.vimeo.com/video/926513634"
-                        width="640"
-                        height="360"
-                        frameBorder="0"
-                        allow="autoplay; fullscreen; picture-in-picture"
-                        allowFullScreen
-                        title="Vimeo video"
-                        ></iframe>
-                    )} */}
-                
-                </div>
+                {is !== null ? ( // Asegúrate de que 'is' se ha inicializado antes de renderizar
+                    is ? 
+                    (<YoutubeEmbed embedId="SL1OKCqP3Io" />) : 
+                    (<YoutubeEmbed embedId="186uTz0VUQ8" />)
+                ) : (
+                    <p>Loading...</p> // Puedes personalizar este mensaje o componente para la carga inicial
+                )}
+
+             
                 <div className="hero-btn" style={{textAlign: 'center'}}>
-                    <a href={is?"mobile":"main"}>✨ Start Designing Now</a>
+                    <a className={is === null? "inactive": ""} href={is?"mobile":"main"}>✨ Start Designing Now</a>
                 </div>
             </div>
         </section>
@@ -307,7 +293,7 @@ export default function Home() {
                     </div>
                 </div>
                 <div className="ts-btn">
-                    <a href={is?"mobile":"main"}>✨ Unlock Your Creativity with WoodXEL</a>
+                    <a className={is === null? "inactive": ""} href={is?"mobile":"main"}>✨ Unlock Your Creativity with WoodXEL</a>
                 </div>
             </div>
         </section>
@@ -359,27 +345,51 @@ export default function Home() {
                 </div>
                 <div className="faq-wrapper">
                     <div className="accordion">
-                        <h3 className="active">Lorem ipsum dolor sit amet consectetur. Scelerisque ipsum hac laoreet id tempor. ?</h3>
+                        <h3 className="active">What is Woodxel, and what does it offer?</h3>
                         <div style={{display: "block"}} >
-                            <p>Lorem ipsum dolor sit amet consectetur. Urna diam nunc quis iaculis montes. Elit in eget vivamus vitae mi. Augue ultrices turpis aliquam massa blandit volutpat auctor dis. Neque commodo feugiat a pharetra velit. Dictum orci fermentum quis eget cras diam et. Mi dignissim felis.</p>
+                            <p>Woodxel is an online platform that creates personalized wood block panels from your uploaded photos or images. Our service allows you to transform your favorite pictures into stunning wooden art pieces.</p>
                         </div>
                     </div>
                     <div className="accordion">
-                        <h3>Lorem ipsum dolor sit amet consectetur. Urna diam nunc quis iaculis montes. Elit in eget vivamus vitae mi?</h3>
+                        <h3>How does creating wood block panels work on Woodxel?</h3>
                         <div>
-                            <p>Lorem ipsum dolor sit amet consectetur. Urna diam nunc quis iaculis montes. Elit in eget vivamus vitae mi. Augue ultrices turpis aliquam massa blandit volutpat auctor dis. Neque commodo feugiat a pharetra velit. Dictum orci fermentum quis eget cras diam et. Mi dignissim felis.</p>
+                            <p>Creating your custom wood block panel is simple and enjoyable. Begin by uploading your chosen photo to our platform and selecting your desired customization options. Based on the uploaded image, our system will generate a 3D model and design for your wood block panel. Once you approve the design and place your order, we&apos;ll handle the manufacturing and shipping of your personalized product.</p>
                         </div>
                     </div>
                     <div className="accordion">
-                        <h3>Lorem ipsum dolor sit amet consectetur. Urna diam nunc quis iaculis montes. Elit in eget ?</h3>
+                        <h3>What types of photos can I use to create woodblock panels on Woodxel?</h3>
                         <div>
-                            <p>Lorem ipsum dolor sit amet consectetur. Urna diam nunc quis iaculis montes. Elit in eget vivamus vitae mi. Augue ultrices turpis aliquam massa blandit volutpat auctor dis. Neque commodo feugiat a pharetra velit. Dictum orci fermentum quis eget cras diam et. Mi dignissim felis.</p>
+                            <p>You can upload any photo or image transformed into a wood block panel. Our versatile customization tools can adapt to various images, from personal portraits to natural landscapes.</p>
                         </div>
                     </div>
                     <div className="accordion">
-                        <h3>Lorem ipsum dolor sit amet consectetur. Scelerisque ipsum ?</h3>
+                        <h3>What will I receive when I order from Woodxel?</h3>
                         <div>
-                            <p>Lorem ipsum dolor sit amet consectetur. Urna diam nunc quis iaculis montes. Elit in eget vivamus vitae mi. Augue ultrices turpis aliquam massa blandit volutpat auctor dis. Neque commodo feugiat a pharetra velit. Dictum orci fermentum quis eget cras diam et. Mi dignissim felis.</p>
+                            <p>When you order from Woodxel, your personalized product will be made to fit your desired size. We can start as small as 24&quot;x24&quot;, which would be one panel. If you need a larger size, we&apos;ll create your order using multiple individual panels, each measuring between 12&quot; and 24&quot; in size. For example, if you order a panel measuring 50&quot; x 48&quot;, it might consist of six panels measuring 16&quot;x16&quot; and three panels measuring 18&quot; x 16&quot;. We divide the total dimension into 2 to 3 sections to get panels as close as possible between them. Each panel will display a portion of your chosen photo or image that together shows the pixeled original image, meticulously painted on wood blocks. Once these individual panels are assembled, they will form the desired image in wooden blocks. Plus, we&apos;ll provide simple installation instructions to make setup a breeze.</p>
+                        </div>
+                    </div>
+                    <div className="accordion">
+                        <h3>How long does it take to receive my order once it is placed?</h3>
+                        <div>
+                            <p>The delivery time for your order depends on factors such as your location and the size of the custom product requested. Typically, you can expect to receive your personalized wood block panel within 15-30 business days after placing your order.</p>
+                        </div>
+                    </div>
+                    <div className="accordion">
+                        <h3>Do you offer international shipping?</h3>
+                        <div>
+                            <p>Yes, we offer international shipping services. Shipping rates and delivery times will vary depending on the destination and the shipping method selected during checkout.</p>
+                        </div>
+                    </div>
+                    <div className="accordion">
+                        <h3>Can I make changes to the design after I&apos;ve approved it?</h3>
+                        <div>
+                            <p>Once you&apos;ve approved the design generated by our system and placed the order, you won&apos;t be able to make any changes. However, if you wish to cancel the order, you have a 24-hour window. After this period, we&apos;ll begin the manufacturing process based on the approved design. We recommend carefully reviewing the design before confirming your approval to ensure it meets your expectations.</p>
+                        </div>
+                    </div>
+                    <div className="accordion">
+                        <h3>How can I contact Woodxel&apos;s support team with any questions or concerns?</h3>
+                        <div>
+                            <p>If you require assistance or have any questions, please don&apos;t hesitate to contact our dedicated support team at support@woodxel.com. We're here to help you every step of the way.</p>
                         </div>
                     </div>
                 </div>
@@ -401,8 +411,10 @@ export default function Home() {
                     </div>
                     <div className="footer-right">
                         <ul>
-                            <li><a href="#">Terms</a></li>
-                            <li><a href="#">Privacy</a></li>
+                            <li><Link href="/terms">Terms & Conditions</Link></li>
+                            <li><a href="/privacy">Privacy Policy</a></li>
+                            <li><a href="/refound">Retrun & Refound Policy</a></li>
+                            <li><a href="/shipping">Shipping Policy</a></li>                            
                             <li><a href="#">Contact</a></li>
                         </ul>
                     </div>

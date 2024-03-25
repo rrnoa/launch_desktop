@@ -126,32 +126,6 @@ label {
     background: #ff7675;
 }
 
-.scrolltotop {
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    border-radius: 50%;
-    background: rgb(250, 170, 24);
-    background: linear-gradient(0deg, rgba(250, 170, 24, 1) 16%, rgba(255, 123, 73, 1) 84%);
-    text-align: center;
-    font-size: 22px;
-    color: #ffffff;
-    position: fixed;
-    right: 30px;
-    bottom: 45px;
-    display: none;
-    animation: lab_top_up 5s linear infinite;
-    -webkit-transition: all 0.3s ease;
-    -moz-transition: all 0.3s ease;
-    transition: all 0.3s ease;
-    border: 2px solid #F46C38;
-    z-index: 1;
-}
-
-.scrolltotop i {
-    color: #ffff;
-}
-
 @keyframes lab_top_up {
     0% {
         transform: translateY(-15px);
@@ -226,6 +200,11 @@ label {
     }
 }
 
+.inactive {
+    pointer-events: none; /* Deshabilita eventos de clic */
+    opacity: 0.4; /* Efecto de velo gris */
+}
+
 /*==== nav area start===== */
 
 header {
@@ -234,11 +213,15 @@ header {
     padding: 26px 64px;
     background: #475F59;
     border-bottom: 1px solid rgba(255, 255, 255, 0.30);
-    text-align: center;
+    text-align: left;
 }
 
 .logo img {
     max-width: 200px;
+}
+
+.logo img {
+    height: 25px;
 }
 
 
@@ -312,7 +295,7 @@ header {
     transition: .3s;
 }
 
-.hero-btn{
+.hero-area .hero-btn{
     position: relative;
     z-index: 1;
     bottom: -50px;
@@ -328,7 +311,6 @@ header {
 
 .hero-scrool-down {
     text-align: center;
-    border-top: 1px solid #ffffff4d;
     padding-top: 16px;
     position: absolute;
     bottom: 0;
@@ -436,6 +418,10 @@ header {
     padding: 128px 0 64px 0;
 }
 
+.design-video-area .hero-btn {
+    margin-top: 64px;
+}
+
 .design-video-area .container {
     display: flex;
     align-items: center;
@@ -459,47 +445,6 @@ header {
     margin-bottom: 96px;
 }
 
-#closer_videopopup {
-    position: absolute;
-    display: table-cell;
-    right: 2%;
-    top: 2%;
-    font-size: 32px;
-    text-align: center;
-    vertical-align: middle;
-    padding: auto;
-    cursor: default;
-    background: none;
-    border: none;
-    color: #ffffff;
-    z-index: 100004;
-}
-
-#opct {
-    position: fixed;
-    z-index: 100000;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    filter: alpha(opacity=90);
-    -moz-opacity: 0.90;
-    opacity: 0.9;
-}
-
-#videCont {
-    position: relative;
-    padding-bottom: 56.25%;
-    padding-top: 5px;
-    height: 0;
-    max-width: 720px;
-    margin: auto;
-    min-height: 100vh;
-    height: auto !important;
-}
-
 video.video-hero {
     position: absolute;
     height: 100%;
@@ -507,27 +452,13 @@ video.video-hero {
     object-fit: cover;
     z-index: 1;
 }
-
-video.tutorial {
-    position: absolute;
-    margin: auto;
-    top: -150px;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    width: 100px;
-    background-color: #ccc;
-    border-radius: 3px;
+.video-responsive {
     width: 100%;
+    text-align: center;
 }
 
-#video1 {
-    cursor: pointer;
-    cursor: hand;
-}
-
-.x-mark {
-    cursor: pointer !important;
+.video-responsive iframe {
+    width: 80%;
 }
 
 .dsk-img-VD {

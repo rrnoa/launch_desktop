@@ -17,6 +17,10 @@ Medium Screen - Others
         min-height: 685px;
     }
 
+    .logo img {
+        height: 25px;
+    }
+
 }
 @media screen and (min-width: 1201px) and (max-width: 1370px) {
     .hero-btn {
@@ -38,6 +42,10 @@ Medium Screen - Others
         min-height: inherit;
     }
 
+    .logo img {
+        height: 20px;
+    }
+
 }
 
 @media screen and (min-width: 992px) and (max-width: 1200px) {
@@ -52,6 +60,10 @@ Medium Screen - Others
     }    
     .hero-right img {
         min-height: inherit;
+    }
+
+    .logo img {
+        height: 20px;
     }
 }
 
