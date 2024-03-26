@@ -113,14 +113,14 @@ export default function Home() {
                 <div className="container">
                     <div style={{zIndex: 1, textAlign: 'center'}}>
                             <div className="hero-left">
-                                <h2 className="hidde-m">Transform Any Image into <br/> A Bespoke PixelArt Custom Wooden Panel</h2>
-                                <h2 className="hidde-b">Transform Any Image <br/> into A Bespoke PixelArt<br/> Custom Wooden Panel</h2>
-                                <p>WoodXEL is the ultimate solution for architects and interior designers seeking to create unique, high-quality custom wooden panels. Our platform combines an intuitive 3D design tool with expert craftsmanship to bring your vision to life.</p>
+                                <h2 className="hidde-m">Transform Your Image <br/> into a One-of-a-Kind <br/> Wooden Pixel-Art Sculpture</h2>
+                                <h2 className="hidde-b">Transform Your Image <br/> into a One-of-a-Kind<br/> Wooden Pixel-Art Sculpture</h2>
+                                <p>WoodXEL Empowers Art Collectors, Design Enthusiasts, and Professionals to Transform Cherished Images into Unique, High-End Wooden Art Pieces. Our Cutting-Edge 3D Design Tool and Master Craftsmanship Bring your Digital Visions to Life as Custom Pixel-Art Sculptures.</p>
                             </div>
                         
                     </div>
                     <div className="hero-btn">
-                        <a className={is === null? "inactive": ""} href={is?"mobile":"main"}>✨ Start Designing Now</a>
+                        <a className={is === null? "inactive": ""} href={is?"mobile":"main"} target="_blank">✨ Start Designing Now</a>
                     </div>
                     <div className="hero-scrool-down" >
                         <a href="#down-sce"><img src="images/arrow.png" alt=""/></a>
@@ -135,7 +135,7 @@ export default function Home() {
         <section className="from-concept-area" id="down-sce">
             <div className="container">
                 <div className="from-conc-title">
-                    <h2>From Concept to Creation in 4 Steps</h2>
+                    <h2>From Pixels to Masterpiece in 4 Steps</h2>
                 </div>
                 <div className="row">
                     <div className="col-md-6 col-lg-3">
@@ -178,7 +178,7 @@ export default function Home() {
         {/* <!-- Create Stunning Designs video start  */}
         <section className="design-video-area">
             <div className="container">
-                <h2>Create Stunning Designs with WoodXEL</h2>
+                <h2>Witness the WoodXEL Magic</h2>
                 {is !== null ? ( // Asegúrate de que 'is' se ha inicializado antes de renderizar
                     is ? 
                     (<YoutubeEmbed embedId="SL1OKCqP3Io" />) : 
@@ -189,7 +189,7 @@ export default function Home() {
 
              
                 <div className="hero-btn" style={{textAlign: 'center'}}>
-                    <a className={is === null? "inactive": ""} href={is?"mobile":"main"}>✨ Start Designing Now</a>
+                    <a className={is === null? "inactive": ""} href={is?"mobile":"main"} target="_blank">✨ Start Designing Now</a>
                 </div>
             </div>
         </section>
@@ -199,7 +199,7 @@ export default function Home() {
         <section className="from-concept-area">
             <div className="container">
                 <div className="from-conc-title">
-                    <h2>Why Architects and Designers Choose WoodXEL</h2>
+                    <h2>Why Art Collectors and Design Professionals Choose WoodXEL</h2>
                 </div>
                 <div className="row">
                     <div className="col-md-6 col-lg-3">
@@ -263,7 +263,7 @@ export default function Home() {
                         </div>
                         <div>
                             <div className="ts-carousel-item">
-                                <p>&quot;WoodXEL&apos;s free 3D models have become an essential part of my design process. They save me time and help me communicate my ideas more effectively.&quot;</p>
+                                <p>&quot;As an interior designer, WoodXEL allows me to create bespoke art installations for my clients. The 3D models are invaluable, the final sculptures never fail to impress.&quot;</p>
                                 <ul>
                                     <li><img src="images/ts2.png" className="img-fluid" alt=""/></li>
                                     <li>
@@ -275,7 +275,7 @@ export default function Home() {
                         </div>
                         <div>
                             <div className="ts-carousel-item">
-                                <p>&quot;I used WoodXEL to create a 3D model for a client presentation, and they were blown away. The free model made it so easy to visualize the final product.&quot;</p>
+                                <p>&quot;WoodXEL&apos;s platform has revolutionized the way I acquire unique art pieces. The ability to transform personal images into custom pixel-art sculptures is truly remarkable.&quot;</p>
                                 <ul>
                                     <li><img src="images/ts1.png" className="img-fluid" alt=""/></li>
                                     <li>
@@ -293,7 +293,7 @@ export default function Home() {
                     </div>
                 </div>
                 <div className="ts-btn">
-                    <a className={is === null? "inactive": ""} href={is?"mobile":"main"}>✨ Unlock Your Creativity with WoodXEL</a>
+                    <a className={is === null? "inactive": ""} href={is?"mobile":"main"} target="_blank">✨ Unlock Your Creativity with WoodXEL</a>
                 </div>
             </div>
         </section>
@@ -304,7 +304,7 @@ export default function Home() {
             <div className="container">
                 <div className="ts-title">
                     <h2>Why WoodXEL</h2>
-                    <p>At WoodXEL, we believe in empowering designers, architects, and artists with the tools they need to bring their unique visions to life. Our intuitive platform combines cutting-edge technology with user-friendly features, making it easy for anyone to create stunning 3D wood panel designs. With free, high-quality 3D models for every creation, WoodXEL streamlines your design process and helps you communicate your ideas more effectively. Join our growing community of creators and discover the power of custom wood art.</p>
+                    <p>At WoodXEL, we&apos;re passionate about enabling artists, designers, and art lovers to transform digital images into extraordinary physical art pieces. Our state-of-the-art platform combines innovative technology with traditional craftsmanship, making it easy for anyone to create stunning, one-of-a-kind wooden pixel-art sculptures. With free, high-quality 3D models for every creation, WoodXEL streamlines your artistic journey from concept to masterpiece. Join our community of art enthusiasts and discover the joy of personalizing your space with custom wooden art.</p>
                 </div>
             </div>
             <div className="ts-inner">
@@ -389,7 +389,7 @@ export default function Home() {
                     <div className="accordion">
                         <h3>How can I contact Woodxel&apos;s support team with any questions or concerns?</h3>
                         <div>
-                            <p>If you require assistance or have any questions, please don&apos;t hesitate to contact our dedicated support team at support@woodxel.com. We're here to help you every step of the way.</p>
+                            <p>If you require assistance or have any questions, please don&apos;t hesitate to contact our dedicated support team at support@woodxel.com. We&apos;re here to help you every step of the way.</p>
                         </div>
                     </div>
                 </div>
@@ -402,22 +402,31 @@ export default function Home() {
             <div className="container">
                 <div className="footer-content">
                     <div className="footer-left">
-                        <div className="f-logo"><img src="images/logo.png" alt=""/></div>
-                        <ul>
-                            <li>Lignum Custom Design Co.<br/>8211 NW 74th Design Co.</li>
-                            <li><a href="mailto:info@lignumcd.com">info@lignumcd.com</a></li>
-                            <li><a href="callto:786 - 472 - 1833">786 - 472 - 1833</a></li>
-                        </ul>
+                        <div className="f-logo">
+                            <ul>
+                                <li><img src="images/logo.png" alt=""/></li>
+                                <li>Lignum Custom Design Co.<br/>8211 NW 74th Design Co.</li>
+                                <li><a href="mailto:info@lignumcd.com">info@lignumcd.com</a></li>
+                                
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <ul>
+                                <li><Link href="/terms" target="_blank">Terms & Conditions</Link></li>
+                                <li><Link href="/privacy" target="_blank">Privacy Policy</Link></li>
+                                <li><Link href="/refound" target="_blank">Retrun & Refound Policy</Link></li>
+                                <li><Link href="/shipping" target="_blank">Shipping Policy</Link></li>                            
+                            </ul>
+                        </div>
+                        <div>
+                            <ul>
+                                <li><Link href="#">Contact</Link></li>
+                            </ul>
+
+                        </div>
                     </div>
-                    <div className="footer-right">
-                        <ul>
-                            <li><Link href="/terms">Terms & Conditions</Link></li>
-                            <li><a href="/privacy">Privacy Policy</a></li>
-                            <li><a href="/refound">Retrun & Refound Policy</a></li>
-                            <li><a href="/shipping">Shipping Policy</a></li>                            
-                            <li><a href="#">Contact</a></li>
-                        </ul>
-                    </div>
+                    
                 </div>
             </div>
         </footer>

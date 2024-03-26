@@ -68,6 +68,8 @@ body {
     font-weight: 400;
     background: #fff;
     color: #535353;
+    margin: 0;
+    padding: 0;
 }
 
 div.vp-title {
@@ -205,13 +207,38 @@ label {
     opacity: 0.4; /* Efecto de velo gris */
 }
 
+.simple-page-policy section.container a {
+    color: #fd7e14 !important;
+}
+
+.simple-page-policy section.container {
+    padding: 100px 50px;
+}
+
+
 /*==== nav area start===== */
+
+.head-simple-pages header {
+    position: relative;
+    box-sizing: border-box;
+    max-width: 1920px;
+    margin: auto;
+
+}
+
+.head-simple-pages h1 {
+    color: #ffffff;
+    text-align: center;
+    margin-top: 50px;
+    margin-bottom: 25px;
+}
+
 
 header {
     position: absolute;
     width: 100%;
     padding: 26px 64px;
-    background: #475F59;
+    background: #7AA197;
     border-bottom: 1px solid rgba(255, 255, 255, 0.30);
     text-align: left;
 }
@@ -233,7 +260,7 @@ header {
 }
 
 .hero-area {
-    background: #475F59;
+    background: #7AA197;
     padding: 0;
     position: relative;
     height: 100%;
@@ -260,9 +287,9 @@ header {
 
 .hero-left h2 {
     font-family: Jost;
-    font-size: 56px;
-    font-weight: 400;
-    line-height: 56px;
+    font-size: 64px;
+    font-weight: 500;
+    line-height: 100%;
     text-align: center;
     color: #fff;
     margin-bottom: 24px;
@@ -273,12 +300,12 @@ header {
     color: #fff;
     font-family: Jost;
     font-size: 24px;
-    font-weight: 400;
-    line-height: 36px;
+    font-weight: 500;
+    line-height: 150%;
     text-align: center;
     margin-bottom: 25px;
     padding: 25px 0;
-    max-width: 710px;
+    max-width: 750px;
 }
 
 .hero-btn a {
@@ -298,7 +325,6 @@ header {
 .hero-area .hero-btn{
     position: relative;
     z-index: 1;
-    bottom: -50px;
 }
 
 .hero-btn a:hover {
@@ -373,14 +399,13 @@ header {
 }
 
 .from-conc-title h2 {
-    color: #000;
+    color: #475F59;
     text-align: center;
     font-family: Arial;
     font-size: 48px;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 120%;
-    /* 57.6px */
     margin-bottom: 96px;
 }
 
@@ -397,7 +422,7 @@ header {
 }
 
 .form-concept-item p {
-    color: #535353;
+    color: #475F59;
     text-align: center;
     font-family: Arial;
     font-size: 20px;
@@ -430,18 +455,18 @@ header {
 
 .head-wrapper {
     height: 100vh;
-    max-height: 1920px;
+    max-height: 1080px;
+    min-height: 700px;
 }
 
 .design-video-area h2 {
-    color: #000;
+    color: #475F59;
     text-align: center;
     font-family: Arial;
-    font-size: 45px;
+    font-size: 48px;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 120%;
-    /* 57.6px */
     margin-bottom: 96px;
 }
 
@@ -478,13 +503,12 @@ video.video-hero {
 }
 
 .ts-title h2 {
-    color: #000;
+    color: #475F59;
     font-family: Arial;
     font-size: 48px;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 120%;
-    /* 57.6px */
     margin-bottom: 52px;
     text-align: center;
 }
@@ -735,11 +759,11 @@ video.video-hero {
 }
 
 .faqs-title h2 {
-    color: #000;
+    color: #475F59;
     font-family: Arial;
     font-size: 48px;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 500;
     line-height: normal;
     text-align: center;
     padding-bottom: 50px;
@@ -783,9 +807,9 @@ video.video-hero {
 }
 
 .accordion>div p {
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 30px;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 150%;
 }
 
 .accordion>div p a {
@@ -795,13 +819,17 @@ video.video-hero {
 /* ===========footer ====== */
 
 footer {
-    background: var(--Black, #121718);
+    background: #7AA197;
     padding: 56px 0px 96px 0px;
 }
 
 .footer-content {
     display: flex;
     justify-content: space-between;
+}
+
+.footer-content ul{
+    padding-left: 0;
 }
 
 .footer-left {
@@ -833,12 +861,6 @@ footer {
     color: #ddd;
 }
 
-.footer-right ul {
-    display: flex;
-    align-items: center;
-    gap: 64px;
-}
-
 .footer-right ul li a {
     color: #FFF;
     font-family: Arial;
@@ -860,7 +882,7 @@ footer {
     font-style: normal;
     font-weight: 400;
     line-height: 150%;
-    background: var(--Black, #121718);
+    background: #7AA197;
     padding: 35px 30px;
     text-align: center;
     border-top: 1px solid rgba(255, 255, 255, 0.10);

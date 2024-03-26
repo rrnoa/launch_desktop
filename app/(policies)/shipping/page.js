@@ -1,9 +1,18 @@
 "use client";
+import HeadPage from '@/app/components/HeadPage';
+import "@/app/css/landing2.css";
+import "@/app/css/responsive_landing.css";
+import "@/app/css/bootstrap.min.css";
+
 import React from 'react'
+import FooterPage from '@/app/components/FooterPage';
 
 export default function Privacy() {
     return (
-        <div>
+        <div className='simple-page-policy'>
+            <HeadPage title={"Terms & Conditions"}/>
+
+            <section className='container'>
             <h2>ORDER PROCESSING</h2>
             <p>You will receive your order confirmation within 24-48 hours after purchase. All orders are processed within 15-30 business days. You will receive another notification with the tracking number when your order is shipped.</p>
 
@@ -19,6 +28,9 @@ export default function Privacy() {
 
             <h2>IMPORT DUTIES AND TAXES</h2>
             <p>Your order may be subject to import duties and taxes, including VAT, once it reaches your destination country. WOODXEL is not responsible for these charges if applied, as they are your responsibility as the customer.</p>
+            </section>
+            <FooterPage/>
+
 
         </div>
         )

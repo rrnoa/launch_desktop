@@ -1,9 +1,17 @@
 "use client";
+import HeadPage from '@/app/components/HeadPage';
 import React from 'react'
+import "@/app/css/landing2.css";
+import "@/app/css/responsive_landing.css";
+import "@/app/css/bootstrap.min.css";
+import FooterPage from '@/app/components/FooterPage';
 
 export default function Privacy() {
     return (
-        <div>
+        <div className='simple-page-policy'>
+            <HeadPage title={"Privacy Policy"}/>
+
+            <section className='container'>
             <p>Thank you for choosing to engage with Woodxel (&quot;Company,&quot; &quot;we,&quot; &quot;us,&quot; &quot;our&quot;). We prioritize the protection of your personal information and your right to privacy. Should you have any questions or concerns regarding this privacy notice or how we handle your personal information, please contact us at [contact email].</p>
             <p>When you use our website,  (the &quot;Website&quot;) and our services (the &quot;Services,&quot; inclusive of the Website), you entrust us with your personal information. We deeply respect your privacy and aim to be transparent about how we collect, use, and safeguard your information. This privacy notice endeavors to provide you with clear and comprehensive information about our data practices. We encourage you to review it carefully. If there are any terms within this privacy notice that you disagree with, we kindly ask you to refrain from using our Services.</p>
             <p>This privacy notice encompasses all data collected through our Services, including the Website and any associated services, sales, marketing, or events.</p>
@@ -122,6 +130,9 @@ export default function Privacy() {
             <p>8211 NW 74th Ave. Medley, FL, 33166. United States</p>
             <p>HOW CAN YOU REVIEW, UPDATE OR DELETE THE DATA WE COLLECT FROM YOU?</p>
             <p>Based on the applicable laws of your country, you may have the right to request access to the personal information we collect from you, change that information, or delete it in some circumstances. To request to review, update, or delete your personal information, please submit a request form by clicking  We will respond to your request within 30 days.</p>
+            </section>
+
+            <FooterPage/>
         </div>
         )
 }
