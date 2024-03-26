@@ -55,8 +55,8 @@ export default function Main() {
 	const [currentState, setCurrentState] = useState("upload");//upload,crop,view	
     
     /*Opciones del crop */
-    const [width, setWidth] = useState(Number(0));
-    const [height, setHeight] = useState(Number(0));
+    const [width, setWidth] = useState(Number(24));
+    const [height, setHeight] = useState(Number(24));
     const [crop, setCrop] = useState({ x: 0, y: 0});
     const [zoom, setZoom] = useState(1);
 	
@@ -190,8 +190,8 @@ export default function Main() {
 				setRotation(0);
 				setContrast(100);
 				setBrightness(100);     
-				setWidth(Number(0));
-				setHeight(Number(0));
+				setWidth(Number(24));
+				setHeight(Number(24));
 				setCrop({ x: 0, y: 0});
 				setZoom(1);
 				setBlockSize(1);

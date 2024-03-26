@@ -36,8 +36,8 @@ export default function Mobile() {
     const [viewportHeight, setViewportHeight] = useState(0);
     const [theme, setTheme] = useState('light'); // Valor predeterminado
     /*Opciones del crop */
-    const [width, setWidth] = useState(0);
-    const [height, setHeight] = useState(0);
+    const [width, setWidth] = useState(24);
+    const [height, setHeight] = useState(24);
     const [crop, setCrop] = useState({ x: 0, y: 0});
     const [zoom, setZoom] = useState(1);
 	const [blockSize, setBlockSize] = useState(1);//1,2,3	
@@ -122,8 +122,8 @@ export default function Mobile() {
                 setRotation(0);
                 setContrast(100);
                 setBrightness(100);		
-                setWidth(0);
-                setHeight(0);
+                setWidth(24);
+                setHeight(24);
                 setCrop({ x: 0, y: 0});
                 setZoom(1);
                 setIsKeyboard1Visible(false);
@@ -173,8 +173,8 @@ export default function Mobile() {
 	const goToPreviousStep = () => {          
 		setCurrentStep((prevStep) => {
             if (prevStep === 1 ) {
-                setHeight(0);
-                setWidth(0);
+                setHeight(24);
+                setWidth(24);
             }
             return prevStep - 1;
         });       
