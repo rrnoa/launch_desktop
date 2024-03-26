@@ -289,7 +289,7 @@ export default function Main() {
 			<header className="header-area">
 				<div className="header-item">
 					<div className="header-item-inner">
-						<a href="#"><img src={theme == 'light'? "images/woodxel-black.png" :"images/woodxel-white.png"} alt=""/></a>					
+						<a href="/woodxel"><img src={theme == 'light'? "images/woodxel-black.png" :"images/woodxel-white.png"} alt=""/></a>					
 					</div>					
 				</div>
 			</header>

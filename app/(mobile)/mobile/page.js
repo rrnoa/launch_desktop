@@ -308,7 +308,7 @@ export default function Mobile() {
         <header className='mb-header'>
         <div className="mb-header-inner">
 				<div className="header-inner-item-1">
-					<a href="#"><img src={theme == 'dark'? "images/woodxel-white.png" :"images/woodxel-black.png"} alt=""/></a>					
+					<a href="/woodxel"><img src={theme == 'dark'? "images/woodxel-white.png" :"images/woodxel-black.png"} alt=""/></a>					
 				</div>				
 			</div>	
         </header>

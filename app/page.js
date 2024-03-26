@@ -105,7 +105,7 @@ export default function Home() {
             {/* <!--  nev area start */}
             <header>
                 <nav style={{zIndex: 1, position: 'relative'}}>
-                    <div className="logo"><a href="#"><img src="images/woodxel-white.png" alt=""/></a></div>
+                    <div className="logo"><a href="/woodxel"><img src="images/woodxel-white.png" alt=""/></a></div>
                 </nav>
             </header>
             {/* <!-- hero-area-start */}
