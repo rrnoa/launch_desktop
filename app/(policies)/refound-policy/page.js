@@ -10,7 +10,7 @@ import FooterPage from '@/app/components/FooterPage';
 export default function Refound() {
     return (
         <div className='simple-page-policy'>
-            <HeadPage title={"Terms & Conditions"}/>
+            <HeadPage title={"Return & Refound Policy"}/>
             <section className='container'>
             <h2>RETURNS</h2>
             <p>Due to the personalized nature of our products, we regret to inform you that we cannot offer refunds or returns once an order has been confirmed and processed. Each item is crafted explicitly according to the customer&#x27;s preferences, so we cannot resell or reuse it. We appreciate your understanding and encourage you to carefully review your options before purchasing. However, if your product arrives damaged or defective, we will happily address the issue promptly and satisfactorily. Please contact our customer service team with any concerns or further inquiries.</p>

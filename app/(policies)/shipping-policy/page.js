@@ -10,7 +10,7 @@ import FooterPage from '@/app/components/FooterPage';
 export default function Privacy() {
     return (
         <div className='simple-page-policy'>
-            <HeadPage title={"Terms & Conditions"}/>
+            <HeadPage title={"Shipping Policy"}/>
 
             <section className='container'>
             <h2>ORDER PROCESSING</h2>

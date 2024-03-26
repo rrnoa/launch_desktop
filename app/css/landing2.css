@@ -235,9 +235,12 @@ label {
 
 
 header {
+    height: 70px;
+    display: flex;
+    align-items: center;
     position: absolute;
     width: 100%;
-    padding: 26px 64px;
+    padding: 0 6vh;
     background: #7AA197;
     border-bottom: 1px solid rgba(255, 255, 255, 0.30);
     text-align: left;
@@ -288,7 +291,7 @@ header {
 .hero-left h2 {
     font-family: Jost;
     font-size: 64px;
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1.1;
     text-align: center;
     color: #fff;
@@ -311,7 +314,7 @@ header {
 .hero-btn a {
     color: #F6F3EF !important;
     text-align: center;
-    font-size: 16px;
+    font-size: 20px;
     font-style: normal;
     font-weight: 700;
     line-height: normal;
@@ -349,7 +352,7 @@ header {
     color: var(--White, #FFF);
     text-align: center;
     /* Paragraph/Extra Small */
-    font-family: Arial;
+    font-family: Jost;
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
@@ -378,7 +381,7 @@ header {
 .hero-btm-sections-contant p {
     color: var(--Dark-Gray, #535353);
     text-align: center;
-    font-family: Arial;
+    font-family: Jost;
     font-size: 24px;
     font-style: normal;
     font-weight: 400;
@@ -394,17 +397,17 @@ header {
 /*======== From Concept area start ====*/
 
 .from-concept-area {
-    padding: 128px 0 64px 0;
+    padding: 96px 0 64px 0;
     background-color: #fff;
 }
 
 .from-conc-title h2 {
     color: #475F59;
     text-align: center;
-    font-family: Arial;
+    font-family: Jost;
     font-size: 48px;
     font-style: normal;
-    font-weight: 500;
+    font-weight: 600;
     line-height: 120%;
     margin-bottom: 96px;
 }
@@ -424,7 +427,7 @@ header {
 .form-concept-item p {
     color: #475F59;
     text-align: center;
-    font-family: Arial;
+    font-family: Jost;
     font-size: 20px;
     font-style: normal;
     font-weight: 400;
@@ -440,7 +443,7 @@ header {
 
 .design-video-area {
     background: var(--Light-Gray, #F3F3F3);
-    padding: 128px 0 64px 0;
+    padding: 96px 0 64px 0;
 }
 
 .design-video-area .hero-btn {
@@ -462,10 +465,10 @@ header {
 .design-video-area h2 {
     color: #475F59;
     text-align: center;
-    font-family: Arial;
+    font-family: Jost;
     font-size: 48px;
     font-style: normal;
-    font-weight: 500;
+    font-weight: 600;
     line-height: 120%;
     margin-bottom: 96px;
 }
@@ -499,17 +502,17 @@ video.video-hero {
 
 .testimonials-area {
     background: #F3F3F3;
-    padding: 128px 0 64px 0;
+    padding: 96px 0 64px 0;
 }
 
 .ts-title h2 {
     color: #475F59;
-    font-family: Arial;
+    font-family: Jost;
     font-size: 48px;
     font-style: normal;
-    font-weight: 500;
+    font-weight: 600;
     line-height: 120%;
-    margin-bottom: 52px;
+    margin-bottom: 96px;
     text-align: center;
 }
 
@@ -610,9 +613,9 @@ video.video-hero {
 }
 
 .ts-carousel-item p {
-    color: #535353;
+    color: #475F59;
     text-align: center;
-    font-family: Arial;
+    font-family: Jost;
     font-size: 24px;
     font-style: italic;
     font-weight: 400;
@@ -628,7 +631,7 @@ video.video-hero {
 
 .ts-carousel-item ul li h3 {
     color: #000;
-    font-family: Arial;
+    font-family: Jost;
     font-size: 20px;
     font-style: normal;
     font-weight: 400;
@@ -637,7 +640,7 @@ video.video-hero {
 
 .ts-carousel-item ul li span {
     color: #535353;
-    font-family: Arial;
+    font-family: Jost;
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
@@ -652,9 +655,9 @@ video.video-hero {
 .ts-btn a {
     color: #F6F3EF;
     text-align: center;
-    font-size: 16px;
+    font-size: 20px;
     font-style: normal;
-    font-weight: 700;
+    font-weight: 600;
     line-height: normal;
     display: inline-block;
     padding: 16px 24px;
@@ -755,18 +758,19 @@ video.video-hero {
 
 .faq-area {
     background: var(--Light-Gray, #F3F3F3);
-    padding: 128px 0 64px 0;
+    padding: 96px 0 64px 0;
+    color: #475F59;
 }
 
 .faqs-title h2 {
     color: #475F59;
-    font-family: Arial;
+    font-family: Jost;
     font-size: 48px;
     font-style: normal;
-    font-weight: 500;
+    font-weight: 600;
     line-height: normal;
     text-align: center;
-    padding-bottom: 50px;
+    padding-bottom: 72px;
     margin-bottom: 24px;
     border-bottom: 1px solid rgba(18, 23, 24, 0.30);
 }
@@ -779,11 +783,10 @@ video.video-hero {
 }
 
 .accordion h3 {
-    color: var(--Black, #121718);
-    font-family: Arial;
-    font-size: 20px;
+    font-family: Jost;
+    font-size: 18px;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 600;
     line-height: 150%;
     /* 30px */
     position: relative;
@@ -820,7 +823,7 @@ video.video-hero {
 
 footer {
     background: #7AA197;
-    padding: 56px 0px 96px 0px;
+    padding: 56px 0px 56px 0px;
 }
 
 .footer-content {
@@ -839,7 +842,7 @@ footer {
 
 .footer-left ul li {
     color: #FFF;
-    font-family: Arial;
+    font-family: Jost;
     font-size: 18px;
     font-style: normal;
     font-weight: 400;
@@ -849,7 +852,7 @@ footer {
 
 .footer-left ul li a {
     color: #FFF;
-    font-family: Arial;
+    font-family: Jost;
     font-size: 18px;
     font-style: normal;
     font-weight: 400;
@@ -863,7 +866,7 @@ footer {
 
 .footer-right ul li a {
     color: #FFF;
-    font-family: Arial;
+    font-family: Jost;
     font-size: 18px;
     font-style: normal;
     font-weight: 400;
@@ -877,13 +880,13 @@ footer {
 
 .copytight {
     color: #FFF;
-    font-family: Arial;
+    font-family: Jost;
     font-size: 18px;
     font-style: normal;
     font-weight: 400;
     line-height: 150%;
     background: #7AA197;
-    padding: 35px 30px;
+    padding: 30px 30px;
     text-align: center;
     border-top: 1px solid rgba(255, 255, 255, 0.10);
 }

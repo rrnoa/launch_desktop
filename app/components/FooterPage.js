@@ -19,8 +19,8 @@ function FooterPage() {
                             <ul>
                                 <li><Link href="/terms" target="_blank">Terms & Conditions</Link></li>
                                 <li><Link href="/privacy" target="_blank">Privacy Policy</Link></li>
-                                <li><Link href="/refound" target="_blank">Return & Refound Policy</Link></li>
-                                <li><Link href="/shipping" target="_blank">Shipping Policy</Link></li>                            
+                                <li><Link href="/refound-policy" target="_blank">Return & Refound Policy</Link></li>
+                                <li><Link href="/shipping-policy" target="_blank">Shipping Policy</Link></li>                            
                                 <li><Link href="#">Contact</Link></li>
                             </ul>
                         </div>

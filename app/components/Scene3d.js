@@ -18,7 +18,7 @@ const Escena3D = ({ width, height, blockSize, croppedImg, setPixelInfo, onGroupR
 
 	const snap = useRef(false);
 
-	const models = ['v5_1.glb', 'v5_2.glb', 'v5_3.glb', 'v5_4.glb'];
+	const models = ['medium_rough1.glb', 'medium_rough2.glb', 'medium_rough3.glb', 'medium_rough4.glb'];
 
 	const meshesRef = useRef([]);//almacena los bloques cargados
 	const allColorsRef = useRef([]);

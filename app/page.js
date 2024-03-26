@@ -26,7 +26,7 @@ export default function Home() {
 
             $("#owl-csel1").owlCarousel({
                 items: 2,
-                autoplay: true,
+                autoplay: false,
                 autoplayTimeout: 3000,
                 startPosition: 0,
                 rtl: false,
@@ -59,7 +59,7 @@ export default function Home() {
             
             $("#owl-csel2").owlCarousel({
                 items: 3,
-                autoplay: true,
+                autoplay: false,
                 autoplayTimeout: 3000,
                 startPosition: 0,
                 rtl: false,
@@ -251,7 +251,7 @@ export default function Home() {
                     <div id="owl-csel1" className="owl-carousel owl-theme">
                         <div>
                             <div className="ts-carousel-item">
-                                <p>&quot;I used WoodXEL to create a 3D model for a client presentation, and they were blown away. The free model made it so easy to visualize the final product.&quot;</p>
+                                <p>&quot;I used WoodXEL to create a 3D model for a client presentation, and they were blown away. The free model made it so easy to visualize the final product. I really liked it&quot;</p>
                                 <ul>
                                     <li><img src="images/ts1.png" className="img-fluid" alt=""/></li>
                                     <li>
@@ -415,8 +415,8 @@ export default function Home() {
                             <ul>
                                 <li><Link href="/terms" target="_blank">Terms & Conditions</Link></li>
                                 <li><Link href="/privacy" target="_blank">Privacy Policy</Link></li>
-                                <li><Link href="/refound" target="_blank">Retrun & Refound Policy</Link></li>
-                                <li><Link href="/shipping" target="_blank">Shipping Policy</Link></li>                            
+                                <li><Link href="/refound-policy" target="_blank">Return & Refound Policy</Link></li>
+                                <li><Link href="/shipping-policy" target="_blank">Shipping Policy</Link></li>                            
                             </ul>
                         </div>
                         <div>
@@ -435,7 +435,7 @@ export default function Home() {
         {/* <!-- copyright */}
         <div className="copytight">
             <div className="contianer">
-                <p>Woodxel © 2024. All rights reserved.</p>
+                <span>Woodxel © 2024. All rights reserved.</span>
             </div>
         </div>
         {/* <!-- copyright */}
